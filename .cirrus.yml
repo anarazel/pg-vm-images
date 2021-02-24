@@ -1,0 +1,26 @@
+only_if: $CIRRUS_BRANCH == 'main'
+only_if: $CIRRUS_REPO_OWNER == 'anarazel'
+
+env:
+  GAC: ENCRYPTED[08c58c0a60e1b0dfd4748960cef61296508f85b81ea8a553ee06c9df86bb2398c3240b35bfd76196f3967819da15cd25]
+
+task:
+  container:
+    dockerfile: LinuxPackerDockerfile
+    cpu: 1
+    memory: 2GB
+  env:
+    GOOGLE_APPLICATION_CREDENTIALS: pg-vm-images-aio.json
+    DEBIAN_FRONTEND: noninteractive
+  init_script:
+    - id
+    - pwd
+    - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth list
+    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth list
+
+  build_image_script:
+    - export DATE=$(date +'%Y-%mt%d-%H-%M')
+    - packer build -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
+    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio pg-aio-sid-${DATE} --member=allAuthenticatedUsers --role=roles/compute.imageUser
