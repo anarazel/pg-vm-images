@@ -129,10 +129,9 @@
         {
             "type": "shell",
             "inline": [
-                "sudo freebsd-update fetch",
-                "sudo freebsd-update install",
+                "sudo freebsd-update fetch install",
                 "sudo pkg update",
-                "sudo pkg upgrade",
+                "sudo pkg upgrade -y",
                 "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache",
                 "sudo pkg clean",
                 "cp /etc/rc.conf /tmp/rc.conf",
