@@ -124,7 +124,8 @@
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get autoremove -y",
                 "apt-get clean",
-                "rm -f /var/lib/apt/lists/deb.debian.org_*"
+                "rm -f /var/lib/apt/lists/deb.debian.org_*",
+                "fstrim -v -a"
             ],
             "only" : ["pg-aio-bullseye", "pg-aio-sid"]
         },
