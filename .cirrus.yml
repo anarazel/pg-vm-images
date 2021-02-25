@@ -21,7 +21,7 @@ task:
     - gcloud auth list
 
   build_image_script:
-    - export DATE=$(date +'%Y-%mt%d-%H-%M')
+    - export DATE=$(date +'%Y-%m-%dt%H-%M')
     - packer build -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio pg-aio-sid-${DATE} --member=allAuthenticatedUsers --role=roles/compute.imageUser
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio pg-aio-bullseye-${DATE} --member=allAuthenticatedUsers --role=roles/compute.imageUser
