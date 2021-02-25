@@ -48,7 +48,7 @@
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size": "30"
+            "disk_size": "20"
         }
     ],
     "provisioners": [
