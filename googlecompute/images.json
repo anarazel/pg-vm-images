@@ -141,7 +141,7 @@
                 "cp /etc/rc.conf /tmp/rc.conf",
                 "grep -v firstboot_ /tmp/rc.conf | sudo tee /etc/rc.conf",
                 "sudo rm -fr /usr/ports /usr/src",
-                "sudo fsck_ffs -ZE /dev/gpt/rootfs"
+                "sudo fsck_ffs -E /dev/gpt/rootfs"
             ],
             "only" : ["pg-aio-freebsd-12-2"]
         }
