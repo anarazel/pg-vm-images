@@ -12,7 +12,8 @@
             "ssh_pty": "true",
             "zone": "us-west1-a",
             "machine_type" : "e2-highcpu-4",
-            "preemptible": "true"
+            "preemptible": "true",
+            "disk_size":"10"
         },
 
         {
@@ -27,7 +28,8 @@
             "ssh_pty": "true",
             "zone": "us-west1-a",
             "machine_type" : "e2-highcpu-4",
-            "preemptible": "true"
+            "preemptible": "true",
+            "disk_size":"10"
         },
 
         {
@@ -50,7 +52,10 @@
         {
             "type": "shell",
             "inline": [
-                "DEBIAN_FRONTEND=noninteractive apt-get purge man-db -y"
+                "rm -f /etc/apt/sources.list.d/google-cloud.list /etc/apt/sources.list.d/gce_sdk.list",
+                "DEBIAN_FRONTEND=noninteractive apt-get purge man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil -y",
+                "DEBIAN_FRONTEND=noninteractive apt-get install -y grub-efi-amd64-bin",
+                "DEBIAN_FRONTEND=noninteractive apt-get autoremove -y"
             ],
             "only" : ["pg-aio-bullseye", "pg-aio-sid"]
         },
@@ -86,6 +91,25 @@
 
         {
             "type": "shell",
+            "expect_disconnect" : true,
+            "inline": [
+                "shutdown -r now"
+            ],
+            "only" : ["pg-aio-bullseye", "pg-aio-sid"]
+        },
+
+        {
+            "type": "shell",
+            "inline": [
+                "DEBIAN_FRONTEND=noninteractive apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y",
+                "sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf",
+                "update-initramfs -u -k all"
+            ],
+            "only" : ["pg-aio-bullseye", "pg-aio-sid"]
+        },
+
+        {
+            "type": "shell",
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git build-essential gcc g++ libreadline-dev flex bison make perl libipc-run-perl clang llvm-dev libperl-dev libpython3-dev tcl-dev libldap2-dev libicu-dev docbook-xml docbook-xsl fop libxml2-utils xsltproc krb5-admin-server krb5-kdc krb5-user slapd ldap-utils libssl-dev pkg-config locales-all liburing-dev python3-distutils ccache gdb"
             ],
@@ -96,7 +120,8 @@
             "type": "shell",
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get autoremove -y",
-                "apt-get clean"
+                "apt-get clean",
+                "rm -f /var/lib/apt/lists/deb.debian.org_*"
             ],
             "only" : ["pg-aio-bullseye", "pg-aio-sid"]
         },
