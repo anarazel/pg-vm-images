@@ -14,29 +14,19 @@ task:
     DEBIAN_FRONTEND: noninteractive
 
   init_script:
-    - id
-    - pwd
     - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
-    - gcloud auth list
     - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-    - gcloud auth list
     - packer --version
 
   matrix:
-    - env:
-        IMG: pg-aio-sid
-    - env:
-        IMG: pg-aio-sid-newkernel
-    - env:
-        IMG: pg-aio-bullseye
-    - env:
-        IMG: pg-aio-freebsd-12-2
+    - name: pg-aio-sid
+    - name: pg-aio-sid-newkernel
+    - name: pg-aio-bullseye
+    - name: pg-aio-freebsd-12-2
 
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
-    - export
-    - echo packer build -only ${IMG} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
-    - packer build -only ${IMG} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
-    - gcloud compute images create ${IMG}-${DATE} --family ${IMG} --source-image ${IMG}-tmp-${DATE}
-    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${IMG}-${DATE}
-    - gcloud compute images delete -q ${IMG}-tmp-${DATE}
+    - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
+    - gcloud compute images create ${CIRRUS_TASK_NAME}-${DATE} --family ${CIRRUS_TASK_NAME} --source-image ${CIRRUS_TASK_NAME}-tmp-${DATE}
+    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-${DATE}
+    - gcloud compute images delete -q ${CIRRUS_TASK_NAME}-tmp-${DATE}
