@@ -27,6 +27,4 @@ task:
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
     - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
-    - gcloud compute images create ${CIRRUS_TASK_NAME}-${DATE} --family ${CIRRUS_TASK_NAME} --source-image ${CIRRUS_TASK_NAME}-tmp-${DATE} --source-image-project pg-vm-images-aio
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-${DATE}
-    - gcloud compute images delete -q ${CIRRUS_TASK_NAME}-tmp-${DATE}
