@@ -6,15 +6,16 @@
             "project_id": "pg-vm-images-aio",
             "source_image_family": "debian-10",
             "source_image_project_id": "debian-cloud",
-            "image_name": "pg-aio-bullseye-{{user `image_date`}}",
-            "image_family": "pg-aio-bullseye-tmp",
+            "image_name": "{{user `prefix`}}pg-aio-bullseye-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-bullseye",
             "ssh_username": "root",
             "ssh_pty": "true",
             "zone": "us-west1-a",
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size" : "10"
+            "disk_size" : "10",
+            "instance_name" : "packer-{{build_name}}-{{uuid}}"
         },
 
         {
@@ -23,15 +24,16 @@
             "project_id": "pg-vm-images-aio",
             "source_image_family": "debian-10",
             "source_image_project_id": "debian-cloud",
-            "image_name": "pg-aio-sid-{{user `image_date`}}",
-            "image_family": "pg-aio-sid-tmp",
+            "image_name": "{{user `prefix`}}pg-aio-sid-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-sid",
             "ssh_username": "root",
             "ssh_pty": "true",
             "zone": "us-west1-a",
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size" : "10"
+            "disk_size" : "10",
+            "instance_name" : "packer-{{build_name}}-{{uuid}}"
         },
 
         {
@@ -40,15 +42,16 @@
             "project_id": "pg-vm-images-aio",
             "source_image_family": "debian-10",
             "source_image_project_id": "debian-cloud",
-            "image_name": "pg-aio-sid-newkernel-{{user `image_date`}}",
-            "image_family": "pg-aio-sid-newkernel-tmp",
+            "image_name": "{{user `prefix`}}pg-aio-sid-newkernel-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-sid-newkernel",
             "ssh_username": "root",
             "ssh_pty": "true",
             "zone": "us-west2-a",
             "machine_type" : "c2-standard-8",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size" : "15"
+            "disk_size" : "15",
+            "instance_name" : "packer-{{build_name}}-{{uuid}}"
         },
 
 
@@ -58,15 +61,16 @@
             "project_id": "pg-vm-images-aio",
             "source_image_family": "freebsd-12-2",
             "source_image_project_id": "freebsd-org-cloud-dev",
-            "image_name": "pg-aio-freebsd-12-2-{{user `image_date`}}",
-            "image_family": "pg-aio-freebsd-12-2-tmp",
+            "image_name": "{{user `prefix`}}pg-aio-freebsd-12-2-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-freebsd-12-2",
             "ssh_username": "pg-vm-images-aio",
             "ssh_pty": "true",
             "zone": "us-west1-a",
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size": "23"
+            "disk_size": "23",
+            "instance_name" : "packer-{{build_name}}-{{uuid}}"
         }
     ],
     "provisioners": [
@@ -180,18 +184,27 @@
         {
             "type": "shell",
             "inline": [
+                "sudo cat /boot/loader.conf || true",
                 "sudo freebsd-update fetch install",
                 "#sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
                 "sudo pkg update",
                 "sudo pkg upgrade -y",
                 "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache",
                 "sudo pkg clean -y",
-                "# the following probably are a bad idea ",
-                "#cp /etc/rc.conf /tmp/rc.conf",
-                "#grep -v firstboot_ /tmp/rc.conf | sudo tee /etc/rc.conf",
                 "sudo rm -fr /usr/ports /usr/src",
+                "sudo cat /etc/rc.conf",
+                "# the firstboot stuff delays boot and sometimes fails - we rebuild images anyway",
+                "sudo sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf",
+                "sudo sed -i -e 's/firstboot_freebsd_update_enable=YES/firstboot_freebsd_update_enable=NO/' /etc/rc.conf",
+                "# try to make debugging easier",
+                "echo rc_debug=YES | sudo tee -a /etc/rc.conf",
+                "echo rc_startmsgs=YES | sudo tee -a /etc/rc.conf",
+                "sudo cat /etc/rc.conf",
+                "sudo cat /boot/loader.conf || true",
+                "# this seems to just be in the wrong place",
+                "sudo sed -i -e 's/kern.timecounter.hardware=ACPI-safe//' /boot/loader.conf",
                 "# this is needed to trigger growing the root filesystem on boot",
-                "sudo touch /root/firstboot /firstboot"
+                "sudo touch /firstboot"
             ],
             "only" : ["pg-aio-freebsd-12-2"]
         }
