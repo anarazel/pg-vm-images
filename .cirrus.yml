@@ -34,6 +34,8 @@ task:
 
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
+    - export
+    - echo packer build -only ${IMG}-tmp-${DATE} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
     - packer build -only ${IMG}-tmp-${DATE} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
     - gcloud compute images create ${IMG}-${DATE} --family ${IMG} --source-image ${IMG}-tmp-${DATE}
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${IMG}-${DATE}
