@@ -118,6 +118,7 @@
             "type": "shell",
             "expect_disconnect" : true,
             "inline": [
+                "echo will reboot",
                 "shutdown -r now"
             ],
             "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
@@ -125,6 +126,7 @@
 
         {
             "type": "shell",
+            "pause_before": "10s",
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y",
                 "sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf",
