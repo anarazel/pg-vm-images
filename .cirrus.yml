@@ -7,8 +7,8 @@ env:
 task:
   container:
     dockerfile: LinuxPackerDockerfile
-    cpu: 1
-    memory: 1GB
+    cpu: 0.5
+    memory: 512Mi
   env:
     GOOGLE_APPLICATION_CREDENTIALS: pg-vm-images-aio.json
     DEBIAN_FRONTEND: noninteractive
@@ -27,6 +27,7 @@ task:
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
     - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
+    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-tmp-${DATE}
     - gcloud compute images create ${CIRRUS_TASK_NAME}-${DATE} --family ${CIRRUS_TASK_NAME} --source-image ${CIRRUS_TASK_NAME}-tmp-${DATE}
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-${DATE}
     - gcloud compute images delete -q ${CIRRUS_TASK_NAME}-tmp-${DATE}
