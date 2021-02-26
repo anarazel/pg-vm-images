@@ -15,7 +15,7 @@
             "preemptible": "true",
             "disk_type" : "pd-ssd",
             "disk_size" : "10",
-            "instance_name" : "packer-{{build_name}}-{{uuid}}"
+            "instance_name" : "build-{{build_name}}-{{uuid}}"
         },
 
         {
@@ -33,7 +33,7 @@
             "preemptible": "true",
             "disk_type" : "pd-ssd",
             "disk_size" : "10",
-            "instance_name" : "packer-{{build_name}}-{{uuid}}"
+            "instance_name" : "build-{{build_name}}-{{uuid}}"
         },
 
         {
@@ -51,7 +51,7 @@
             "preemptible": "true",
             "disk_type" : "pd-ssd",
             "disk_size" : "15",
-            "instance_name" : "packer-{{build_name}}-{{uuid}}"
+            "instance_name" : "build-{{build_name}}-{{uuid}}"
         },
 
 
@@ -70,7 +70,7 @@
             "preemptible": "true",
             "disk_type" : "pd-ssd",
             "disk_size": "23",
-            "instance_name" : "packer-{{build_name}}-{{uuid}}"
+            "instance_name" : "build-{{build_name}}-{{uuid}}"
         }
     ],
     "provisioners": [
