@@ -134,7 +134,7 @@
             "type": "shell",
             "inline": [
                 "sudo freebsd-update fetch install",
-                "sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
+                "#sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
                 "sudo pkg update",
                 "sudo pkg upgrade -y",
                 "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache",
