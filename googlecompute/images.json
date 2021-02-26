@@ -156,7 +156,7 @@
                 "make install prefix=/usr/local/",
                 "",
                 "# build liburing",
-                "apt purge liburing1",
+                "apt purge -y liburing1",
                 "cd /usr/src/",
                 "git clone --single-branch --depth 1 https://github.com/axboe/liburing.git",
                 "cd liburing/",
