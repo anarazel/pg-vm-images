@@ -8,10 +8,11 @@ task:
   container:
     dockerfile: LinuxPackerDockerfile
     cpu: 1
-    memory: 2GB
+    memory: 1GB
   env:
     GOOGLE_APPLICATION_CREDENTIALS: pg-vm-images-aio.json
     DEBIAN_FRONTEND: noninteractive
+
   init_script:
     - id
     - pwd
@@ -19,6 +20,7 @@ task:
     - gcloud auth list
     - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth list
+    - packer --version
 
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
