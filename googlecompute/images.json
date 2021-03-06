@@ -225,6 +225,10 @@
             "type": "shell",
             "expect_disconnect" : true,
             "inline": [
+                "sudo mount -u -f -r /",
+                "sudo fsck_ffs -E /",
+                "sudo tunefs -j enable /",
+                "sudo mount -u -f -w /",
                 "sudo shutdown -h now"
             ],
             "only" : ["pg-aio-freebsd-12-2"]
