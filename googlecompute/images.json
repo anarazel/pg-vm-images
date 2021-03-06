@@ -193,7 +193,7 @@
                 "sudo pkg upgrade -y",
                 "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache",
                 "sudo pkg clean -y",
-                "sudo rm -fr /usr/ports /usr/src",
+                "sudo rm -fr /usr/ports /usr/src /usr/lib/debug",
                 "sudo cat /etc/rc.conf",
                 "# the firstboot stuff delays boot and sometimes fails - we rebuild images anyway",
                 "sudo sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf",
