@@ -208,7 +208,7 @@
 
                 "# XXX: Try to ensure the new instance doesn't use old network etc configuration",
                 "cat /usr/local/etc/instance_configs.cfg || true",
-                "sudo rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 /var/db/dhclient.leases.vtnet0 /etc/ssh/*key*",
+                "sudo rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 /var/db/dhclient.leases.vtnet0 /etc/hostid /etc/ssh/*key*",
                 "cat /etc/hosts",
                 "sudo sed -i -e '/[gG]oogle/d' /etc/hosts",
                 "cat /etc/hosts",
