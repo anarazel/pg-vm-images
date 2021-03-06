@@ -213,6 +213,7 @@
                 "sudo sed -i -e '/[gG]oogle/d' /etc/hosts",
                 "cat /etc/hosts",
                 "echo sendmail_enable=NO |sudo tee -a /etc/rc.conf",
+                "echo sendmail_submit_enable=NO |sudo tee -a /etc/rc.conf",
                 "sudo cat /etc/rc.conf",
 
                 "# this is needed to trigger growing the root filesystem on boot",
