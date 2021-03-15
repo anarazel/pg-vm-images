@@ -228,7 +228,6 @@
             "inline": [
                 "sudo mount -u -f -r /",
                 "sudo fsck_ffs -E /",
-                "sudo tunefs -j enable /",
                 "sudo mount -u -f -w /",
                 "sudo shutdown -h now"
             ],
