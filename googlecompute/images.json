@@ -56,13 +56,13 @@
 
 
         {
-            "name": "pg-aio-freebsd-12-2",
+            "name": "pg-aio-freebsd-13-0",
             "type": "googlecompute",
             "project_id": "pg-vm-images-aio",
-            "source_image_family": "freebsd-12-2",
+            "source_image_family": "freebsd-13-0",
             "source_image_project_id": "freebsd-org-cloud-dev",
-            "image_name": "{{user `prefix`}}pg-aio-freebsd-12-2-{{user `image_date`}}",
-            "image_family": "{{user `prefix`}}pg-aio-freebsd-12-2",
+            "image_name": "{{user `prefix`}}pg-aio-freebsd-13-0-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-freebsd-13-0",
             "ssh_username": "pg-vm-images-aio",
             "ssh_pty": "true",
             "zone": "us-west1-a",
@@ -219,7 +219,7 @@
                 "# this is needed to trigger growing the root filesystem on boot",
                 "sudo touch /firstboot"
             ],
-            "only" : ["pg-aio-freebsd-12-2"]
+            "only" : ["pg-aio-freebsd-13-0"]
         },
 
         {
@@ -231,7 +231,7 @@
                 "sudo mount -u -f -w /",
                 "sudo shutdown -h now"
             ],
-            "only" : ["pg-aio-freebsd-12-2"]
+            "only" : ["pg-aio-freebsd-13-0"]
         }
     ]
 }
