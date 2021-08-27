@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:bullseye
 RUN apt-get -y update
 RUN apt-get -y upgrade
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y --no-install-recommends install ca-certificates gnupg curl
