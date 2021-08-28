@@ -175,7 +175,8 @@
                 "git clone --single-branch --depth 1 https://github.com/axboe/liburing.git",
                 "cd liburing/",
                 "./configure --prefix=/usr/local/",
-                "make -j8 -s install"
+                "make -j8 -s install",
+                "ldconfig"
             ],
             "only" : ["pg-aio-sid-newkernel"]
         },
