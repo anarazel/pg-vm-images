@@ -227,7 +227,7 @@
                 "sudo cat /etc/rc.conf",
 
                 "# this is needed to trigger growing the root filesystem on boot",
-                "sudo touch /firstboot"
+                "#sudo touch /firstboot"
             ],
             "only" : ["pg-aio-freebsd-13-0"]
         },
