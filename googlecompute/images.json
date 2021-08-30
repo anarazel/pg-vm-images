@@ -229,7 +229,8 @@
                 "sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf",
                 "# the loader.conf parts from: https://lists.freebsd.org/pipermail/freebsd-cloud/2017-January/000080.html",
                 "echo 'machdep.disable_tsc_calibration=1' | sudo tee -a /boot/loader.conf",
-                "echo 'kern.timecounter.invariant_tsc=1' | sudo tee -a /boot/loader.conf"
+                "echo 'kern.timecounter.invariant_tsc=1' | sudo tee -a /boot/loader.conf",
+                "echo 'kern.timecounter.smp_tsc=1' | sudo tee -a /boot/loader.conf"
             ],
             "only" : ["pg-aio-freebsd-13-0"]
         },
