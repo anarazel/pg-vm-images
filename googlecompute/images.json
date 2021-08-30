@@ -228,6 +228,7 @@
 
                 "# this is needed to trigger growing the root filesystem on boot",
                 "#sudo touch /firstboot",
+                "du -h",
                 "gpart list",
                 "gpart show da0",
                 "gpart add -t freebsd-ufs -l data8k da0 || true"
