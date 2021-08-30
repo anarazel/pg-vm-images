@@ -230,8 +230,10 @@
                 "# this is needed to trigger growing the root filesystem on boot",
                 "#sudo touch /firstboot",
                 "df -h",
-                "gpart list",
-                "gpart show da0",
+                "sudo gpart list",
+                "sudo gpart show da0",
+                "sudo gpart undo da0",
+                "sudo gpart show da0",
                 "gpart add -t freebsd-ufs -l data8k da0 || true"
             ],
             "only" : ["pg-aio-freebsd-13-0"]
