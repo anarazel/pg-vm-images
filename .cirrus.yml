@@ -19,9 +19,9 @@ task:
     - packer --version
 
   matrix:
-    - name: pg-aio-sid
-    - name: pg-aio-sid-newkernel
-    - name: pg-aio-bullseye
+    #- name: pg-aio-sid
+    #- name: pg-aio-sid-newkernel
+    #- name: pg-aio-bullseye
     - name: pg-aio-freebsd-13-0
 
   build_image_script:

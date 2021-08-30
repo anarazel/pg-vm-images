@@ -69,7 +69,7 @@
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size": "50",
+            "disk_size": "25G",
             "instance_name" : "build-{{user `prefix`}}-{{build_name}}"
         }
     ],
@@ -196,8 +196,6 @@
         {
             "type": "shell",
             "inline": [
-                "df -h /",
-                "sudo dmesg",
                 "sudo cat /boot/loader.conf || true",
                 "sudo freebsd-update fetch install",
                 "sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
@@ -227,15 +225,8 @@
                 "echo sendmail_enable=NO |sudo tee -a /etc/rc.conf",
                 "echo sendmail_submit_enable=NO |sudo tee -a /etc/rc.conf",
                 "sudo cat /etc/rc.conf",
-
-                "# this is needed to trigger growing the root filesystem on boot",
-                "#sudo touch /firstboot",
-                "df -h /",
-                "sudo gpart list",
-                "sudo gpart show da0",
-                "sudo gpart undo da0 || true",
-                "sudo gpart show da0",
-                "gpart add -t freebsd-ufs -l data8k da0 || true"
+                "# disable growfs, so we can create space for new partitions",
+                "sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf"
             ],
             "only" : ["pg-aio-freebsd-13-0"]
         },
