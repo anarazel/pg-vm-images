@@ -226,7 +226,10 @@
                 "echo sendmail_submit_enable=NO |sudo tee -a /etc/rc.conf",
                 "sudo cat /etc/rc.conf",
                 "# disable growfs, so we can create space for new partitions",
-                "sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf"
+                "sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf",
+                "# the loader.conf parts from: https://lists.freebsd.org/pipermail/freebsd-cloud/2017-January/000080.html",
+                "echo 'machdep.disable_tsc_calibration=1' >> /boot/loader.conf",
+                "echo 'kern.timecounter.invariant_tsc=1' >> /boot/loader.conf"
             ],
             "only" : ["pg-aio-freebsd-13-0"]
         },
