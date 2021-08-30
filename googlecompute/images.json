@@ -69,7 +69,7 @@
             "machine_type" : "e2-highcpu-4",
             "preemptible": "true",
             "disk_type" : "pd-ssd",
-            "disk_size": "25G",
+            "disk_size": "25",
             "instance_name" : "build-{{user `prefix`}}-{{build_name}}"
         }
     ],
