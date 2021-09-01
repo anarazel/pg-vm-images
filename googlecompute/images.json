@@ -180,7 +180,7 @@
             "type": "shell",
             "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
             "inline": [
-                "git clone --single-branch --depth 1 git://git.kernel.dk/linux-block -b $(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\/heads\///') /usr/src/linux"
+                "git clone --single-branch --depth 1 git://git.kernel.dk/linux-block -b $(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\\/heads\\///') /usr/src/linux"
             ],
             "only" : ["pg-aio-sid-newkernel-uring"]
         },
