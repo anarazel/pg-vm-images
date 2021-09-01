@@ -54,6 +54,23 @@
             "instance_name" : "build-{{user `prefix`}}-{{build_name}}"
         },
 
+        {
+            "name": "pg-aio-sid-newkernel-uring",
+            "type": "googlecompute",
+            "project_id": "pg-vm-images-aio",
+            "source_image_family": "debian-11",
+            "source_image_project_id": "debian-cloud",
+            "image_name": "{{user `prefix`}}pg-aio-sid-newkernel-uring-{{user `image_date`}}",
+            "image_family": "{{user `prefix`}}pg-aio-sid-newkernel-uring",
+            "ssh_username": "packer",
+            "ssh_pty": "true",
+            "zone": "us-west2-a",
+            "machine_type" : "c2-standard-8",
+            "preemptible": "true",
+            "disk_type" : "pd-ssd",
+            "disk_size" : "25",
+            "instance_name" : "build-{{user `prefix`}}-{{build_name}}"
+        },
 
         {
             "name": "pg-aio-freebsd-13-0",
@@ -83,7 +100,7 @@
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y grub-efi-amd64-bin",
                 "DEBIAN_FRONTEND=noninteractive apt-get autoremove -y"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -94,7 +111,7 @@
                 "echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list",
                 "apt-get update -y"
             ],
-            "only" : ["pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -115,7 +132,7 @@
                 "apt-get update -y",
                 "DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade --no-install-recommends -y"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -126,7 +143,7 @@
                 "echo will reboot",
                 "shutdown -r now"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -138,7 +155,7 @@
                 "sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf",
                 "update-initramfs -u -k all"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -147,7 +164,25 @@
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git build-essential gcc g++ libreadline-dev flex bison make perl libipc-run-perl clang llvm-dev libperl-dev libpython3-dev tcl-dev libldap2-dev libicu-dev docbook-xml docbook-xsl fop libxml2-utils xsltproc krb5-admin-server krb5-kdc krb5-user slapd ldap-utils libssl-dev pkg-config locales-all liburing-dev python3-distutils ccache gdb"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+        },
+
+        {
+            "type": "shell",
+            "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+            "inline": [
+                "git clone --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git /usr/src/linux"
+            ],
+            "only" : ["pg-aio-sid-newkernel"]
+        },
+
+        {
+            "type": "shell",
+            "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
+            "inline": [
+                "git clone --single-branch --depth 1 git://git.kernel.dk/linux-block -b $(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\/heads\///') /usr/src/linux"
+            ],
+            "only" : ["pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -155,9 +190,7 @@
             "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev binutils-dev  libnuma-dev libcap-dev libiberty-dev  libbabeltrace-dev systemtap-sdt-dev",
-                "cd /usr/src/",
-                "git clone --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git",
-                "cd linux",
+                "cd /usr/src/linux",
                 "make x86_64_defconfig",
                 "make kvm_guest.config",
                 "./scripts/config -e CONFIG_KVM_CLOCK",
@@ -178,7 +211,7 @@
                 "make -j8 -s install",
                 "ldconfig"
             ],
-            "only" : ["pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {
@@ -190,7 +223,7 @@
                 "rm -f /var/lib/apt/lists/deb.debian.org_*",
                 "fstrim -v -a"
             ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel"]
+            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
         },
 
         {

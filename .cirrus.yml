@@ -21,6 +21,7 @@ task:
   matrix:
     - name: pg-aio-sid
     - name: pg-aio-sid-newkernel
+    - name: pg-aio-sid-newkernel-uring
     - name: pg-aio-bullseye
     - name: pg-aio-freebsd-13-0
 
