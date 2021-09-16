@@ -180,7 +180,8 @@
             "type": "shell",
             "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
             "inline": [
-                "git clone --single-branch --depth 1 git://git.kernel.dk/linux-block -b $(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\\/heads\\///') /usr/src/linux"
+                "head=$(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\\/heads\\///')",
+                "git clone -o $head --single-branch --depth 1 git://git.kernel.dk/linux-block -b $head /usr/src/linux"
             ],
             "only" : ["pg-aio-sid-newkernel-uring"]
         },
@@ -191,10 +192,12 @@
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev binutils-dev  libnuma-dev libcap-dev libiberty-dev  libbabeltrace-dev systemtap-sdt-dev",
                 "cd /usr/src/linux",
+                "echo linux git revision from $(git remote) is: $(git rev-list HEAD)",
                 "make x86_64_defconfig",
                 "make kvm_guest.config",
                 "./scripts/config -e CONFIG_KVM_CLOCK",
                 "./scripts/config -e CONFIG_LOCALVERSION_AUTO",
+                "./scripts/config --set-str CONFIG_LOCALVERSION $(git remote)",
                 "# cirrus queries memory usage that way",
                 "./scripts/config -e MEMCG",
                 "# for good measure",
@@ -211,6 +214,7 @@
                 "cd /usr/src/",
                 "git clone --single-branch --depth 1 https://github.com/axboe/liburing.git",
                 "cd liburing/",
+                "echo liburing git revision is: $(git rev-list HEAD)",
                 "./configure --prefix=/usr/local/",
                 "make -j8 -s install",
                 "ldconfig"
