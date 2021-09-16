@@ -181,7 +181,8 @@
             "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
             "inline": [
                 "head=$(git ls-remote --exit-code --heads --sort=-version:refname git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring'|head -n 1|cut -f 2|sed -e 's/^refs\\/heads\\///')",
-                "git clone -o $head --single-branch --depth 1 git://git.kernel.dk/linux-block -b $head /usr/src/linux"
+                "origin=$(echo $head|sed -e 's/\\//-/')",
+                "git clone -o $origin --single-branch --depth 1 git://git.kernel.dk/linux-block -b $head /usr/src/linux"
             ],
             "only" : ["pg-aio-sid-newkernel-uring"]
         },
@@ -197,7 +198,7 @@
                 "make kvm_guest.config",
                 "./scripts/config -e CONFIG_KVM_CLOCK",
                 "./scripts/config -e CONFIG_LOCALVERSION_AUTO",
-                "./scripts/config --set-str CONFIG_LOCALVERSION $(git remote)",
+                "./scripts/config --set-str CONFIG_LOCALVERSION -$(git remote)",
                 "# cirrus queries memory usage that way",
                 "./scripts/config -e MEMCG",
                 "# for good measure",
