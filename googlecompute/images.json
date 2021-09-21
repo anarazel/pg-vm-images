@@ -243,7 +243,7 @@
                 "sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
                 "sudo pkg update",
                 "sudo pkg upgrade -y",
-                "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache",
+                "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache git-tiny bash",
                 "sudo pkg clean -y",
                 "sudo rm -fr /usr/ports /usr/src /usr/lib/debug",
                 "sudo cat /etc/rc.conf",
