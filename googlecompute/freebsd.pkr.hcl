@@ -52,55 +52,57 @@ build {
   }
 
   provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-        sudo cat /boot/loader.conf || true
-        sudo freebsd-update fetch install
-        sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
-        sudo pkg update
-        sudo pkg upgrade -y
-        sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache git-tiny bash meson ninja python3 pkgconf
-        sudo pkg clean -y
-        sudo rm -fr /usr/ports /usr/src /usr/lib/debug
-        sudo cat /etc/rc.conf
+        cat /boot/loader.conf || true
+        freebsd-update fetch install
+        pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
+        pkg update
+        pkg upgrade -y
+        pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache git-tiny bash meson ninja python3 pkgconf
+        pkg clean -y
+        rm -fr /usr/ports /usr/src /usr/lib/debug
+        cat /etc/rc.conf
         # the firstboot stuff delays boot and sometimes fails - we rebuild images anyway
-        sudo sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf
-        sudo sed -i -e 's/firstboot_freebsd_update_enable=YES/firstboot_freebsd_update_enable=NO/' /etc/rc.conf
+        sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf
+        sed -i -e 's/firstboot_freebsd_update_enable=YES/firstboot_freebsd_update_enable=NO/' /etc/rc.conf
         # try to make debugging easier
-        echo rc_debug=YES | sudo tee -a /etc/rc.conf
-        echo rc_startmsgs=YES | sudo tee -a /etc/rc.conf
-        sudo cat /etc/rc.conf
-        sudo cat /boot/loader.conf || true
+        echo rc_debug=YES | tee -a /etc/rc.conf
+        echo rc_startmsgs=YES | tee -a /etc/rc.conf
+        cat /etc/rc.conf
+        cat /boot/loader.conf || true
         # this seems to just be in the wrong place
-        sudo sed -i -e 's/kern.timecounter.hardware=ACPI-safe//' /boot/loader.conf
+        sed -i -e 's/kern.timecounter.hardware=ACPI-safe//' /boot/loader.conf
         # XXX: Try to ensure the new instance doesn't use old network etc configuration
         cat /usr/local/etc/instance_configs.cfg || true
-        sudo rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 \
+        rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 \
 	  /var/db/dhclient.leases.vtnet0 /etc/hostid /etc/ssh/*key*
         cat /etc/hosts
-        sudo sed -i -e '/[gG]oogle/d' /etc/hosts
+        sed -i -e '/[gG]oogle/d' /etc/hosts
         cat /etc/hosts
-        echo sendmail_enable=NO |sudo tee -a /etc/rc.conf
-        echo sendmail_submit_enable=NO |sudo tee -a /etc/rc.conf
-        sudo cat /etc/rc.conf
+        echo sendmail_enable=NO |tee -a /etc/rc.conf
+        echo sendmail_submit_enable=NO |tee -a /etc/rc.conf
+        cat /etc/rc.conf
         # disable growfs, so we can create space for new partitions
-        sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf
+        sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf
         # the loader.conf parts from: https://lists.freebsd.org/pipermail/freebsd-cloud/2017-January/000080.html
-        echo 'kern.timecounter.invariant_tsc=1' | sudo tee -a /boot/loader.conf
-        echo 'kern.timecounter.smp_tsc=1' | sudo tee -a /boot/loader.conf
-        echo 'kern.timecounter.smp_tsc_adjust=1' | sudo tee -a /boot/loader.conf
+        echo 'kern.timecounter.invariant_tsc=1' | tee -a /boot/loader.conf
+        echo 'kern.timecounter.smp_tsc=1' | tee -a /boot/loader.conf
+        echo 'kern.timecounter.smp_tsc_adjust=1' | tee -a /boot/loader.conf
       SCRIPT
     ]
   }
 
   provisioner "shell" {
     expect_disconnect = true
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-        sudo mount -u -f -r /
-        sudo fsck_ffs -E /
-        sudo mount -u -f -w /
-        sudo shutdown -h now
+        mount -u -f -r /
+        fsck_ffs -E /
+        mount -u -f -w /
+        shutdown -h now
       SCRIPT
     ]
   }

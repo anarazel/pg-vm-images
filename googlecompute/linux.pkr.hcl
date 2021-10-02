@@ -73,7 +73,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         rm -f /etc/apt/sources.list.d/google-cloud.list /etc/apt/sources.list.d/gce_sdk.list
@@ -86,7 +86,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         echo 'deb http://deb.debian.org/debian unstable main' > /etc/apt/sources.list
@@ -98,7 +98,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         echo 'deb http://deb.debian.org/debian bullseye main' > /etc/apt/sources.list
@@ -110,7 +110,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         apt-get update -y
@@ -120,9 +120,9 @@ build {
   }
 
   provisioner "shell" {
-    execute_command   = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     expect_disconnect = true
-    inline            = [
+    inline = [
       <<-SCRIPT
         echo will reboot
         shutdown -r now
@@ -131,7 +131,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     pause_before = "10s"
     inline = [
       <<-SCRIPT
@@ -150,7 +150,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         git clone --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git /usr/src/linux
@@ -160,7 +160,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         head=$(git ls-remote --exit-code --heads --sort=-version:refname \
@@ -175,7 +175,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -215,7 +215,7 @@ build {
   }
 
   provisioner "shell" {
-    execute_command = "sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
       DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
