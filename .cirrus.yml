@@ -1,5 +1,4 @@
-only_if: $CIRRUS_BRANCH == 'main'
-only_if: $CIRRUS_REPO_OWNER == 'anarazel'
+only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
 
 env:
   GAC: ENCRYPTED[08c58c0a60e1b0dfd4748960cef61296508f85b81ea8a553ee06c9df86bb2398c3240b35bfd76196f3967819da15cd25]
