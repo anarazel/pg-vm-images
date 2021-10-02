@@ -8,7 +8,7 @@ task:
   container:
     dockerfile: LinuxPackerDockerfile
     cpu: 0.5
-    memory: 512Mi
+    memory: 256Mi
   env:
     GOOGLE_APPLICATION_CREDENTIALS: pg-vm-images-aio.json
     DEBIAN_FRONTEND: noninteractive
@@ -19,13 +19,20 @@ task:
     - packer --version
 
   matrix:
-    - name: pg-aio-sid
-    - name: pg-aio-sid-newkernel
-    - name: pg-aio-sid-newkernel-uring
-    - name: pg-aio-bullseye
     - name: pg-aio-freebsd-13-0
+      env:
+        PACKERFILE: googlecompute/freebsd.json
+
+    - env:
+        PACKERFILE: googlecompute/linux.json
+
+      matrix:
+        - name: pg-aio-sid
+        - name: pg-aio-sid-newkernel
+        - name: pg-aio-sid-newkernel-uring
+        - name: pg-aio-bullseye
 
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
-    - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" googlecompute/images.json
+    - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" ${PACKERFILE}
     - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-${DATE}

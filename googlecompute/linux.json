@@ -70,26 +70,9 @@
             "disk_type" : "pd-ssd",
             "disk_size" : "25",
             "instance_name" : "build-{{user `prefix`}}{{build_name}}"
-        },
-
-        {
-            "name": "pg-aio-freebsd-13-0",
-            "type": "googlecompute",
-            "project_id": "pg-vm-images-aio",
-            "source_image_family": "freebsd-13-0",
-            "source_image_project_id": "freebsd-org-cloud-dev",
-            "image_name": "{{user `prefix`}}pg-aio-freebsd-13-0-{{user `image_date`}}",
-            "image_family": "{{user `prefix`}}pg-aio-freebsd-13-0",
-            "ssh_username": "pg-vm-images-aio",
-            "ssh_pty": "true",
-            "zone": "us-west1-a",
-            "machine_type" : "e2-highcpu-4",
-            "preemptible": "true",
-            "disk_type" : "pd-ssd",
-            "disk_size": "25",
-            "instance_name" : "build-{{user `prefix`}}{{build_name}}"
         }
     ],
+
     "provisioners": [
         {
             "type": "shell",
@@ -99,8 +82,7 @@
                 "DEBIAN_FRONTEND=noninteractive apt-get purge man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil -y",
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y grub-efi-amd64-bin grub2-common",
                 "DEBIAN_FRONTEND=noninteractive apt-get autoremove -y"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+            ]
         },
 
         {
@@ -131,8 +113,7 @@
             "inline": [
                 "apt-get update -y",
                 "DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade --no-install-recommends -y"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+            ]
         },
 
         {
@@ -142,8 +123,7 @@
             "inline": [
                 "echo will reboot",
                 "shutdown -r now"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+            ]
         },
 
         {
@@ -154,8 +134,7 @@
                 "DEBIAN_FRONTEND=noninteractive apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y",
                 "sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf",
                 "update-initramfs -u -k all"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+            ]
         },
 
         {
@@ -163,8 +142,7 @@
             "execute_command": "sudo -S sh -c '{{ .Vars }} {{ .Path }}'",
             "inline": [
                 "DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git build-essential gcc g++ libreadline-dev flex bison make perl libipc-run-perl libio-pty-perl clang llvm-dev libperl-dev libpython3-dev tcl-dev libldap2-dev libicu-dev docbook-xml docbook-xsl fop libxml2-utils xsltproc krb5-admin-server krb5-kdc krb5-user slapd ldap-utils libssl-dev pkg-config locales-all liburing-dev python3-distutils ccache gdb meson"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
+            ]
         },
 
         {
@@ -231,62 +209,7 @@
                 "apt-get clean",
                 "rm -f /var/lib/apt/lists/deb.debian.org_*",
                 "fstrim -v -a"
-            ],
-            "only" : ["pg-aio-bullseye", "pg-aio-sid", "pg-aio-sid-newkernel", "pg-aio-sid-newkernel-uring"]
-        },
-
-        {
-            "type": "shell",
-            "inline": [
-                "sudo cat /boot/loader.conf || true",
-                "sudo freebsd-update fetch install",
-                "sudo pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs",
-                "sudo pkg update",
-                "sudo pkg upgrade -y",
-                "sudo pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache git-tiny bash meson ninja python3 pkgconf",
-                "sudo pkg clean -y",
-                "sudo rm -fr /usr/ports /usr/src /usr/lib/debug",
-                "sudo cat /etc/rc.conf",
-                "# the firstboot stuff delays boot and sometimes fails - we rebuild images anyway",
-                "sudo sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf",
-                "sudo sed -i -e 's/firstboot_freebsd_update_enable=YES/firstboot_freebsd_update_enable=NO/' /etc/rc.conf",
-                "# try to make debugging easier",
-                "echo rc_debug=YES | sudo tee -a /etc/rc.conf",
-                "echo rc_startmsgs=YES | sudo tee -a /etc/rc.conf",
-                "sudo cat /etc/rc.conf",
-                "sudo cat /boot/loader.conf || true",
-                "# this seems to just be in the wrong place",
-                "sudo sed -i -e 's/kern.timecounter.hardware=ACPI-safe//' /boot/loader.conf",
-
-                "# XXX: Try to ensure the new instance doesn't use old network etc configuration",
-                "cat /usr/local/etc/instance_configs.cfg || true",
-                "sudo rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 /var/db/dhclient.leases.vtnet0 /etc/hostid /etc/ssh/*key*",
-                "cat /etc/hosts",
-                "sudo sed -i -e '/[gG]oogle/d' /etc/hosts",
-                "cat /etc/hosts",
-                "echo sendmail_enable=NO |sudo tee -a /etc/rc.conf",
-                "echo sendmail_submit_enable=NO |sudo tee -a /etc/rc.conf",
-                "sudo cat /etc/rc.conf",
-                "# disable growfs, so we can create space for new partitions",
-                "sudo sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf",
-                "# the loader.conf parts from: https://lists.freebsd.org/pipermail/freebsd-cloud/2017-January/000080.html",
-                "echo 'kern.timecounter.invariant_tsc=1' | sudo tee -a /boot/loader.conf",
-                "echo 'kern.timecounter.smp_tsc=1' | sudo tee -a /boot/loader.conf",
-                "echo 'kern.timecounter.smp_tsc_adjust=1' | sudo tee -a /boot/loader.conf"
-            ],
-            "only" : ["pg-aio-freebsd-13-0"]
-        },
-
-        {
-            "type": "shell",
-            "expect_disconnect" : true,
-            "inline": [
-                "sudo mount -u -f -r /",
-                "sudo fsck_ffs -E /",
-                "sudo mount -u -f -w /",
-                "sudo shutdown -h now"
-            ],
-            "only" : ["pg-aio-freebsd-13-0"]
+            ]
         }
     ]
 }
