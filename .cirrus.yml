@@ -18,20 +18,22 @@ task:
     - packer --version
 
   matrix:
-    - name: pg-aio-freebsd-13-0
+    - name: freebsd-13-0
       env:
-        PACKERFILE: googlecompute/freebsd.json
+        PACKERFILE: googlecompute/freebsd.pkr.hcl
 
     - env:
-        PACKERFILE: googlecompute/linux.json
+        PACKERFILE: googlecompute/linux.pkr.hcl
 
       matrix:
-        - name: pg-aio-sid
-        - name: pg-aio-sid-newkernel
-        - name: pg-aio-sid-newkernel-uring
-        - name: pg-aio-bullseye
+        - name: bullseye
+        - name: sid
+        - name: sid-newkernel
+        - name: sid-newkernel-uring
 
   build_image_script:
     - export DATE=$(date +'%Y-%m-%dt%H-%M')
-    - packer build -only ${CIRRUS_TASK_NAME} -timestamp-ui -force -var "image_date=$DATE" ${PACKERFILE}
-    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser ${CIRRUS_TASK_NAME}-${DATE}
+    - set -x
+    - packer build -only "*.${CIRRUS_TASK_NAME}" -timestamp-ui -force -var "image_date=$DATE" $PACKERFILE
+
+    - gcloud compute images add-iam-policy-binding --project pg-vm-images-aio --member=allAuthenticatedUsers --role=roles/compute.imageUser pg-aio-${CIRRUS_TASK_NAME}-${DATE}
