@@ -60,7 +60,10 @@ build {
         pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
         pkg update
         pkg upgrade -y
-        pkg install -y readline flex bison gmake perl5 p5-IPC-Run ccache git-tiny bash meson ninja python3 pkgconf
+        pkg install -y \
+          readline flex bison gmake perl5 p5-IPC-Run ccache liblz4 libxml2 libxslt \
+          openldap-client gettext tcl86 openldap-server krb5 \
+          git-tiny bash meson ninja python3 pkgconf
         pkg clean -y
         rm -fr /usr/ports /usr/src /usr/lib/debug
         cat /etc/rc.conf
