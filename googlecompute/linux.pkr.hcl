@@ -94,7 +94,7 @@ build {
         apt-get update -y
         SCRIPT
     ]
-    only = ["sid", "sid-newkernel", "sid-newkernel-uring"]
+    only = ["googlecompute.sid", "googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
 
   provisioner "shell" {
@@ -106,7 +106,7 @@ build {
         apt-get update -y
       SCRIPT
     ]
-    only = ["bullseye"]
+    only = ["googlecompute.bullseye"]
   }
 
   provisioner "shell" {
@@ -158,7 +158,7 @@ build {
         git clone --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git /usr/src/linux
       SCRIPT
     ]
-    only = ["sid-newkernel"]
+    only = ["googlecompute.sid-newkernel"]
   }
 
   provisioner "shell" {
@@ -173,7 +173,7 @@ build {
           git://git.kernel.dk/linux-block -b $head /usr/src/linux
       SCRIPT
     ]
-    only = ["sid-newkernel-uring"]
+    only = ["googlecompute.sid-newkernel-uring"]
   }
 
   provisioner "shell" {
@@ -213,7 +213,7 @@ build {
         ldconfig
         SCRIPT
     ]
-    only = ["sid-newkernel", "sid-newkernel-uring"]
+    only = ["googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
 
   provisioner "shell" {
