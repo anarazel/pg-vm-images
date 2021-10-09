@@ -32,7 +32,7 @@ task:
         - name: sid-newkernel-uring
 
   build_image_script:
-    - export DATE=$(date +'%Y-%m-%dt%H-%M')
+    - export DATE=$(date --utc +'%Y-%m-%dt%H-%M')
     - set -x
     - packer build -only "*.${CIRRUS_TASK_NAME}" -timestamp-ui -force -var "image_date=$DATE" $PACKERFILE
 
