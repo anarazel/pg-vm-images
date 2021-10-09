@@ -167,8 +167,8 @@ build {
       <<-SCRIPT
         head=$(git ls-remote --exit-code --heads --sort=-version:refname \
           git://git.kernel.dk/linux-block 'refs/heads/for-*/io_uring' | \
-                head -n 1|cut -f 2|sed -e 's/^refs\\/heads\\///')
-        origin=$(echo $head|sed -e 's/\\//-/')
+                head -n 1|cut -f 2|sed -e 's/^refs\/heads\///')
+        origin=$(echo $head|sed -e 's/\//-/')
         git clone -o $origin --single-branch --depth 1 \
           git://git.kernel.dk/linux-block -b $head /usr/src/linux
       SCRIPT
