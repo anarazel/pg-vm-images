@@ -203,7 +203,7 @@ build {
         make install prefix=/usr/local/
 
         # build liburing
-        DEBIAN_FRONTEND=noninteractive apt-get purge -y -q liburing1
+        DEBIAN_FRONTEND=noninteractive apt-get purge -y -q 'liburing*'
         cd /usr/src/
         git clone --single-branch --depth 1 https://github.com/axboe/liburing.git
         cd liburing/
