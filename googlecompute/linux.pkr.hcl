@@ -145,7 +145,7 @@ build {
           libicu-dev docbook-xml docbook-xsl fop libxml2-utils xsltproc krb5-admin-server \
           krb5-kdc krb5-user slapd ldap-utils libssl-dev pkg-config locales-all liblz4-dev \
           libsystemd-dev libxml2-dev libxslt1-dev python3-dev libkrb5-dev libpam-dev \
-          libkrb5-*-heimdal uuid-dev libossp-uuid-dev gettext \
+          libkrb5-*-heimdal uuid-dev libossp-uuid-dev gettext libselinux1-dev \
           liburing-dev python3-distutils ccache gdb meson
       SCRIPT
     ]
