@@ -47,7 +47,7 @@ build {
   name="linux"
 
   # Generate debian gcp images. Unfortunately variable expansion inside source
-  # and build blocks doesn't work well yet on packer 1.7.7. Hence this.
+  # and build blocks doesn't yet work well on packer 1.7.7. Hence this.
 
   dynamic "source" {
     for_each = local.debian_gcp_images
@@ -89,24 +89,24 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-        echo 'deb http://deb.debian.org/debian unstable main' > /etc/apt/sources.list
-        echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
-        apt-get update -y
-        SCRIPT
-    ]
-    only = ["googlecompute.sid", "googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
-  }
-
-  provisioner "shell" {
-    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    inline = [
-      <<-SCRIPT
         echo 'deb http://deb.debian.org/debian bullseye main' > /etc/apt/sources.list
         echo 'deb-src http://deb.debian.org/debian bullseye main' >> /etc/apt/sources.list
         apt-get update -y
       SCRIPT
     ]
     only = ["googlecompute.bullseye"]
+  }
+
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      <<-SCRIPT
+        echo 'deb http://deb.debian.org/debian unstable main' > /etc/apt/sources.list
+        echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+        apt-get update -y
+        SCRIPT
+    ]
+    only = ["googlecompute.sid", "googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
 
   provisioner "shell" {
@@ -181,8 +181,8 @@ build {
     inline = [
       <<-SCRIPT
         DEBIAN_FRONTEND=noninteractive apt-get install -y \
-	  time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev \
-	  binutils-dev  libnuma-dev libcap-dev libiberty-dev libbabeltrace-dev systemtap-sdt-dev
+          time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev \
+          binutils-dev  libnuma-dev libcap-dev libiberty-dev libbabeltrace-dev systemtap-sdt-dev
 
         cd /usr/src/linux
         echo linux git revision from $(git remote) is: $(git rev-list HEAD)
@@ -211,7 +211,7 @@ build {
         ./configure --prefix=/usr/local/
         make -j8 -s install
         ldconfig
-        SCRIPT
+      SCRIPT
     ]
     only = ["googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
@@ -220,10 +220,10 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-      DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
-      apt-get clean
-      rm -f /var/lib/apt/lists/deb.debian.org_*
-      fstrim -v -a
+        DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+        apt-get clean
+        rm -f /var/lib/apt/lists/deb.debian.org_*
+        fstrim -v -a
       SCRIPT
     ]
   }

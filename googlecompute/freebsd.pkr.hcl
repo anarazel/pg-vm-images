@@ -67,28 +67,34 @@ build {
         pkg clean -y
         rm -fr /usr/ports /usr/src /usr/lib/debug
         cat /etc/rc.conf
+
         # the firstboot stuff delays boot and sometimes fails - we rebuild images anyway
         sed -i -e 's/firstboot_pkgs_enable=YES/firstboot_pkgs_enable=NO/' /etc/rc.conf
         sed -i -e 's/firstboot_freebsd_update_enable=YES/firstboot_freebsd_update_enable=NO/' /etc/rc.conf
+
         # try to make debugging easier
         echo rc_debug=YES | tee -a /etc/rc.conf
         echo rc_startmsgs=YES | tee -a /etc/rc.conf
         cat /etc/rc.conf
         cat /boot/loader.conf || true
+
         # this seems to just be in the wrong place
         sed -i -e 's/kern.timecounter.hardware=ACPI-safe//' /boot/loader.conf
+
         # XXX: Try to ensure the new instance doesn't use old network etc configuration
         cat /usr/local/etc/instance_configs.cfg || true
         rm -f /usr/local/etc/instance_configs.cfg /var/run/resolvconf/interfaces/vtnet0 \
-	  /var/db/dhclient.leases.vtnet0 /etc/hostid /etc/ssh/*key*
+          /var/db/dhclient.leases.vtnet0 /etc/hostid /etc/ssh/*key*
         cat /etc/hosts
         sed -i -e '/[gG]oogle/d' /etc/hosts
         cat /etc/hosts
         echo sendmail_enable=NO |tee -a /etc/rc.conf
         echo sendmail_submit_enable=NO |tee -a /etc/rc.conf
         cat /etc/rc.conf
+
         # disable growfs, so we can create space for new partitions
         sed -i -e 's/growfs_enable=YES/growfs_enable=NO/' /etc/rc.conf
+
         # the loader.conf parts from: https://lists.freebsd.org/pipermail/freebsd-cloud/2017-January/000080.html
         echo 'kern.timecounter.invariant_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc=1' | tee -a /boot/loader.conf
