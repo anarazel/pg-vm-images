@@ -135,18 +135,68 @@ build {
     pause_before = "10s"
     inline = [
       <<-SCRIPT
-        DEBIAN_FRONTEND=noninteractive apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y
+        export DEBIAN_FRONTEND=noninteractive
+
+        apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y
         sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf
         update-initramfs -u -k all
 
-        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-          git build-essential gcc g++ libreadline-dev flex bison make perl libipc-run-perl \
-          libio-pty-perl clang llvm-dev libperl-dev libpython3-dev tcl-dev libldap2-dev \
-          libicu-dev docbook-xml docbook-xsl fop libxml2-utils xsltproc krb5-admin-server \
-          krb5-kdc krb5-user slapd ldap-utils libssl-dev pkg-config locales-all liblz4-dev \
-          libsystemd-dev libxml2-dev libxslt1-dev python3-dev libkrb5-dev libpam-dev \
-          libkrb5-*-heimdal uuid-dev libossp-uuid-dev gettext libselinux1-dev \
-          liburing-dev python3-distutils ccache gdb meson
+        apt-get -y install --no-install-recommends \
+          \
+          build-essential \
+          gdb \
+          make \
+          git \
+          meson \
+          perl \
+          pkg-config \
+          \
+          bison \
+          ccache \
+          clang \
+          flex \
+          g++ \
+          gcc \
+          gettext \
+          \
+          libio-pty-perl \
+          libipc-run-perl \
+          python3-distutils \
+          \
+          libicu-dev \
+          libkrb5-*-heimdal \
+          libkrb5-dev \
+          libldap2-dev \
+          liblz4-dev \
+          libossp-uuid-dev \
+          libpam-dev \
+          libperl-dev \
+          libpython3-dev \
+          libreadline-dev \
+          libselinux*-dev \
+          libssl-dev \
+          libsystemd-dev \
+          liburing-dev \
+          libxml2-dev \
+          libxslt1-dev \
+          llvm-dev \
+          python3-dev \
+          systemtap-sdt-dev \
+          tcl-dev \
+          uuid-dev \
+          \
+          docbook-xml \
+          docbook-xsl \
+          fop \
+          libxml2-utils \
+          xsltproc \
+          \
+          krb5-admin-server \
+          krb5-kdc \
+          krb5-user \
+          ldap-utils \
+          locales-all \
+          slapd
       SCRIPT
     ]
   }
@@ -221,8 +271,7 @@ build {
     inline = [
       <<-SCRIPT
         DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
-        apt-get clean
-        rm -f /var/lib/apt/lists/deb.debian.org_*
+        apt-get clean && rm -rf /var/lib/apt/lists/*
         fstrim -v -a
       SCRIPT
     ]
