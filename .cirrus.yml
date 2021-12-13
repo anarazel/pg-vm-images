@@ -11,11 +11,6 @@ task:
     cpu: 0.5
     memory: 256Mi
 
-  init_script:
-    - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
-    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-    - packer --version
-
   matrix:
     - name: freebsd-13-0
       env:
@@ -29,6 +24,13 @@ task:
         - name: sid
         - name: sid-newkernel
         - name: sid-newkernel-uring
+
+  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'LinuxPackerDockerfile', $PACKERFILE)
+
+  init_script:
+    - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - packer --version
 
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M')
