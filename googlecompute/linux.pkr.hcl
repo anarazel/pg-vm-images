@@ -33,12 +33,12 @@ locals {
 }
 
 source "googlecompute" "bullseye-vanilla" {
-  project_id              = "pg-vm-images-aio"
-  source_image_family     = "debian-11"
-  source_image_project_id = ["debian-cloud"]
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
+  project_id              = "pg-vm-images-aio"
+  source_image_family     = "debian-11"
+  source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"
   ssh_username            = "packer"
 }
