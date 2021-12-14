@@ -196,7 +196,11 @@ build {
           krb5-user \
           ldap-utils \
           locales-all \
-          slapd
+          slapd \
+	  \
+          g++-mingw-w64-x86-64-win32 \
+          gcc-mingw-w64-x86-64-win32 \
+          libz-mingw-w64-dev
       SCRIPT
     ]
   }
