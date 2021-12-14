@@ -61,9 +61,31 @@ build {
         pkg update
         pkg upgrade -y
         pkg install -y \
-          readline flex bison gmake perl5 p5-IPC-Run ccache liblz4 libxml2 libxslt \
-          gettext tcl86 openldap25-client openldap25-server krb5 \
-          git-tiny bash meson ninja python3 pkgconf
+          bash \
+          git-tiny \
+          gmake \
+          meson \
+          ninja \
+          perl5 \
+          pkgconf \
+          \
+          bison \
+          ccache \
+          flex \
+          gettext \
+          \
+          p5-IPC-Run \
+          \
+          liblz4 \
+          libxml2 \
+          libxslt \
+          python3 \
+          readline \
+          tcl86 \
+          \
+          krb5 \
+          openldap25-client \
+          openldap25-server
         pkg clean -y
         rm -fr /usr/ports /usr/src /usr/lib/debug
         cat /etc/rc.conf
