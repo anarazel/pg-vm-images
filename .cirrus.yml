@@ -1,15 +1,20 @@
-only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
-
 env:
-  GAC: ENCRYPTED[08c58c0a60e1b0dfd4748960cef61296508f85b81ea8a553ee06c9df86bb2398c3240b35bfd76196f3967819da15cd25]
-  GOOGLE_APPLICATION_CREDENTIALS: pg-vm-images-aio.json
+  CIRRUS_LOG_TIMESTAMP: true
+
+  GAC: ENCRYPTED[a29831e7338e6bca4d4c4306b25a97b296963ea3819877e3b10fa7d08884992a5e44a480cb045a62523d51eb8387628b]
   GCP_PROJECT: pg-vm-images-aio
+  GCP_REPO: us-docker.pkg.dev/$GCP_PROJECT/ci
+  GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
 
 task:
+  #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
   container:
     dockerfile: LinuxPackerDockerfile
     cpu: 0.5
     memory: 256Mi
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
 
   matrix:
     - name: freebsd-13-0
@@ -28,12 +33,13 @@ task:
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'LinuxPackerDockerfile', $PACKERFILE)
 
   init_script:
-    - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
     - packer --version
 
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M')
+
+    gcloud auth list
 
     packer build \
       -only "*.${CIRRUS_TASK_NAME}" \
@@ -57,10 +63,14 @@ task:
 # Only do so after a run successfully creating all images, to avoid deleting
 # all image versions when image creation has failed for a few days.
 task:
+  #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
   container:
     dockerfile: LinuxPackerDockerfile
     cpu: 0.5
     memory: 256Mi
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
 
   name: cleanup-old
   depends_on:
@@ -71,7 +81,6 @@ task:
     - sid-newkernel-uring
 
   init_script:
-    - echo $GAC | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
     - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
 
   cleanup_script: |
@@ -89,3 +98,136 @@ task:
     else
       echo no images to delete
     fi
+
+
+task:
+  name: build-containers-linux
+  compute_engine_instance:
+    image_project: cirrus-images
+    image: family/docker-builder
+    platform: linux
+    cpu: 2
+    memory: 8G
+  env:
+    IMAGE: linux_debian_bullseye_ci
+  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
+
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
+
+  multibuilder_script:
+    - docker buildx create --name multibuilder
+    - docker buildx use multibuilder
+    - docker buildx inspect --bootstrap
+
+  init_script:
+    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth --quiet configure-docker us-docker.pkg.dev
+    - docker info
+
+  build_script: |
+    docker buildx build \
+      --cache-from type=registry,ref=$GCP_REPO/$IMAGE \
+      --cache-to=type=inline \
+      --platform linux/amd64,linux/arm64 \
+      --tag $GCP_REPO/$IMAGE:latest \
+      -f docker/$IMAGE \
+      --push \
+      .
+
+    docker buildx imagetools inspect $GCP_REPO/$IMAGE:latest
+
+
+docker_builder:
+  name: build-containers-windows
+  platform: windows
+  os_version: 2019
+  env:
+    GOOGLE_APPLICATION_CREDENTIALS: c:/gcp-service-account.json
+
+  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
+
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
+
+  init_script:
+    - gcloud auth activate-service-account --key-file=%GOOGLE_APPLICATION_CREDENTIALS%
+    - gcloud auth --quiet configure-docker us-docker.pkg.dev
+    - docker info
+
+  build_script: |
+    docker pull %GCP_REPO%/windows_ci_base:latest || cmd /s /c
+    docker build --cache-from %GCP_REPO%/windows_ci_base:latest --cache-from docker.io/cirrusci/windowsservercore:2019-2021.12.07 --tag windows_ci_base:latest -f docker/windows_ci_base .
+    docker tag windows_ci_base:latest %GCP_REPO%/windows_ci_base:latest
+    docker push %GCP_REPO%/windows_ci_base:latest
+
+    docker pull %GCP_REPO%/windows_ci_vs_base:latest || cmd /s /c
+    docker build --cache-from %GCP_REPO%/windows_ci_vs_base:latest --tag windows_ci_vs_base:latest -f docker/windows_ci_vs_base .
+    docker tag windows_ci_vs_base:latest %GCP_REPO%/windows_ci_vs_base:latest
+    docker push %GCP_REPO%/windows_ci_vs_base:latest
+
+    docker pull %GCP_REPO%/windows_ci_vs_2019:latest || cmd /s /c
+    docker build --cache-from %GCP_REPO%/windows_ci_vs_2019:latest --tag windows_ci_vs_2019:latest -f docker/windows_ci_vs_2019 .
+    docker tag windows_ci_vs_2019:latest %GCP_REPO%/windows_ci_vs_2019:latest
+    docker push %GCP_REPO%/windows_ci_vs_2019:latest
+
+
+task:
+  name: test-linux-container-amd64
+  env:
+    - GAC:
+  depends_on:
+    - build-containers-linux
+  container:
+    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+  test_script:
+    - uname -a
+    - xsltproc --version
+
+task:
+  name: test-linux-container-arm64
+  env:
+    - GAC:
+  depends_on:
+    - build-containers-linux
+  arm_container:
+    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+  test_script:
+    - uname -a
+    - xsltproc --version
+
+task:
+  name: test-windows-container-base-amd64
+  env:
+    - GAC:
+  depends_on:
+    - build-containers-windows
+  windows_container:
+    image: $GCP_REPO/windows_ci_base:latest
+  test_script:
+    - ver
+    - set
+    - where perl
+    - perl --version
+    - python --version
+    - diff --version
+
+task:
+  name: test-windows-container-vs-2019-amd64
+  env:
+    - GAC:
+  depends_on:
+    - build-containers-windows
+  windows_container:
+    image: $GCP_REPO/windows_ci_vs_2019:latest
+  test_script:
+    - ver
+    - set
+    - where perl
+    - perl --version
+    - python --version
+    - vcvarsall x64
+    - bison --version
+    - flex --version

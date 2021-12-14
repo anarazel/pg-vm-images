@@ -1,0 +1,14 @@
+# escape=`
+
+FROM windows_ci_vs_base
+
+COPY `
+  scripts/windows_install_vs_2019.ps1 `
+  scripts/
+
+RUN `
+  `
+  scripts\windows_install_vs_2019.ps1 ; `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\BuildTools\VC\Auxiliary\Build;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
+  `
+  Remove-Item C:\scripts -Force -Recurse

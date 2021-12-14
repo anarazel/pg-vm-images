@@ -1,0 +1,29 @@
+# escape=`
+
+# We used to use cirrus' visual studio container as base, but it's too
+# outdated and bloated. This also makes it easier to run in other environments
+FROM docker.io/cirrusci/windowsservercore:2019-2021.12.07
+
+SHELL ["powershell", "-NoLogo", "-NoProfile", "-Command"]
+
+COPY `
+  scripts/windows_install_dbg.ps1 `
+  scripts/windows_install_openssl.ps1 `
+  scripts/windows_install_perl.ps1 `
+  scripts/windows_install_python.ps1 `
+  scripts/
+
+RUN `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\Program Files\Git\usr\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine'); `
+  `
+  scripts\windows_install_dbg.ps1 ; `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\Windows Kits\10\Debuggers\x64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
+  `
+  scripts\windows_install_python.ps1 ; `
+  `
+  scripts\windows_install_perl.ps1 ; `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\strawberry\5.26.3.1\perl\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
+  `
+  scripts\windows_install_openssl.ps1 ; `
+  `
+  Remove-Item C:\scripts -Force -Recurse
