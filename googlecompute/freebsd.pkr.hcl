@@ -56,7 +56,7 @@ build {
     inline = [
       <<-SCRIPT
         cat /boot/loader.conf || true
-        freebsd-update fetch install
+        PAGER=cat freebsd-update fetch install
         pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
         pkg update
         pkg upgrade -y
