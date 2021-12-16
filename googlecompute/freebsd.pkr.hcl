@@ -26,7 +26,7 @@ source "googlecompute" "freebsd-13-0-vanilla" {
   source_image_family     = "freebsd-13-0"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   ssh_pty                 = "true"
-  ssh_username            = "pg-vm-images-aio"
+  ssh_username            = "packer"
 }
 
 
