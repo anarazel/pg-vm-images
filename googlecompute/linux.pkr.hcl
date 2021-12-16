@@ -1,4 +1,5 @@
 variable "image_date" { type = string }
+variable "gcp_project" { type = string }
 
 variable "prefix" {
   type = string
@@ -36,7 +37,7 @@ source "googlecompute" "bullseye-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
-  project_id              = "pg-vm-images-aio"
+  project_id              = var.gcp_project
   source_image_family     = "debian-11"
   source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"

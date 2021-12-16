@@ -46,6 +46,7 @@ task:
       -timestamp-ui \
       -force \
       -var "image_date=$DATE" \
+      -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
     gcloud compute images add-iam-policy-binding \
       --project "$GCP_PROJECT" \

@@ -1,4 +1,5 @@
 variable "image_date" { type = string }
+variable "gcp_project" { type = string }
 
 variable "prefix" {
   type = string
@@ -21,7 +22,7 @@ source "googlecompute" "freebsd-13-0-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
-  project_id              = "pg-vm-images-aio"
+  project_id              = var.gcp_project
   source_image_family     = "freebsd-13-0"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   ssh_pty                 = "true"
