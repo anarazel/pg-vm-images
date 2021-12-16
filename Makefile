@@ -9,3 +9,4 @@ pre-commit:
 	  -var gcp_project=pg-vm-images-aio \
 	  -var "image_date=$(image_date)" \
 	  googlecompute/linux.pkr.hcl
+	yamllint -c .yamllint-cirrus .cirrus.yml
