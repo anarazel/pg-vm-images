@@ -1,0 +1,81 @@
+GCP_PROJECT=pg-ci-images
+
+gcloud projects create $GCP_PROJECT
+# Must enable billing, I only know how to do so in web console
+
+# Also request increases in quota for:
+# compute engine: images -> 500
+# compute engine: c2 cpus us-west 1,2,3 -> 24
+
+gcloud services enable --project $GCP_PROJECT iam.googleapis.com
+gcloud services enable --project $GCP_PROJECT compute.googleapis.com
+gcloud services enable --project $GCP_PROJECT cloudresourcemanager.googleapis.com
+gcloud services enable --project $GCP_PROJECT artifactregistry.googleapis.com
+
+# Create service account and a *private* key for it
+gcloud iam service-accounts create image-builder \
+  --project $GCP_PROJECT \
+  --description="CI Image Builder Service Account" \
+  --display-name="CI Image Builder Service Account"
+
+gcloud iam service-accounts keys create \
+  image-builder@$GCP_PROJECT.iam.gserviceaccount.com.json \
+  --iam-account image-builder@$GCP_PROJECT.iam.gserviceaccount.com
+
+
+# FIXME: It'd be better to create a more restrictive role with just the
+# permissions we need, intead of using the pre-defined roles.
+
+
+# For packer we need:
+# https://www.packer.io/docs/builders/googlecompute
+
+gcloud projects add-iam-policy-binding $GCP_PROJECT \
+    --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/compute.instanceAdmin.v1
+
+gcloud projects add-iam-policy-binding $GCP_PROJECT \
+    --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/iam.serviceAccountUser
+
+gcloud projects add-iam-policy-binding $GCP_PROJECT \
+    --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/iap.tunnelResourceAccessor
+
+gcloud projects add-iam-policy-binding $GCP_PROJECT \
+    --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/compute.storageAdmin
+
+
+# docker image repository
+
+gcloud artifacts repositories create ci \
+  --repository-format=docker \
+  --project $GCP_PROJECT \
+  --location=us \
+  --description="CI images"
+
+gcloud artifacts repositories add-iam-policy-binding \
+  --project $GCP_PROJECT \
+  --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+  --role=roles/artifactregistry.writer \
+  --location us \
+  ci
+
+gcloud artifacts repositories add-iam-policy-binding \
+  --project $GCP_PROJECT \
+  --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
+  --role=roles/artifactregistry.repoAdmin \
+  --location us \
+  ci
+
+gcloud artifacts repositories add-iam-policy-binding \
+  --project $GCP_PROJECT \
+  --member=allUsers \
+  --role=roles/artifactregistry.reader \
+  --location us \
+  ci
+
+
+# Figure out per-user quota settings
+# https://cloud.google.com/artifact-registry/quotas#user-quota

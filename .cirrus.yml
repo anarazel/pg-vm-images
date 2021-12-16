@@ -1,9 +1,10 @@
 env:
   CIRRUS_LOG_TIMESTAMP: true
 
-  GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
+  # See gcp_project_setup.txt for setup instructions
   GCP_PROJECT: pg-ci-images
   GCP_REPO: us-docker.pkg.dev/$GCP_PROJECT/ci
+  GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
   GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
 
 task:
