@@ -4,9 +4,9 @@ pre-commit:
 	packer validate \
 	  -var gcp_project=pg-vm-images-aio \
 	  -var "image_date=$(image_date)" \
-	  googlecompute/freebsd.pkr.hcl
+	  packer/freebsd.pkr.hcl
 	packer validate \
 	  -var gcp_project=pg-vm-images-aio \
 	  -var "image_date=$(image_date)" \
-	  googlecompute/linux.pkr.hcl
+	  packer/linux_debian.pkr.hcl
 	yamllint -c .yamllint-cirrus .cirrus.yml

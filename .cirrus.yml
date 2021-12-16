@@ -20,10 +20,10 @@ task:
   matrix:
     - name: freebsd-13-0
       env:
-        PACKERFILE: googlecompute/freebsd.pkr.hcl
+        PACKERFILE: packer/freebsd.pkr.hcl
 
     - env:
-        PACKERFILE: googlecompute/linux.pkr.hcl
+        PACKERFILE: packer/linux_debian.pkr.hcl
 
       matrix:
         - name: bullseye
