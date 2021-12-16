@@ -7,7 +7,7 @@ variable "prefix" {
 }
 
 locals {
-  name = "${var.prefix}pg-aio"
+  name = "${var.prefix}pg-ci"
 
   debian_gcp_images = [
     {

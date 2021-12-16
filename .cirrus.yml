@@ -52,7 +52,7 @@ task:
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
-      pg-aio-${CIRRUS_TASK_NAME}-${DATE}
+      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
 
 # Clean up old images regularly - after a while the individually small cost
