@@ -1,3 +1,7 @@
+# Due to the dependency on encrypted variables, this will only work in a
+# specific repo
+only_if: $CIRRUS_REPO_OWNER == 'anarazel' && $CIRRUS_REPO_NAME == 'pg-vm-images'
+
 env:
   CIRRUS_LOG_TIMESTAMP: true
 
@@ -44,12 +48,6 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 
 task:
-  #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
-  container:
-    dockerfile: docker/linux_debian_packer
-    cpu: 0.5
-    memory: 256Mi
-
   matrix:
     - name: freebsd-13-0
       env:
@@ -63,6 +61,11 @@ task:
         - name: sid
         - name: sid-newkernel
         - name: sid-newkernel-uring
+
+  container:
+    dockerfile: docker/linux_debian_packer
+    cpu: 0.5
+    memory: 256Mi
 
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $PACKERFILE)
 
@@ -97,13 +100,13 @@ task:
 # Only do so after a run successfully creating all images, to avoid deleting
 # all image versions when image creation has failed for a few days.
 task:
-  #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
+  name: cleanup-old
+
   container:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
     memory: 256Mi
 
-  name: cleanup-old
   depends_on:
     - freebsd-13-0
     - bullseye
@@ -148,6 +151,7 @@ task:
     memory: 8G
   env:
     IMAGE: linux_debian_bullseye_ci
+
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
 
   <<: *gcp_auth_unix
@@ -158,6 +162,10 @@ task:
     - docker buildx use multibuilder
     - docker buildx inspect --bootstrap
 
+  # XXX: would be nicer to split into multiple steps, so that e.g. build vs
+  # upload time are visible
+  #
+  # XXX: would be nice to test images before tagging them as available
   build_script: |
     docker buildx build \
       --cache-from type=registry,ref=$GCP_REPO/$IMAGE \
@@ -208,6 +216,7 @@ task:
     - uname -a
     - xsltproc --version
 
+
 task:
   name: test-linux-container-arm64
   depends_on:
@@ -217,6 +226,7 @@ task:
   test_script:
     - uname -a
     - xsltproc --version
+
 
 task:
   name: test-windows-container-base-amd64
@@ -231,6 +241,7 @@ task:
     - perl --version
     - python --version
     - diff --version
+
 
 task:
   name: test-windows-container-vs-2019-amd64
