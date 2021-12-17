@@ -3,7 +3,8 @@ env:
 
   # See gcp_project_setup.txt for setup instructions
   GCP_PROJECT: pg-ci-images
-  GCP_REPO: us-docker.pkg.dev/$GCP_PROJECT/ci
+  GCP_REGION: us
+  GCP_REPO: $GCP_REGION-docker.pkg.dev/$GCP_PROJECT/ci
   GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
   GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
 
@@ -125,7 +126,7 @@ task:
 
   init_script:
     - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-    - gcloud auth --quiet configure-docker us-docker.pkg.dev
+    - gcloud auth --quiet configure-docker $GCP_REGION-docker.pkg.dev
     - docker info
 
   build_script: |
@@ -156,7 +157,7 @@ docker_builder:
 
   init_script:
     - gcloud auth activate-service-account --key-file=%GOOGLE_APPLICATION_CREDENTIALS%
-    - gcloud auth --quiet configure-docker us-docker.pkg.dev
+    - gcloud auth --quiet configure-docker %GCP_REGION%-docker.pkg.dev
     - docker info
 
   build_script: |
