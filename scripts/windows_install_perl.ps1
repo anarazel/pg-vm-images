@@ -1,12 +1,18 @@
-# Using perl 5.26.3.1 for now, as newer versions don't currently work
-# correctly for plperl
+$ErrorActionPreference = "Stop"
 
-mkdir c:\t ;
-cd c:\t ;
+$perl_version = $args[0]
+$filepath = "$Env:TEMP/perl.zip"
 
-curl.exe -sSL -o perl.zip `
-    https://strawberryperl.com/download/5.26.3.1/strawberry-perl-5.26.3.1-64bit-portable.zip ;
-7z.exe x .\perl.zip -xr!c -oc:\strawberry\5.26.3.1 ;
+echo "downloading perl $perl_vesion"
+curl.exe -sSL -o "$filepath" `
+    https://strawberryperl.com/download/$perl_version/strawberry-perl-$perl_version-64bit-portable.zip
+if (!$?) { throw 'cmdfail' }
 
-cd c:\ ;
-Remove-Item C:\t -Force -Recurse
+echo "installing perl $perl_vesion"
+
+# Exclude the 'c' directory - it contains enough contrib stuff -which we don't
+# need - to bloat the image size noticeably
+7z.exe x "$filepath" -xr!c -oc:\strawberry\$perl_version
+if (!$?) { throw 'cmdfail' }
+
+Remove-Item "$filepath" -Force

@@ -1,13 +1,17 @@
-mkdir c:\t ;
-cd c:\t ;
+$ErrorActionPreference = "Stop"
 
-curl.exe -sSL -o winflexbison.zip `
+$filepath = "$Env:TEMP/winflexbison.zip"
+
+echo "downloading winflexbison"
+curl.exe -sSL -o "$filepath" `
     https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip ;
+if (!$?) { throw 'cmdfail' }
 
-echo 'installing winflexbison' ;
-7z.exe x .\winflexbison.zip -oc:\winflexbison ;
-Rename-Item -Path c:\winflexbison\win_flex.exe c:\winflexbison\flex.exe ;
-Rename-Item -Path c:\winflexbison\win_bison.exe c:\winflexbison\bison.exe ;
+echo "installing winflexbison"
+7z.exe x "$filepath" -oc:\winflexbison
+if (!$?) { throw 'cmdfail' }
 
-cd c:\ ;
-Remove-Item C:\t -Force -Recurse
+Rename-Item -Path c:\winflexbison\win_flex.exe c:\winflexbison\flex.exe
+Rename-Item -Path c:\winflexbison\win_bison.exe c:\winflexbison\bison.exe
+
+Remove-Item "$filepath" -Force
