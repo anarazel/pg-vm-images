@@ -1,3 +1,13 @@
+# Install openssl
+#
+# This is one of the windows binaries referenced by the openssl wiki. See
+# https://www.openssl.org/community/binaries.html and
+# https://wiki.openssl.org/index.php/Binaries
+#
+# It might be nicer to switch to the openssl built as part of curl-for-win,
+# but recent releases only build openssl 3, and that still seems troublesome
+# on Windows.
+
 mkdir c:\t ;
 cd c:\t ;
 
