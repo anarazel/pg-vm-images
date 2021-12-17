@@ -77,11 +77,13 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
+        export DEBIAN_FRONTEND=noninteractive
         rm -f /etc/apt/sources.list.d/google-cloud.list /etc/apt/sources.list.d/gce_sdk.list
-        DEBIAN_FRONTEND=noninteractive apt-get purge man-db google-cloud-sdk \
-          unattended-upgrades gnupg shim-unsigned publicsuffix mokutil -y
-        DEBIAN_FRONTEND=noninteractive apt-get install -y grub-efi-amd64-bin grub2-common
-        DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+        apt-get update
+        apt-get purge -y \
+          man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil
+        apt-get install -y grub-efi-amd64-bin grub2-common
+        apt-get autoremove -y
       SCRIPT
     ]
   }
