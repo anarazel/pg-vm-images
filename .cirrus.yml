@@ -5,8 +5,43 @@ env:
   GCP_PROJECT: pg-ci-images
   GCP_REGION: us
   GCP_REPO: $GCP_REGION-docker.pkg.dev/$GCP_PROJECT/ci
-  GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
-  GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
+
+
+# central definition for the tasks interacting with gcp
+gcp_auth_unix: &gcp_auth_unix
+  env:
+    GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
+    GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
+
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
+
+  gcp_auth_script:
+    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth list
+
+gcp_auth_win: &gcp_auth_win
+  env:
+    GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
+    GOOGLE_APPLICATION_CREDENTIALS: c:/gcp-service-account.json
+
+  gcp_key_file:
+    path: $GOOGLE_APPLICATION_CREDENTIALS
+    variable_name: GAC
+
+  gcp_auth_script:
+    - gcloud auth activate-service-account --key-file=%GOOGLE_APPLICATION_CREDENTIALS%
+    - gcloud auth list
+
+gcp_docker_auth_unix: &gcp_docker_auth_unix
+  gcp_docker_auth_script:
+    - gcloud auth configure-docker --quiet $GCP_REGION-docker.pkg.dev
+
+gcp_docker_auth_win: &gcp_docker_auth_win
+  gcp_docker_auth_script:
+    - gcloud auth configure-docker --quiet %GCP_REGION%-docker.pkg.dev
+
 
 task:
   #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
@@ -14,9 +49,6 @@ task:
     dockerfile: LinuxPackerDockerfile
     cpu: 0.5
     memory: 256Mi
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
 
   matrix:
     - name: freebsd-13-0
@@ -34,14 +66,13 @@ task:
 
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'LinuxPackerDockerfile', $PACKERFILE)
 
-  init_script:
-    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+  <<: *gcp_auth_unix
+
+  info_script:
     - packer --version
 
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M')
-
-    gcloud auth list
 
     packer build \
       -only "*.${CIRRUS_TASK_NAME}" \
@@ -71,9 +102,6 @@ task:
     dockerfile: LinuxPackerDockerfile
     cpu: 0.5
     memory: 256Mi
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
 
   name: cleanup-old
   depends_on:
@@ -83,8 +111,7 @@ task:
     - sid-newkernel
     - sid-newkernel-uring
 
-  init_script:
-    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+  <<: *gcp_auth_unix
 
   cleanup_script: |
     images=$(gcloud compute images list \
@@ -115,19 +142,13 @@ task:
     IMAGE: linux_debian_bullseye_ci
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
 
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
+  <<: *gcp_auth_unix
+  <<: *gcp_docker_auth_unix
 
   multibuilder_script:
     - docker buildx create --name multibuilder
     - docker buildx use multibuilder
     - docker buildx inspect --bootstrap
-
-  init_script:
-    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-    - gcloud auth --quiet configure-docker $GCP_REGION-docker.pkg.dev
-    - docker info
 
   build_script: |
     docker buildx build \
@@ -146,19 +167,11 @@ docker_builder:
   name: build-containers-windows
   platform: windows
   os_version: 2019
-  env:
-    GOOGLE_APPLICATION_CREDENTIALS: c:/gcp-service-account.json
 
   skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
 
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
-
-  init_script:
-    - gcloud auth activate-service-account --key-file=%GOOGLE_APPLICATION_CREDENTIALS%
-    - gcloud auth --quiet configure-docker %GCP_REGION%-docker.pkg.dev
-    - docker info
+  <<: *gcp_auth_win
+  <<: *gcp_docker_auth_win
 
   build_script: |
     docker pull %GCP_REPO%/windows_ci_base:latest || cmd /s /c
@@ -179,8 +192,6 @@ docker_builder:
 
 task:
   name: test-linux-container-amd64
-  env:
-    - GAC:
   depends_on:
     - build-containers-linux
   container:
@@ -191,8 +202,6 @@ task:
 
 task:
   name: test-linux-container-arm64
-  env:
-    - GAC:
   depends_on:
     - build-containers-linux
   arm_container:
@@ -203,8 +212,6 @@ task:
 
 task:
   name: test-windows-container-base-amd64
-  env:
-    - GAC:
   depends_on:
     - build-containers-windows
   windows_container:
@@ -219,8 +226,6 @@ task:
 
 task:
   name: test-windows-container-vs-2019-amd64
-  env:
-    - GAC:
   depends_on:
     - build-containers-windows
   windows_container:
