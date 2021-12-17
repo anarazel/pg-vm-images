@@ -46,7 +46,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 task:
   #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
   container:
-    dockerfile: LinuxPackerDockerfile
+    dockerfile: docker/linux_debian_packer
     cpu: 0.5
     memory: 256Mi
 
@@ -64,7 +64,7 @@ task:
         - name: sid-newkernel
         - name: sid-newkernel-uring
 
-  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'LinuxPackerDockerfile', $PACKERFILE)
+  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $PACKERFILE)
 
   <<: *gcp_auth_unix
 
@@ -99,7 +99,7 @@ task:
 task:
   #only_if: $CIRRUS_BRANCH == 'main' && $CIRRUS_REPO_OWNER == 'anarazel'
   container:
-    dockerfile: LinuxPackerDockerfile
+    dockerfile: docker/linux_debian_packer
     cpu: 0.5
     memory: 256Mi
 
