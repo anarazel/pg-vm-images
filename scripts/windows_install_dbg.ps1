@@ -1,7 +1,7 @@
+# Install commandline debugger and log all crashes to c:\cirrus\crashlog.txt
+#
 # Done manually as doing this via chocolatey / the installer directly, ends up
 # with a lot of unnecessary chaff, making the layer unnecessarily large.
-#
-# Install commandline debugger and log all crashes to c:\cirrus\crashlog.txt
 mkdir c:\t ;
 cd c:\t ;
 
