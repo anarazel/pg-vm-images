@@ -5,6 +5,7 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get -y install --no-install-recommends \
+  procps \
   \
   build-essential \
   gdb \
