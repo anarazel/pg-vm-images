@@ -67,7 +67,7 @@ task:
     cpu: 0.5
     memory: 256Mi
 
-  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $PACKERFILE)
+  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $PACKERFILE)
 
   <<: *gcp_auth_unix
 
@@ -156,7 +156,7 @@ task:
   env:
     IMAGE: linux_debian_bullseye_ci
 
-  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
+  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
 
   <<: *gcp_auth_unix
   <<: *gcp_docker_auth_unix
@@ -188,7 +188,7 @@ docker_builder:
   platform: windows
   os_version: 2019
 
-  skip: $CIRRUS_CRON != 'nightly' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
+  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
 
   <<: *gcp_auth_win
   <<: *gcp_docker_auth_win
