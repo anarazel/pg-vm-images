@@ -67,7 +67,7 @@ task:
     cpu: 0.5
     memory: 256Mi
 
-  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $PACKERFILE)
+  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'scripts/linux_debian_*', $PACKERFILE)
 
   <<: *gcp_auth_unix
 
