@@ -27,7 +27,7 @@ if (!$?) { throw 'cmdfail' }
 
 Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug' `
   -Name 'Debugger' `
-  -Value '"C:\Windows Kits\10\Debuggers\x64\cdb.exe" -p %ld -e %ld -g -kqm -c ".lines -e; .symfix+ ;.logappend c:\cirrus\crashlog.txt ; !peb; ~*kP ; .logclose ; q "'
+  -Value '"C:\Windows Kits\10\Debuggers\x64\cdb.exe" -p %ld -e %ld -g -kqm -c ".lines -e; .symfix+ ; aS /c proc !adplusext.adpprocname ; .block {.logopen /t c:/cirrus/crashlog-${proc}.txt}; lsa $ip; ~*kP ; !peb; .logclose ; q "'
 Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug' -Name Debugger
 
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug' `
