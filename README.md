@@ -1,16 +1,18 @@
 # Postgres CI Image Creation
 
 Builds VM and container images for PostgreSQL CI, currently utilizing
-[cirrus-ci](https://cirrus-ci.org/).
+[cirrus-ci](https://cirrus-ci.org/). See
+[src/tools/ci/README](https://github.com/postgres/postgres/blob/master/src/tools/ci/README)
+for more details.
 
-These images are used for, currently unofficial, PostgreSQL CI (see
-https://github.com/anarazel/postgres/tree/ci and
-https://github.com/anarazel/postgres/tree/aio)
+An example cirrus-ci use of these images is Postgres' [.cirrus.yml](
+https://github.com/postgres/postgres/blob/master/.cirrus.yml)
 
 
 ## How to use
 
-An example cirrus-ci use of these images is https://github.com/anarazel/postgres/tree/ci/.cirrus.yml
+Postgres' CI [README](https://github.com/postgres/postgres/blob/master/src/tools/ci/README)
+explains how to enable CI utilizing these image for a repository.
 
 
 ## How it works
