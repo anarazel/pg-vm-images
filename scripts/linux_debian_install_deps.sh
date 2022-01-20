@@ -53,6 +53,7 @@ apt-get -y install --no-install-recommends \
   docbook-xsl \
   fop \
   libxml2-utils \
+  wget \
   xsltproc \
   \
   krb5-admin-server \
