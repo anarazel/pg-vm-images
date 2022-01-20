@@ -6,43 +6,74 @@ env:
   CIRRUS_LOG_TIMESTAMP: true
 
   # See gcp_project_setup.txt for setup instructions
-  GCP_PROJECT: pg-ci-images
-  GCP_REGION: us
-  GCP_REPO: $GCP_REGION-docker.pkg.dev/$GCP_PROJECT/ci
+  GCP_PROJECT_MAIN: pg-ci-images
+  GCP_PROJECT_DEV: pg-ci-images-dev
+
+  # the following variables are chosen in .cirrus.star, based on the branch
+  # being built etc
+  # BRANCH_TYPE = dev|main
+  # GCP_PROJECT = $GCP_PROJECT_MAIN or $GCP_PROJECT_DEV
+  # GCP_REGION
+  # GCP_REPO
 
 
 # central definition for the tasks interacting with gcp
-gcp_auth_unix: &gcp_auth_unix
-  env:
-    GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
-    GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account.json
 
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
+# shared gcp auth
+gcp_auth: &gcp_auth
+  env:
+    # image-builder@pg-ci-images-dev.iam.gserviceaccount.com
+    GAC_DEV: ENCRYPTED[c11b72762b062ffe6f9eb672b9236f3fdfe3404edd786e47fc17ff79714e633688e79da85b9efccd79d52a6322a4f60f]
+    # image-builder@pg-ci-images.iam.gserviceaccount.com
+    GAC_MAIN: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
+
+# gcp auth for unixoid systems
+gcp_auth_unix: &gcp_auth_unix
+  <<: *gcp_auth
+
+  env:
+    GOOGLE_APPLICATION_CREDENTIALS: /gcp-service-account-${BRANCH_TYPE}.json
+
+  gcp_main_key_file:
+    path: /gcp-service-account-main.json
+    variable_name: GAC_MAIN
+
+  gcp_dev_key_file:
+    path: /gcp-service-account-dev.json
+    variable_name: GAC_DEV
 
   gcp_auth_script:
-    - gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+    - gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
     - gcloud auth list
 
+# gcp auth for windows
 gcp_auth_win: &gcp_auth_win
-  env:
-    GAC: ENCRYPTED[388f06938c10a81478033cb9059c454d1d2e7580e9060e539f0be518b823b5a73cb1bc7c7fcefe351131c57c404c143f]
-    GOOGLE_APPLICATION_CREDENTIALS: c:/gcp-service-account.json
+  <<: *gcp_auth
 
-  gcp_key_file:
-    path: $GOOGLE_APPLICATION_CREDENTIALS
-    variable_name: GAC
+  env:
+    GOOGLE_APPLICATION_CREDENTIALS: c:/gcp-service-account-%BRANCH_TYPE%.json
+
+  gcp_main_key_file:
+    path: c:/gcp-service-account-main.json
+    variable_name: GAC_MAIN
+
+  gcp_dev_key_file:
+    path: c:/gcp-service-account-dev.json
+    variable_name: GAC_DEV
 
   gcp_auth_script:
     - gcloud auth activate-service-account --key-file=%GOOGLE_APPLICATION_CREDENTIALS%
     - gcloud auth list
 
+# docker->gcp auth for unixoid systems
 gcp_docker_auth_unix: &gcp_docker_auth_unix
+  <<: *gcp_auth_unix
   gcp_docker_auth_script:
     - gcloud auth configure-docker --quiet $GCP_REGION-docker.pkg.dev
 
+# docker->gcp  auth for windows systems
 gcp_docker_auth_win: &gcp_docker_auth_win
+  <<: *gcp_auth_win
   gcp_docker_auth_script:
     - gcloud auth configure-docker --quiet %GCP_REGION%-docker.pkg.dev
 
@@ -67,7 +98,7 @@ task:
     cpu: 0.5
     memory: 256Mi
 
-  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'scripts/linux_debian_*', $PACKERFILE)
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'scripts/linux_debian_*', $PACKERFILE)
 
   <<: *gcp_auth_unix
 
@@ -147,6 +178,7 @@ task:
 
 task:
   name: build-containers-linux
+
   compute_engine_instance:
     image_project: cirrus-images
     image: family/docker-builder
@@ -156,9 +188,8 @@ task:
   env:
     IMAGE: linux_debian_bullseye_ci
 
-  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
 
-  <<: *gcp_auth_unix
   <<: *gcp_docker_auth_unix
 
   multibuilder_script:
@@ -185,12 +216,12 @@ task:
 
 docker_builder:
   name: build-containers-windows
+
   platform: windows
   os_version: 2019
 
-  skip: $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/docker/windows_*', 'scripts/windows*')
 
-  <<: *gcp_auth_win
   <<: *gcp_docker_auth_win
 
   build_script: |
