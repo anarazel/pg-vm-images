@@ -60,6 +60,7 @@ apt-get -y install --no-install-recommends \
   krb5-user \
   ldap-utils \
   locales-all \
+  lz4 \
   slapd \
   \
   g++-mingw-w64-x86-64-win32 \
