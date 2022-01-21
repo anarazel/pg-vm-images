@@ -9,8 +9,8 @@ apt-get -y install --no-install-recommends \
   \
   build-essential \
   gdb \
-  make \
   git \
+  make \
   meson \
   perl \
   pkg-config \
