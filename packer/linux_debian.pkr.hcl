@@ -80,10 +80,19 @@ build {
         export DEBIAN_FRONTEND=noninteractive
         rm -f /etc/apt/sources.list.d/google-cloud.list /etc/apt/sources.list.d/gce_sdk.list
         apt-get update
+
+        # remove, instead of purge, grub-cloud-amd64, we want to keep its version of
+        # /etc/default/grub
+        apt-get remove -y grub-cloud-amd64
+
+        # Remove unnecessary packages, to reduce image size
         apt-get purge -y \
-          man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil
-        apt-get install -y grub-efi-amd64-bin grub2-common
+          man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil grub-efi-amd64-signed \
+          \
+          grub-efi-amd64-bin+ grub2-common+
         apt-get autoremove -y
+
+        cat /etc/default/grub
       SCRIPT
     ]
   }
@@ -92,8 +101,15 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-        echo 'deb http://deb.debian.org/debian bullseye main' > /etc/apt/sources.list
-        echo 'deb-src http://deb.debian.org/debian bullseye main' >> /etc/apt/sources.list
+        tee /etc/apt/sources.list <<-EOF
+          deb http://deb.debian.org/debian bullseye main
+          deb-src http://deb.debian.org/debian bullseye main
+          deb http://security.debian.org/debian-security bullseye-security main
+          deb-src http://security.debian.org/debian-security bullseye-security main
+          deb http://deb.debian.org/debian bullseye-updates main
+          deb-src http://deb.debian.org/debian bullseye-updates main
+        EOF
+
         apt-get update -y
       SCRIPT
     ]
@@ -104,10 +120,12 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
-        echo 'deb http://deb.debian.org/debian unstable main' > /etc/apt/sources.list
-        echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+        tee /etc/apt/sources.list <<-EOF
+            deb http://deb.debian.org/debian unstable main
+            deb-src http://deb.debian.org/debian unstable main
+        EOF
         apt-get update -y
-        SCRIPT
+      SCRIPT
     ]
     only = ["googlecompute.sid", "googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
@@ -118,10 +136,19 @@ build {
       <<-SCRIPT
         apt-get update -y
         DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade --no-install-recommends -y
+
+        # prevent some to-be-installed services from automatically starting
+        mkdir -p /etc/systemd/system/
+        ln -sf /dev/null /etc/systemd/system/slapd.service
+        ln -sf /dev/null /etc/systemd/system/krb5-kdc.service
+        ln -sf /dev/null /etc/systemd/system/krb5-admin.service
+        # nvmf-autoconnect doesn't work on our own kernel, and isn't needed
+        ln -sf /dev/null /etc/systemd/system/nvmf-autoconnect.service
       SCRIPT
     ]
   }
 
+  # reboot so old kernel etc can be removed
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     expect_disconnect = true
@@ -140,7 +167,13 @@ build {
       <<-SCRIPT
         export DEBIAN_FRONTEND=noninteractive
 
-        apt-get purge $(dpkg -l|grep linux-image|grep 4.19 |awk '{print $2}') -y
+        apt-get purge $(dpkg -l|awk '{print $2}'|grep -E 'linux-image-[0-9]' |grep -v `uname -r`) -y
+
+        # compress modules with zstd, that saves more that it costs
+        apt-get install -y zstd
+        sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' /etc/initramfs-tools/initramfs.conf
+
+        # don't include stuff we don't need in initramfs
         sed -i 's/MODULES=most/MODULES=dep/' /etc/initramfs-tools/initramfs.conf
         update-initramfs -u -k all
       SCRIPT
@@ -190,17 +223,42 @@ build {
         echo linux git revision from $(git remote) is: $(git rev-list HEAD)
         make x86_64_defconfig
         make kvm_guest.config
-        ./scripts/config -e CONFIG_KVM_CLOCK
-        ./scripts/config -e CONFIG_LOCALVERSION_AUTO
-        ./scripts/config --set-str CONFIG_LOCALVERSION -$(git remote)
-        # cirrus queries memory usage that way
-        ./scripts/config -e MEMCG
-        # for good measure
-        ./scripts/config -e CGROUP_PID -e BLK_CGROUP
+        ./scripts/config -e LOCALVERSION_AUTO
+        ./scripts/config --set-str LOCALVERSION -$(git remote)
+
+        # disable drivers we don't need
+        ./scripts/config -d WLAN -d WIRELESS -d ATA -d PCCARD -d CONNECTOR -d USB_NET_DRIVERS -d SOUND -d DRM -d TIGON3 -d REALTEK_PHY -d NET_VENDOR_REALTEK -d NET_VENDOR_INTEL
+
+        # enable virtualization related stuff
+        ./scripts/config -e KVM_CLOCK -e CRYPTO_DEV_VIRTIO -e VIRTIO_FS -e I2C_VIRTIO -e VIRTIO_BALLOON -e VIRTIO_FS -e VIRTIO_IOMMU -e GVE -e HW_RANDOM_VIRTIO  -e PVPANIC
+
+        # cirrus queries memory usage via cgroups, enable others for good measure
+        ./scripts/config -e MEMCG -e CGROUP_PIDS -e BLK_CGROUP -e USER_NS
+
+        # enable some drivers that are likely missing
+        ./scripts/config -e CRYPTO_AES_NI_INTEL -e CRYPTO_CRC32C_INTEL -e CRYPTO_CRC32_PCLMUL
+
+        # options to prevent systemd from complaining
+        ./scripts/config -e BPF_SYSCALL -e BPF_JIT -e CGROUP_BPF
+
+        # compress kernel
+        ./scripts/config -e KERNEL_ZSTD
+
+        # containers
+        ./scripts/config -e OVERLAY_FS -e TUN -e BRIDGE -e VETH
+        ./scripts/config -e NF_TABLES -e NFT_COMPAT -e NF_TABLES_IPV4 -e NF_TABLES_IPV6 -e NF_TABLES_BRIDGE -e NFT_CT -e NFT_REJECT -e NF_TABLES_NETDEV -e NF_TABLES_INET
+        ./scripts/config -e NF_CONNTRACK_LABELS -e NETFILTER_ADVANCED -e NETFILTER_XT_MATCH_COMMENT -e NF_CONNTRACK_LABELS -e NETFILTER_ADVANCED -e NETFILTER_XT_MATCH_COMMENT -e NF_CONNTRACK_MARK -e NFT_NAT -e NFT_REJECT_NETDEV -e NFT_MAS
+
+        # enable facilities that could be useful
+        ./scripts/config -e DM_CRYPT -e DM_FLAKEY -e IKCONFIG_PROC
+
         make mod2yesconfig
+
         time make -j16 -s all
         make -j16 -s modules_install
         make -j16 -s install
+
+
         cd tools/perf
         make install prefix=/usr/local/
 
@@ -227,5 +285,30 @@ build {
         fstrim -v -a
       SCRIPT
     ]
+  }
+
+  # reboot to verify we still boot
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    expect_disconnect = true
+    inline = [
+      <<-SCRIPT
+        echo will reboot
+        shutdown -r now
+      SCRIPT
+    ]
+    only = ["googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
+  }
+
+  # check kernel version etc to see everything went well
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    pause_before = "10s"
+    inline = [
+      <<-SCRIPT
+        uname -a
+      SCRIPT
+    ]
+    only = ["googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
 }
