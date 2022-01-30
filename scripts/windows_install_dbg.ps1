@@ -22,6 +22,9 @@ Start-Process -Wait -FilePath msiexec.exe `
   -ArgumentList '/a "C:\t\sdk\Installers\X64 Debuggers And Tools-x64_en-us.msi" /qb /log install2.log'
 if (!$?) { throw 'cmdfail' }
 
+# For some reason the msi install ends up with a copy of the msi in c:/, remove
+Remove-Item "c:\X64 Debuggers And Tools-x64_en-us.msi"
+
 C:\Windows` Kits\10\Debuggers\x64\cdb.exe -version
 if (!$?) { throw 'cmdfail' }
 
@@ -35,3 +38,6 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDeb
 
 cd c:\
 Remove-Item C:\t -Force -Recurse
+
+# to make it easier to spot if there's additional bogus leftovers
+dir c:\
