@@ -42,6 +42,8 @@ source "googlecompute" "bullseye-vanilla" {
   source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"
   ssh_username            = "packer"
+  # Debian sid doesn't accept the packer default of rsa anymore.
+  temporary_key_pair_type = "ed25519"
 }
 
 build {
