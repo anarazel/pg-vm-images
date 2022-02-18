@@ -99,6 +99,7 @@ task:
     memory: 256Mi
 
   skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'scripts/linux_debian_*', $PACKERFILE)
+  auto_cancellation: false
 
   <<: *gcp_auth_unix
 
