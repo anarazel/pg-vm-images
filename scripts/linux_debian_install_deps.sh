@@ -56,6 +56,8 @@ apt-get -y install --no-install-recommends \
   wget \
   xsltproc \
   \
+  lcov \
+  \
   krb5-admin-server \
   krb5-kdc \
   krb5-user \
