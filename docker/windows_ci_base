@@ -20,7 +20,7 @@ RUN `
   scripts\windows_install_dbg.ps1 ; `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\Windows Kits\10\Debuggers\x64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   `
-  scripts\windows_install_python.ps1 3.10.2 ; `
+  scripts\windows_install_python.ps1 3.10.4 ; `
   `
   <# Using perl 5.26.3.1 for now, as newer versions don't currently work #> `
   <# correctly for plperl #> `
