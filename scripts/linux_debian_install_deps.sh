@@ -43,6 +43,7 @@ apt-get -y install --no-install-recommends \
   liburing-dev \
   libxml2-dev \
   libxslt1-dev \
+  libzstd-dev \
   llvm-dev \
   python3-dev \
   systemtap-sdt-dev \
@@ -65,6 +66,7 @@ apt-get -y install --no-install-recommends \
   locales-all \
   lz4 \
   slapd \
+  zstd \
   \
   g++-mingw-w64-x86-64-win32 \
   gcc-mingw-w64-x86-64-win32 \
