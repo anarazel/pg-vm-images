@@ -83,6 +83,7 @@ build {
           python3 \
           readline \
           tcl86 \
+          zstd \
           \
           krb5 \
           openldap25-client \
