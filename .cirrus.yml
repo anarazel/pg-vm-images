@@ -12,6 +12,7 @@ env:
   # the following variables are chosen in .cirrus.star, based on the branch
   # being built etc
   # BRANCH_TYPE = dev|main
+  # BUCKET = ${GCP_PROJECT_MAIN}-bucket or ${GCP_PROJECT_DEV}-bucket
   # GCP_PROJECT = $GCP_PROJECT_MAIN or $GCP_PROJECT_DEV
   # GCP_REGION
   # GCP_REPO
@@ -123,6 +124,60 @@ task:
       pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
 
+task:
+  matrix:
+    - name: openbsd-7-1-vanilla
+      env:
+        PACKERFILE: packer/bsd/openbsd_vanilla.pkr.hcl
+
+    - name: openbsd-7-1-postgres
+      depends_on:
+        - openbsd-7-1-vanilla
+      env:
+        PACKERFILE: packer/bsd/openbsd_postgres.pkr.hcl
+
+    - name: netbsd-9-2-vanilla
+      env:
+        PACKERFILE: packer/bsd/netbsd_vanilla.pkr.hcl
+
+    - name: netbsd-9-2-postgres
+      depends_on:
+        - netbsd-9-2-vanilla
+      env:
+        PACKERFILE: packer/bsd/netbsd_postgres.pkr.hcl
+
+  container:
+    dockerfile: docker/linux_debian_packer
+    cpu: 2
+    memory: 4G
+
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'files/bsd/*', 'scripts/bsd/*', $PACKERFILE)
+  auto_cancellation: false
+
+  <<: *gcp_auth_unix
+
+  info_script:
+    - packer --version
+
+  build_image_script: |
+    DATE=$(date --utc +'%Y-%m-%dt%H-%M')
+    PACKER_LOG=1
+
+    packer build \
+      -timestamp-ui \
+      -force \
+      -var "image_date=$DATE" \
+      -var "image_name=${CIRRUS_TASK_NAME}" \
+      -var "bucket=$BUCKET" \
+      -var gcp_project=$GCP_PROJECT \
+      "$PACKERFILE"
+    gcloud compute images add-iam-policy-binding \
+      --project "$GCP_PROJECT" \
+      --member=allAuthenticatedUsers \
+      --role=roles/compute.imageUser \
+      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+
+
 # Clean up old images regularly - after a while the individually small cost
 # starts adding up
 #
@@ -141,6 +196,8 @@ task:
 
   depends_on:
     - freebsd-13-0
+    - netbsd-9-2-postgres
+    - openbsd-7-1-postgres
     - bullseye
     - sid
     - sid-newkernel
