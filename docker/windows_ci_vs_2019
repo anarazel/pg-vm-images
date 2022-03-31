@@ -4,14 +4,12 @@ FROM windows_ci_vs_base
 
 COPY `
   scripts/windows_install_vs_2019.ps1 `
-  scripts/windows_install_deps.ps1 `
   scripts/
 
 RUN `
   `
   scripts\windows_install_vs_2019.ps1 ; `
-  scripts\windows_install_deps.ps1 ; `
   <# Adding path to vcvarsall.bat to PATH so user of container don't need to  know the full path #> `
-  [Environment]::SetEnvironmentVariable('PATH',  'C:\BuildTools\VC\Auxiliary\Build;C:\icu;C:\lz4;C:\zstd;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\BuildTools\VC\Auxiliary\Build;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   `
   Remove-Item C:\scripts -Force -Recurse
