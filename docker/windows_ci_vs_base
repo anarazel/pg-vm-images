@@ -13,6 +13,7 @@ RUN `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\winflexbison;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\icu;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\lz4;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
+  [Environment]::SetEnvironmentVariable('PATH',  'C:\zlib;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\zstd\zstd-v1.5.2-win64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   `
   Remove-Item C:\scripts -Force -Recurse
