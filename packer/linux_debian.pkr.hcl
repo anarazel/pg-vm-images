@@ -164,7 +164,7 @@ build {
 
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    pause_before = "10s"
+    pause_before = "20s"
     inline = [
       <<-SCRIPT
         export DEBIAN_FRONTEND=noninteractive
@@ -184,7 +184,6 @@ build {
 
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    pause_before = "10s"
     script = "scripts/linux_debian_install_deps.sh"
   }
 
@@ -305,7 +304,7 @@ build {
   # check kernel version etc to see everything went well
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
-    pause_before = "10s"
+    pause_before = "20s"
     inline = [
       <<-SCRIPT
         uname -a
