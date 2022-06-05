@@ -158,6 +158,7 @@ build {
       <<-SCRIPT
         echo will reboot
         shutdown -r now
+        sleep 360 # so that the shutdown shows effect before next command
       SCRIPT
     ]
   }
@@ -296,6 +297,7 @@ build {
       <<-SCRIPT
         echo will reboot
         shutdown -r now
+        sleep 360 # so that the shutdown shows effect before next command
       SCRIPT
     ]
     only = ["googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
