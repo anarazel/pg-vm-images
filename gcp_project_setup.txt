@@ -26,6 +26,9 @@ gcloud iam service-accounts keys create \
 # FIXME: It'd be better to create a more restrictive role with just the
 # permissions we need, intead of using the pre-defined roles.
 
+# Create bucket for uploading images of openBSD and netBSD, bucket name
+# should be unique
+gsutil mb -p $GCP_PROJECT -b on gs://$GCP_PROJECT-bucket
 
 # For packer we need:
 # https://www.packer.io/docs/builders/googlecompute
