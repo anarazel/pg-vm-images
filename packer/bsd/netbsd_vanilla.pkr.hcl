@@ -106,11 +106,6 @@ build {
     inline = ["chmod 744 /etc/rc.local && chmod 744 /etc/rc.shutdown"]
   }
 
-  # clear ssh keys
-  provisioner "shell" {
-    inline = ["rm -rf /home/* && rm -rf /root/.ssh/"]
-  }
-
   post-processors {
     post-processor "compress" {
       output = "output/netbsd92.tar.gz"

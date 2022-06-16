@@ -33,8 +33,8 @@ build {
     script = "scripts/bsd/netbsd-prep-postgres.sh"
   }
 
-  # clear ssh keys
+  # clear users and ssh keys
   provisioner "shell" {
-    inline = ["rm -rf /home/* && rm -rf /root/.ssh/"]
+    script = "scripts/bsd/clear_users_and_ssh_keys.sh"
   }
 }
