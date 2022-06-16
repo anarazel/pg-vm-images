@@ -11,7 +11,7 @@ then
     {
         /etc/rc.d/syslogd restart > /dev/null
     }
-    
+
     # chown home paths
     chown_home()
     {
@@ -62,8 +62,8 @@ fi
 
 # There are two types of ssh keys on the GCE; project level and instance level ssh keys.
 # Fetch both of the keys and put them to the related paths
-project_level_ssh_keys=$(curl -s -H "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/project/attributes/ssh-keys)
-instance_level_ssh_keys=$(curl -s -H "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/instance/attributes/ssh-keys)
+project_level_ssh_keys=$(curl -fsH "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/project/attributes/ssh-keys)
+instance_level_ssh_keys=$(curl -fsH "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/instance/attributes/ssh-keys)
 ssh_keys=$(printf '%s\n%s' "$project_level_ssh_keys" "$instance_level_ssh_keys")
 
 if [ "$ssh_keys" != "" ]
@@ -88,7 +88,10 @@ then
             fi
         elif [ "$username" != "" ]
         then
-            useradd ${username}
+            if ! id "$username" > /dev/null 2>&1;
+            then
+                useradd ${username}
+            fi
             mkdir -p /home/${username}/.ssh
             touch /home/${username}/.ssh/authorized_keys
             chown_home
