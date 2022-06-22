@@ -262,7 +262,8 @@ build {
 
 
         cd tools/perf
-        make install prefix=/usr/local/
+        # LIBBPF causes build failure due to signature change of BFD's init_disassemble_info
+        make install prefix=/usr/local/ NO_LIBBPF=1
 
         # build liburing
         DEBIAN_FRONTEND=noninteractive apt-get purge -y -q 'liburing*'
