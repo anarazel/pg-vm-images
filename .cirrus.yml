@@ -80,6 +80,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 
 task:
+  only_if: false
   matrix:
     - name: freebsd-13-0
       env:
@@ -125,6 +126,7 @@ task:
 
 
 task:
+  only_if: false
   matrix:
     - name: openbsd-7-1-vanilla
       env:
@@ -189,6 +191,8 @@ task:
 task:
   name: cleanup-old
 
+  only_if: false
+
   container:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
@@ -250,30 +254,46 @@ task:
 
   <<: *gcp_docker_auth_unix
 
-  multibuilder_script:
-    - docker buildx create --name multibuilder
-    - docker buildx use multibuilder
-    - docker buildx inspect --bootstrap
+  podman_install_script:
+    - apt-get update && apt-get install -y podman qemu-user-static
 
-  # XXX: would be nicer to split into multiple steps, so that e.g. build vs
-  # upload time are visible
-  #
-  # XXX: would be nice to test images before tagging them as available
   build_script: |
-    docker buildx build \
-      --cache-from type=registry,ref=$GCP_REPO/$IMAGE \
-      --cache-to=type=inline \
-      --platform linux/amd64,linux/arm64 \
-      --tag $GCP_REPO/$IMAGE:latest \
-      -f docker/$IMAGE \
-      --push \
+    podman build \
+      --jobs 2 \
+      --manifest $GCP_REPO/$IMAGE:latest \
+      --platform=linux/amd64,linux/arm64 \
+      -f docker/linux_debian_bullseye_ci \
       .
 
-    docker buildx imagetools inspect $GCP_REPO/$IMAGE:latest
+  push_script:
+    podman manifest push --all $GCP_REPO/$IMAGE:latest
+
+#  multibuilder_script:
+#    - docker buildx create --name multibuilder
+#    - docker buildx use multibuilder
+#    - docker buildx inspect --bootstrap
+#
+#  # XXX: would be nicer to split into multiple steps, so that e.g. build vs
+#  # upload time are visible
+#  #
+#  # XXX: would be nice to test images before tagging them as available
+#  build_script: |
+#    docker buildx build \
+#      --cache-from type=registry,ref=$GCP_REPO/$IMAGE \
+#      --cache-to=type=inline \
+#      --platform linux/amd64,linux/arm64 \
+#      --tag $GCP_REPO/$IMAGE:latest \
+#      -f docker/$IMAGE \
+#      --push \
+#      .
+#
+#    docker buildx imagetools inspect $GCP_REPO/$IMAGE:latest
 
 
 docker_builder:
   name: build-containers-windows
+
+  only_if: false
 
   platform: windows
   os_version: 2019
