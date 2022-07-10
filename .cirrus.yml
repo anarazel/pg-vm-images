@@ -259,11 +259,13 @@ task:
   # upload time are visible
   #
   # XXX: would be nice to test images before tagging them as available
+  #
+  # Disabled linux/arm64, fails currently due to reasons outside of our control
   build_script: |
     docker buildx build \
       --cache-from type=registry,ref=$GCP_REPO/$IMAGE \
       --cache-to=type=inline \
-      --platform linux/amd64,linux/arm64 \
+      --platform linux/amd64 \
       --tag $GCP_REPO/$IMAGE:latest \
       -f docker/$IMAGE \
       --push \
@@ -314,16 +316,16 @@ task:
     - uname -a
     - xsltproc --version
 
-
-task:
-  name: test-linux-container-arm64
-  depends_on:
-    - build-containers-linux
-  arm_container:
-    image: $GCP_REPO/linux_debian_bullseye_ci:latest
-  test_script:
-    - uname -a
-    - xsltproc --version
+# Disabled linux/arm64, fails currently due to reasons outside of our control
+#task:
+#  name: test-linux-container-arm64
+#  depends_on:
+#    - build-containers-linux
+#  arm_container:
+#    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+#  test_script:
+#    - uname -a
+#    - xsltproc --version
 
 
 task:
