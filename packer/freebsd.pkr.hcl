@@ -11,19 +11,19 @@ locals {
 
   freebsd_gcp_images = [
     {
-      name = "freebsd-13-0"
+      name = "freebsd-13-1"
       zone = "us-west1-a"
       machine = "e2-highcpu-4"
     },
   ]
 }
 
-source "googlecompute" "freebsd-13-0-vanilla" {
+source "googlecompute" "freebsd-13-1-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
-  source_image_family     = "freebsd-13-0"
+  source_image_family     = "freebsd-13-1"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   ssh_pty                 = "true"
   ssh_username            = "packer"
@@ -36,7 +36,7 @@ build {
   # See linux case for explanation, mostly copied for symmetry
   dynamic "source" {
     for_each = local.freebsd_gcp_images
-    labels = ["source.googlecompute.freebsd-13-0-vanilla"]
+    labels = ["source.googlecompute.freebsd-13-1-vanilla"]
     iterator = tag
 
     content {
@@ -133,7 +133,8 @@ build {
     inline = [
       <<-SCRIPT
         mount -u -f -r /
-        fsck_ffs -E /
+        # starting in freebsd 13.1 -E alone would ask a lot of questions
+        fsck_ffs -p -E /
         mount -u -f -w /
         shutdown -h now
       SCRIPT
