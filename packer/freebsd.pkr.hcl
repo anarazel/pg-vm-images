@@ -18,7 +18,7 @@ locals {
   ]
 }
 
-source "googlecompute" "freebsd-13-1-vanilla" {
+source "googlecompute" "freebsd-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
@@ -36,7 +36,7 @@ build {
   # See linux case for explanation, mostly copied for symmetry
   dynamic "source" {
     for_each = local.freebsd_gcp_images
-    labels = ["source.googlecompute.freebsd-13-1-vanilla"]
+    labels = ["source.googlecompute.freebsd-vanilla"]
     iterator = tag
 
     content {
