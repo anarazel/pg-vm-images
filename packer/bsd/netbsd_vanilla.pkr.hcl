@@ -109,7 +109,7 @@ build {
   # clear ssh keys
   provisioner "shell" {
     inline = ["rm -rf /home/* && rm -rf /root/.ssh/"]
-  } 
+  }
 
   post-processors {
     post-processor "compress" {
