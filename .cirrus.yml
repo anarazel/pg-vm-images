@@ -81,7 +81,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 task:
   matrix:
-    - name: freebsd-13-1
+    - name: freebsd-13
       env:
         PACKERFILE: packer/freebsd.pkr.hcl
 
@@ -195,7 +195,7 @@ task:
     memory: 256Mi
 
   depends_on:
-    - freebsd-13-1
+    - freebsd-13
     - netbsd-9-2-postgres
     - openbsd-7-1-postgres
     - bullseye

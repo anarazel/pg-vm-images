@@ -11,7 +11,7 @@ locals {
 
   freebsd_gcp_images = [
     {
-      name = "freebsd-13-1"
+      name = "freebsd-13"
       zone = "us-west1-a"
       machine = "e2-highcpu-4"
     },
