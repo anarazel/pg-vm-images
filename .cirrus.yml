@@ -81,7 +81,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 task:
   matrix:
-    - name: freebsd-13-1
+    - name: freebsd-13
       env:
         PACKERFILE: packer/freebsd.pkr.hcl
 
@@ -126,21 +126,25 @@ task:
 
 task:
   matrix:
+    # include minor version in vanilla images
     - name: openbsd-7-1-vanilla
       env:
         PACKERFILE: packer/bsd/openbsd_vanilla.pkr.hcl
 
-    - name: openbsd-7-1-postgres
+    # but not in images used for CI
+    - name: openbsd-7-postgres
       depends_on:
         - openbsd-7-1-vanilla
       env:
         PACKERFILE: packer/bsd/openbsd_postgres.pkr.hcl
 
+    # see openbsd case
     - name: netbsd-9-2-vanilla
       env:
         PACKERFILE: packer/bsd/netbsd_vanilla.pkr.hcl
 
-    - name: netbsd-9-2-postgres
+    # see openbsd case
+    - name: netbsd-9-postgres
       depends_on:
         - netbsd-9-2-vanilla
       env:
@@ -195,9 +199,9 @@ task:
     memory: 256Mi
 
   depends_on:
-    - freebsd-13-1
-    - netbsd-9-2-postgres
-    - openbsd-7-1-postgres
+    - freebsd-13
+    - netbsd-9-postgres
+    - openbsd-7-postgres
     - bullseye
     - sid
     - sid-newkernel
