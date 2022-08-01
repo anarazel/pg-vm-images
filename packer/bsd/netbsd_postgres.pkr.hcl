@@ -10,15 +10,21 @@ variable "prefix" {
   default = ""
 }
 
+locals {
+  name = "${var.prefix}pg-ci"
+  version = "9-2"
+}
+
 source "googlecompute" "netbsd-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
-  source_image_family     = "pg-ci-netbsd-9-2-vanilla"
+  source_image_family     = "${local.name}-netbsd-${local.version}-vanilla"
   source_image_project_id = ["${var.gcp_project}"]
-  image_family            = "pg-ci-${var.image_name}"
-  image_name              = "${var.prefix}pg-ci-${var.image_name}-${var.image_date}"
+  image_family            = "${local.name}-${var.image_name}"
+  image_name              = "${local.name}-${var.image_name}-${var.image_date}"
+  instance_name           = "build-${var.image_name}-${var.image_date}"
   zone                    = "us-west1-a"
   machine_type            = "e2-highcpu-4"
   ssh_username            = "root"
@@ -26,7 +32,7 @@ source "googlecompute" "netbsd-vanilla" {
 }
 
 build {
-  name="netbsd-postgres"
+  name = "netbsd-postgres"
   sources = ["source.googlecompute.netbsd-vanilla"]
 
   provisioner "shell" {

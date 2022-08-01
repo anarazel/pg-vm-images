@@ -8,6 +8,10 @@ variable "prefix" {
   default = ""
 }
 
+locals {
+  name = "${var.prefix}pg-ci"
+}
+
 source "qemu" "qemu-gce-builder" {
 
   boot_command            = [
@@ -114,8 +118,8 @@ build {
     post-processor "googlecompute-import" {
       gcs_object_name   = "packer-${var.image_name}-${var.image_date}.tar.gz"
       bucket            = "${var.bucket}"
-      image_family      = "pg-ci-${var.image_name}"
-      image_name        = "${var.prefix}pg-ci-${var.image_name}-${var.image_date}"
+      image_family      = "${local.name}-${var.image_name}"
+      image_name        = "${local.name}-${var.image_name}-${var.image_date}"
       project_id        = "${var.gcp_project}"
     }
   }
