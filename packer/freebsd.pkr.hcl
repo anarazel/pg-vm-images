@@ -49,7 +49,7 @@ build {
 
       zone = tag.value.zone
       machine_type = tag.value.machine
-      instance_name = "build-${local.name}-${tag.value.name}"
+      instance_name = "build-${tag.value.name}-${var.image_date}"
     }
   }
 

@@ -165,7 +165,7 @@ task:
     - packer --version
 
   build_image_script: |
-    DATE=$(date --utc +'%Y-%m-%dt%H-%M')
+    DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
     PACKER_LOG=1
 
     packer build \
