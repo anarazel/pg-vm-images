@@ -115,6 +115,7 @@ task:
       -timestamp-ui \
       -force \
       -var "image_date=$DATE" \
+      -var "task_name=${CIRRUS_TASK_NAME}" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
     gcloud compute images add-iam-policy-binding \

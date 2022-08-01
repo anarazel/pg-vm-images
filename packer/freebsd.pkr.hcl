@@ -1,5 +1,6 @@
 variable "image_date" { type = string }
 variable "gcp_project" { type = string }
+variable "task_name" { type = string }
 
 variable "prefix" {
   type = string
@@ -11,7 +12,7 @@ locals {
 
   freebsd_gcp_images = [
     {
-      name = "freebsd-13"
+      name = "${var.task_name}"
       zone = "us-west1-a"
       machine = "e2-highcpu-4"
     },
