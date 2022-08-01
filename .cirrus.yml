@@ -209,22 +209,8 @@ task:
 
   <<: *gcp_auth_unix
 
-  cleanup_vm_images_script: |
-    images=$(gcloud compute images list \
-      --project "$GCP_PROJECT" \
-      --format "object value(name)" \
-      --no-standard-images \
-      --filter='creationTimestamp < -P2W')
-    echo -e "list of images to delete:\n$images"
-    if [ "$images" != '' ]; then
-      gcloud compute images delete \
-      --quiet \
-      --project "$GCP_PROJECT" \
-      $images
-    else
-      echo no images to delete
-    fi
-
+  cleanup_vm_images_script:
+    ./gcp_delete_old_images.py
 
   # FIXME: deletion doesn't work 100% reliable, because this doesn't correctly
   # deal with multi-arch containers (gcloud shows the individual architecture
