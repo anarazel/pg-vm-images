@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# qemu's curses output doesn't work unless using a tty, but packer doesn't
+# start qemu with a tty. Use pipetty to wrap qemu in a tty, and then ansi2txt
+# to make the output halfway reasonable. unbuffer avoids screen buffering
+# issues.
+exec unbuffer pipetty /usr/bin/qemu-system-x86_64 "$@" | unbuffer -p ansi2txt

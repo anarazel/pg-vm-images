@@ -42,6 +42,14 @@ source "qemu" "qemu-gce-builder" {
   format                  = "raw"
   vm_name                 = "disk.raw"
   output_directory        = "output"
+  # force graphical output to recorded via qemu's curses display, which
+  # qemu-wrap-curses allows to use even from packer
+  qemu_binary		  = "./qemu-wrap-curses"
+  qemuargs                = [
+    ["-display", "curses"],
+    ["-serial", "vc"],
+    ["-vga", "cirrus"],
+  ]
 }
 
 build {
