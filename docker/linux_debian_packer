@@ -10,6 +10,8 @@ RUN \
     python3 \
     qemu-system \
     qemu-utils \
+    colorized-logs \
+    expect \
     && \
   echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" > \
     /etc/apt/sources.list.d/google-cloud-sdk.list && \
