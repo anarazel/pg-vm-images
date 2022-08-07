@@ -11,6 +11,7 @@ PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -
 export PKG_PATH && \
 /usr/sbin/pkg_add pkgin && \
 /usr/pkg/bin/pkgin update && \
+/usr/pkg/bin/pkgin upgrade -y && \
 /usr/pkg/bin/pkgin -y install \
     curl \
     mozilla-rootcerts && \
