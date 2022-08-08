@@ -20,7 +20,7 @@ pkg_add -I \
     libxslt \
     lz4 \
     openpam \
-    python%3.8 \
+    python%3.9 \
     readline \
     tcl%8.6 \
     \

@@ -12,7 +12,7 @@
     p5-IPC-Run \
     flex \
     pkgconf \
-    python38 \
+    python39 \
     icu \
     lz4 \
     libxslt \
