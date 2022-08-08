@@ -14,7 +14,6 @@ pkg_add -I \
     \
     p5-IPC-Run \
     \
-    gssdp \
     icu4c \
     libxml \
     libxslt \
