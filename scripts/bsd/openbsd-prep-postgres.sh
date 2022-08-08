@@ -23,6 +23,7 @@ pkg_add -I \
     python%3.9 \
     readline \
     tcl%8.6 \
+    zstd \
     \
     login_krb5 \
     openldap-client--gssapi \

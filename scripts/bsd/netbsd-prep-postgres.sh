@@ -16,7 +16,8 @@
     icu \
     lz4 \
     libxslt \
-    tcl
+    tcl \
+    zstd
 
 # Set kernel parameters for running postgres tests
 echo "sysctl -w kern.ipc.semmni=2048" >> /etc/rc.local
