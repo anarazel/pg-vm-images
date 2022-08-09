@@ -90,7 +90,7 @@ then
         then
             if ! id "$username" > /dev/null 2>&1;
             then
-                useradd ${username}
+                useradd -G wheel ${username}
             fi
             mkdir -p /home/${username}/.ssh
             touch /home/${username}/.ssh/authorized_keys
@@ -113,7 +113,7 @@ fi
 
 ### Check for bootstrap scripts ###
 
-instance_bootstrap=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/bootstrap)
+instance_bootstrap=$(curl -fsH "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/bootstrap)
 
 if [ "$instance_bootstrap" != "" ]
 then
@@ -136,7 +136,7 @@ fi
 
 ### Run startup scripts ###
 
-startup_script=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/startup-script)
+startup_script=$(curl -fsH "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/startup-script)
 
 if [ "$startup_script" != "" ]
 then
