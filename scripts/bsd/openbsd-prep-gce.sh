@@ -21,6 +21,3 @@ pkg_add -uvI
 
 # Install curl for startup & shutdown scripts
 pkg_add -I curl
-
-# Forbid root username/password login
-sed -i 's/PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config

@@ -1,7 +1,9 @@
 #!/bin/sh
 
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin
+
 # Install required packages for running tests on netBSD
-/usr/pkg/bin/pkgin -y install \
+pkgin -y install \
     vim \
     git \
     gmake \

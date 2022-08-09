@@ -1,5 +1,17 @@
 #!/bin/sh
 
+if [ "$(uname)" = "NetBSD" ]
+then
+    export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin
+elif [ "$(uname)" = "OpenBSD" ]
+then
+    export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin
+else
+    # Unsupported OS
+    echo "Unsupported OS, exiting"
+    exit 1
+fi
+
 # since we are creating postgres images from vanilla images,
 # vanilla images' rc.local script will create users and
 # these users will exist in postgres images.
@@ -14,7 +26,7 @@ then
     echo "$ssh_keys" | while read line
     do
         username="$(echo $line | cut -d: -f1)"
-        if [ "$username" != "root" ]
+        if [ "$username" != "root" ] && id "$username" > /dev/null 2>&1;
         then
             # remove the user's home directory, any subdirectories,
             # and any files and other entries in them.

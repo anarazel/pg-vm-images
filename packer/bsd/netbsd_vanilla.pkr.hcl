@@ -65,7 +65,7 @@ source "qemu" "qemu-gce-builder" {
     "sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/g' /etc/ssh/sshd_config<enter><wait5s>",
     # Enable ipv4 network(ipv6 has problems with QEMU)
     "echo '/sbin/dhcpcd -4' > /etc/rc.local<enter><wait5s>",
-    "reboot<enter>"
+    "/sbin/shutdown -r now<enter>"
   ]
 
   boot_wait               = "120s"
@@ -116,6 +116,27 @@ build {
 
   provisioner "shell" {
     inline = ["chmod 744 /etc/rc.local && chmod 744 /etc/rc.shutdown"]
+  }
+
+  # reboot to verify we still boot
+  provisioner "shell" {
+    expect_disconnect = true
+    inline = [
+      <<-SCRIPT
+        echo will reboot
+        /sbin/shutdown -r now
+      SCRIPT
+    ]
+  }
+
+  # check kernel version etc to see everything went well
+  provisioner "shell" {
+    inline = ["uname -a"]
+  }
+
+
+  provisioner "shell" {
+    inline = ["/usr/bin/sed -i 's/PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config"]
   }
 
   post-processors {

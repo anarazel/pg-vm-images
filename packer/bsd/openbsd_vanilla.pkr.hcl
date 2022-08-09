@@ -17,7 +17,7 @@ source "qemu" "qemu-gce-builder" {
   boot_command            = [
     "S<enter><wait>",
     "cat <<EOF >>install.conf<enter>",
-    "System hostname = openbsd70<enter>",
+    "System hostname = openbsd71<enter>",
     "Password for root = packer<enter>",
     "Allow root ssh login = yes<enter>",
     "What timezone are you in = Etc/UTC<enter>",
@@ -35,10 +35,10 @@ source "qemu" "qemu-gce-builder" {
   headless                = true
   iso_checksum            = "sha256:d3a7c5b9bf890bc404304a1c96f9ee72e1d9bbcf9cc849c1133bdb0d67843396"
   iso_urls                = [
-    "install70.iso",
+    "install71.iso",
     "https://cdn.openbsd.org/pub/OpenBSD/7.1/amd64/install71.iso"
     ]
-  shutdown_command        = "halt -p"
+  shutdown_command        = "shutdown -p now"
   ssh_username            = "root"
   ssh_password            = "packer"
   ssh_port                = 22
@@ -76,6 +76,26 @@ build {
 
   provisioner "shell" {
     inline = ["chmod 744 /etc/rc.local && chmod 744 /etc/rc.shutdown"]
+  }
+
+  # reboot to verify we still boot
+  provisioner "shell" {
+    expect_disconnect = true
+    inline = [
+      <<-SCRIPT
+        echo will reboot
+        shutdown -r now
+      SCRIPT
+    ]
+  }
+
+  # check kernel version etc to see everything went well
+  provisioner "shell" {
+    inline = ["uname -a"]
+  }
+
+  provisioner "shell" {
+    inline = ["sed -i 's/PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config"]
   }
 
   post-processors {

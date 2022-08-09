@@ -14,7 +14,7 @@ fi
 
 ### Run shutdown scripts ###
 
-shutdown_script=$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/shutdown-script)
+shutdown_script=$(curl -fsH "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/shutdown-script)
 
 if [ "$shutdown_script" != "" ]
 then
