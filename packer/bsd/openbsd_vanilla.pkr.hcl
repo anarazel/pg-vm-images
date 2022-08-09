@@ -94,6 +94,12 @@ build {
     inline = ["uname -a"]
   }
 
+  # lock root because we don't want that root is accessible by using
+  # username-password, root is still reachable from ssh key
+  provisioner "shell" {
+    inline = ["/usr/sbin/usermod -f 1 root"]
+  }
+
   provisioner "shell" {
     inline = ["sed -i 's/PermitRootLogin yes/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config"]
   }
