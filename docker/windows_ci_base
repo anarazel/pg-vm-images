@@ -2,7 +2,7 @@
 
 # We used to use cirrus' visual studio container as base, but it's too
 # outdated and bloated. This also makes it easier to run in other environments
-FROM docker.io/cirrusci/windowsservercore:2019-2021.12.07
+FROM docker.io/cirrusci/windowsservercore:2019-2022.06.23
 
 SHELL ["powershell", "-NoLogo", "-NoProfile", "-Command"]
 
