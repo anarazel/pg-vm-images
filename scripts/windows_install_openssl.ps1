@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $filepath = "$Env:TEMP/openssl-setup.exe"
 
 echo "downloading openssl"
-curl.exe -o "$filepath" -sSL https://slproweb.com/download/Win64OpenSSL-1_1_1n.exe
+curl.exe -o "$filepath" -sSL https://slproweb.com/download/Win64OpenSSL-1_1_1q.exe
 if (!$?) { throw 'cmdfail' }
 
 echo "installing openssl"
