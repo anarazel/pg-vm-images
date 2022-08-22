@@ -127,29 +127,17 @@ task:
 
 task:
   matrix:
-    # include minor version in vanilla images
-    - name: openbsd-7-1-vanilla
-      env:
-        PACKERFILE: packer/bsd/openbsd_vanilla.pkr.hcl
-
-    # but not in images used for CI
-    - name: openbsd-7-postgres
+    - name: openbsd-vanilla
+    - name: netbsd-vanilla
+    - name: openbsd-postgres
       depends_on:
-        - openbsd-7-1-vanilla
-      env:
-        PACKERFILE: packer/bsd/openbsd_postgres.pkr.hcl
-
-    # see openbsd case
-    - name: netbsd-9-2-vanilla
-      env:
-        PACKERFILE: packer/bsd/netbsd_vanilla.pkr.hcl
-
-    # see openbsd case
-    - name: netbsd-9-postgres
+        - openbsd-vanilla
+    - name: netbsd-postgres
       depends_on:
-        - netbsd-9-2-vanilla
-      env:
-        PACKERFILE: packer/bsd/netbsd_postgres.pkr.hcl
+        - netbsd-vanilla
+
+  env:
+    PACKERFILE: packer/netbsd_openbsd.pkr.hcl
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -166,11 +154,14 @@ task:
 
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
+    PKRVARFILE=packer/${CIRRUS_TASK_NAME%-*}.pkrvars.hcl
     export PACKER_LOG=1
 
     packer build \
+      -only "*.${CIRRUS_TASK_NAME}" \
       -timestamp-ui \
       -force \
+      -var-file="${PKRVARFILE}" \
       -var "image_date=$DATE" \
       -var "image_name=${CIRRUS_TASK_NAME}" \
       -var "bucket=$BUCKET" \
@@ -201,8 +192,8 @@ task:
 
   depends_on:
     - freebsd-13
-    - netbsd-9-postgres
-    - openbsd-7-postgres
+    - netbsd-postgres
+    - openbsd-postgres
     - bullseye
     - sid
     - sid-newkernel
