@@ -18,6 +18,8 @@ Start-Process -Wait -FilePath ".\windsdksetup.exe" `
   -ArgumentList '/Features OptionId.WindowsDesktopDebuggers /layout c:\t\sdk /quiet /norestart /log c:\t\sdk.log'
 if (!$?) { throw 'cmdfail' }
 
+
+# Install x64 debugger
 Start-Process -Wait -FilePath msiexec.exe `
   -ArgumentList '/a "C:\t\sdk\Installers\X64 Debuggers And Tools-x64_en-us.msi" /qb /log install2.log'
 if (!$?) { throw 'cmdfail' }
@@ -35,6 +37,26 @@ Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDeb
 
 New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AeDebug' `
   -Name 'Auto' -Value 1 -PropertyType DWord
+
+
+# Install x86 debugger
+Start-Process -Wait -FilePath msiexec.exe `
+  -ArgumentList '/a "C:\t\sdk\Installers\X86 Debuggers And Tools-x86_en-us.msi" /qb /log install2.log'
+if (!$?) { throw 'cmdfail' }
+
+# For some reason the msi install ends up with a copy of the msi in c:/, remove
+Remove-Item "c:\X86 Debuggers And Tools-x86_en-us.msi"
+
+C:\Windows` Kits\10\Debuggers\x86\cdb.exe -version
+if (!$?) { throw 'cmdfail' }
+
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug' `
+  -Name 'Debugger' `
+  -Value '"C:\Windows Kits\10\Debuggers\x86\cdb.exe" -p %ld -e %ld -g -kqm -c ".lines -e; .symfix+ ; aS /c proc !adplusext.adpprocname ; .block {.logopen /t c:/cirrus/crashlog-${proc}.txt}; lsa $ip; ~*kP ; !peb; .logclose ; q "'
+Get-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug' -Name Debugger
+New-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug' `
+  -Name 'Auto' -Value 1 -PropertyType DWord
+
 
 cd c:\
 Remove-Item C:\t -Force -Recurse
