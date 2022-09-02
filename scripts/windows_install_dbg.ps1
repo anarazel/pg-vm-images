@@ -61,5 +61,16 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentV
 cd c:\
 Remove-Item C:\t -Force -Recurse
 
+
+# Remove unnecessary things to keep image size in check - the pdb files are
+# the biggest chunk. It's better to download those symbols than for the image
+# to start up slowly
+du -shc "c:/Windows Kits/10/Debuggers/"
+rm "c:/Windows Kits/10/Debuggers/*/*.doc"
+rm "c:/Windows Kits/10/Debuggers/*/*.chm"
+rm "c:/Windows Kits/10/Debuggers/*/sym/*pdb"
+du -shc "c:/Windows Kits/10/Debuggers/"
+
+
 # to make it easier to spot if there's additional bogus leftovers
 dir c:\
