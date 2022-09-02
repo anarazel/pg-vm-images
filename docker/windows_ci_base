@@ -31,9 +31,6 @@ RUN `
   [Environment]::SetEnvironmentVariable('DEFAULT_PERL_VERSION', $perl_version, 'Machine') ; `
   [Environment]::SetEnvironmentVariable('PATH',  \"C:\strawberry\$perl_version\perl\bin;\" + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   `
-  <# but also install 5.32.1.1 to work on a fix #> `
-  scripts\windows_install_perl.ps1 '5.32.1.1' ; `
-  `
   scripts\windows_install_openssl.ps1 ; `
   `
   Remove-Item C:\scripts -Force -Recurse
