@@ -20,7 +20,7 @@ RUN `
   scripts\windows_install_dbg.ps1 ; `
   [Environment]::SetEnvironmentVariable('PATH',  'C:\Windows Kits\10\Debuggers\x64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine') ; `
   `
-  scripts\windows_install_python.ps1 3.10.4 ; `
+  scripts\windows_install_python.ps1 3.10.6 ; `
   <# Install meson and ninja by using pip after installing python #> `
   py -m pip install meson ninja ; `
   `
