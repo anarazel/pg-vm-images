@@ -15,4 +15,6 @@ RUN `
   <# Change default console code page (0) with Windows code page (65001) to get rid of warnings in postgres tests #> `
   chcp 65001; `
   `
-  Remove-Item C:\scripts -Force -Recurse
+  echo start removing; `
+  Remove-Item C:\scripts -Force -Recurse; `
+  echo end removing
