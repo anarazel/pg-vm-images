@@ -278,20 +278,24 @@ docker_builder:
     docker tag windows_ci_base:latest %GCP_REPO%/windows_ci_base:latest
     docker push %GCP_REPO%/windows_ci_base:latest
 
+
+    rem docker pull %GCP_REPO%/windows_ci_mingw64:latest || cmd /s /c
+    docker build --cache-from %GCP_REPO%/windows_ci_mingw64:latest --tag windows_ci_mingw64:latest -f docker/windows_ci_mingw64 .
+    echo built mingw
+    docker tag windows_ci_mingw64:latest %GCP_REPO%/windows_ci_mingw64:latest
+    docker push %GCP_REPO%/windows_ci_mingw64:latest
+
+
     rem docker pull %GCP_REPO%/windows_ci_vs_base:latest || cmd /s /c
     docker build --cache-from %GCP_REPO%/windows_ci_vs_base:latest --tag windows_ci_vs_base:latest -f docker/windows_ci_vs_base .
     docker tag windows_ci_vs_base:latest %GCP_REPO%/windows_ci_vs_base:latest
     docker push %GCP_REPO%/windows_ci_vs_base:latest
 
+
     rem docker pull %GCP_REPO%/windows_ci_vs_2019:latest || cmd /s /c
     docker build --cache-from %GCP_REPO%/windows_ci_vs_2019:latest --tag windows_ci_vs_2019:latest -f docker/windows_ci_vs_2019 .
     docker tag windows_ci_vs_2019:latest %GCP_REPO%/windows_ci_vs_2019:latest
     docker push %GCP_REPO%/windows_ci_vs_2019:latest
-
-    rem docker pull %GCP_REPO%/windows_ci_mingw64:latest || cmd /s /c
-    docker build --cache-from %GCP_REPO%/windows_ci_mingw64:latest --tag windows_ci_mingw64:latest -f docker/windows_ci_mingw64 .
-    docker tag windows_ci_mingw64:latest %GCP_REPO%/windows_ci_mingw64:latest
-    docker push %GCP_REPO%/windows_ci_mingw64:latest
 
 
 task:
