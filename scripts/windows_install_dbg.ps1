@@ -8,6 +8,27 @@ $ErrorActionPreference = "Stop"
 mkdir c:\t
 cd c:\t
 
+
+echo "configuring windows error reporting"
+
+# prevent windows error handling dialog from causing hangs
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' `
+  -Name 'DontShowUI' -Value 1 -PropertyType DWord
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' `
+  -Name 'Disabled' -Value 1 -PropertyType DWord
+
+# Will hopefully not be triggered because of the JIT debugger configured below, but
+# just to be sure...
+New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting' `
+  -Name 'LocalDumps'
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps' `
+  -Name 'DumpFolder' -Value "C:\cirrus\crashdumps" -PropertyType ExpandString
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps' `
+  -Name 'DumpCount' -Value 5 -PropertyType DWord
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps' `
+  -Name 'Dumptype' -Value 1 -PropertyType DWord
+
+
 echo "downloading windows sdk (for debugger)"
 curl.exe -sSL -o 'windsdksetup.exe' `
   https://download.microsoft.com/download/9/7/9/97982c1d-d687-41be-9dd3-6d01e52ceb68/windowssdk/winsdksetup.exe
