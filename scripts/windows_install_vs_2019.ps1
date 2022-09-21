@@ -17,6 +17,19 @@ Start-Process -Wait `
       '--add', 'Microsoft.VisualStudio.Component.Windows10SDK.20348'
 if (!$?) { throw 'cmdfail' }
 
+# clear pdb files to download them later
+du -shc "C:\BuildTools\VC\Tools\MSVC"
+rm "C:\BuildTools\VC\Tools\MSVC\*\lib\**\**\*pdb"
+du -shc "C:\BuildTools\VC\Tools\MSVC"
+
+# clear not required arm files
+du -shc "" "C:\Program Files (x86)\Windows Kits"
+rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\ucrt\arm"
+rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\ucrt\arm64"
+rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\um\arm"
+rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\um\arm64"
+du -shc "" "C:\Program Files (x86)\Windows Kits"
+
 cd c:\
 Remove-Item C:\t -Force -Recurse
 Remove-Item -Force -Recurse ${Env:TEMP}\*
