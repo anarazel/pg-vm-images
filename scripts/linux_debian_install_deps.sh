@@ -82,6 +82,8 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
   dpkg --add-architecture i386
   apt-get update
   apt-get -y install --no-install-recommends --no-remove \
+    gcc-multilib \
+    \
     libicu-dev:i386 \
     libkrb5-*-heimdal:i386 \
     libkrb5-dev:i386 \
