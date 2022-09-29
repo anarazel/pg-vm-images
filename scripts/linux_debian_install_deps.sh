@@ -45,7 +45,6 @@ apt-get -y install --no-install-recommends \
   libxslt1-dev \
   libzstd-dev \
   llvm-dev \
-  python3-dev \
   systemtap-sdt-dev \
   tcl-dev \
   uuid-dev \
@@ -72,3 +71,33 @@ apt-get -y install --no-install-recommends \
   gcc-mingw-w64-x86-64-win32 \
   libz-mingw-w64-dev \
   mingw-w64-tools
+
+if [ $(dpkg --print-architecture) = "amd64" ] ; then
+
+  # Install development packages necessary to target i386 from amd64. Leave
+  # out packages that'd enlarge the image unduly (e.g. llvm-dev).
+  #
+  # Not installing libossp-uuid-dev:i386, systemtap-sdt-dev:i386
+  # they conflict with the amd64 variants
+  dpkg --add-architecture i386
+  apt-get update
+  apt-get -y install --no-install-recommends --no-remove \
+    libicu-dev:i386 \
+    libkrb5-*-heimdal:i386 \
+    libkrb5-dev:i386 \
+    libldap2-dev:i386 \
+    liblz4-dev:i386 \
+    libpam-dev:i386 \
+    libperl-dev:i386 \
+    libpython3-dev:i386 \
+    libreadline-dev:i386 \
+    libselinux*-dev:i386 \
+    libssl-dev:i386 \
+    libsystemd-dev:i386 \
+    liburing-dev:i386 \
+    libxml2-dev:i386 \
+    libxslt1-dev:i386 \
+    libzstd-dev:i386 \
+    tcl-dev:i386 \
+    uuid-dev:i386
+fi
