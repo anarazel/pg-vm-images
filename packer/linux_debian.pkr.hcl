@@ -88,6 +88,9 @@ build {
         # /etc/default/grub
         apt-get remove -y grub-cloud-amd64
 
+        # mark as installed, to prevent them from getting auto-removed
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y grub-efi-amd64-bin grub2-common
+
         # Remove unnecessary packages, to reduce image size
         apt-get purge -y \
           man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil grub-efi-amd64-signed \
@@ -127,6 +130,7 @@ build {
             deb http://deb.debian.org/debian unstable main
             deb-src http://deb.debian.org/debian unstable main
         EOF
+
         apt-get update -y
       SCRIPT
     ]
