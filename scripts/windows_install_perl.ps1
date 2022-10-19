@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$perl_version = $args[0]
+$perl_version = $Env:TEMP_PERL_VERSION
 $filepath = "$Env:TEMP/perl.zip"
 
 echo "downloading perl $perl_vesion"
@@ -14,5 +14,8 @@ echo "installing perl $perl_vesion"
 # need - to bloat the image size noticeably
 7z.exe x "$filepath" -xr!c -oc:\strawberry\$perl_version
 if (!$?) { throw 'cmdfail' }
+
+[Environment]::SetEnvironmentVariable('DEFAULT_PERL_VERSION', $perl_version, 'Machine')
+[Environment]::SetEnvironmentVariable('PATH',  "C:\strawberry\$perl_version\perl\bin;" + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
 
 Remove-Item "$filepath" -Force

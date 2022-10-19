@@ -25,3 +25,5 @@ msys 'pacman -Scc --noconfirm'
 # Install perl modules to enable tap tests
 msys 'where perl'
 msys '(echo; echo o conf recommends_policy 0; echo notest install IPC::Run) | cpan'
+
+[Environment]::SetEnvironmentVariable('MSYSTEM', 'UCRT64', 'Machine')

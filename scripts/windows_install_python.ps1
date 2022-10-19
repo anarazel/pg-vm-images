@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$python_version = $args[0]
+$python_version = $Env:TEMP_PYTHON_VERSION
 $filepath = "$Env:TEMP/python.exe"
 
 echo "downloading python $python_version"
