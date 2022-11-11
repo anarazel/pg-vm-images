@@ -12,12 +12,12 @@ boot_command = [
   "EOF<enter>",
   "install -af install.conf && reboot<enter>"
 ]
-iso_checksum = "sha256:d3a7c5b9bf890bc404304a1c96f9ee72e1d9bbcf9cc849c1133bdb0d67843396"
+iso_checksum = "sha256:0369ef40a3329efcb978c578c7fdc7bda71e502aecec930a74b44160928c91d3"
 iso_urls                = [
-  "install71.iso",
-  "https://cdn.openbsd.org/pub/OpenBSD/7.1/amd64/install71.iso"
+  "install72.iso",
+  "https://cdn.openbsd.org/pub/OpenBSD/7.2/amd64/install72.iso"
 ]
-output_file_name = "output/openbsd71.tar.gz"
-version = "7-1"
+output_file_name = "output/openbsd72.tar.gz"
+version = "7-2"
 vanilla_name = [ { name = "openbsd-vanilla" } ]
 postgres_name = [ { name = "openbsd-postgres" } ]
