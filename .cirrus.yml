@@ -127,24 +127,30 @@ task:
 
 task:
   matrix:
-    - name: openbsd-vanilla
-    - name: netbsd-vanilla
-    - name: openbsd-postgres
-      depends_on:
-        - openbsd-vanilla
-    - name: netbsd-postgres
-      depends_on:
-        - netbsd-vanilla
+    - env:
+        PACKERFILE: packer/netbsd_openbsd.pkr.hcl
+        PKRVARFILE: packer/openbsd.pkrvars.hcl
+      matrix:
+        - name: openbsd-vanilla
+        - name: openbsd-postgres
+          depends_on:
+            - openbsd-vanilla
 
-  env:
-    PACKERFILE: packer/netbsd_openbsd.pkr.hcl
+    - env:
+        PACKERFILE: packer/netbsd_openbsd.pkr.hcl
+        PKRVARFILE: packer/netbsd.pkrvars.hcl
+      matrix:
+        - name: netbsd-vanilla
+        - name: netbsd-postgres
+          depends_on:
+            - netbsd-vanilla
 
   container:
     dockerfile: docker/linux_debian_packer
     cpu: 2
     memory: 4G
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'files/bsd/*', 'scripts/bsd/*', $PACKERFILE)
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'files/bsd/*', 'scripts/bsd/*', $PACKERFILE, $PKRVARFILE)
   auto_cancellation: false
 
   <<: *gcp_auth_unix
@@ -154,7 +160,6 @@ task:
 
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
-    PKRVARFILE=packer/${CIRRUS_TASK_NAME%-*}.pkrvars.hcl
     export PACKER_LOG=1
 
     packer build \
