@@ -11,8 +11,33 @@ https://github.com/postgres/postgres/blob/master/.cirrus.yml)
 
 ## How to use
 
-Postgres' CI [README](https://github.com/postgres/postgres/blob/master/src/tools/ci/README)
+If you are contributing to Postgres, Postgres' CI
+[README](https://github.com/postgres/postgres/blob/master/src/tools/ci/README)
 explains how to enable CI utilizing these image for a repository.
+
+If you are developing a different project that uses Cirrus CI, you might be
+interested in using one of the BSD images. Here is an example using the NetBSD
+image without Postgres:
+
+```yaml
+foo_task:
+  compute_engine_instance:
+    image_project: pg-ci-images
+    image: family/pg-ci-netbsd-vanilla-9-2
+    platform: netbsd
+```
+
+The following images are available:
+
+-   FreeBSD images with Postgres are available in the family `pg-ci-freebsd-13`.
+    (If you are looking for images without Postgres, just use FreeBSD's
+    [official GCP images](https://cloud.google.com/compute/docs/images#freebsd).)
+
+-   NetBSD and OpenBSD images are available both with and without Postgres,
+    in families `pg-ci-{net,open}bsd-{vanilla,postgres}-$version`. Find
+    the current value of `$version` in
+    [packer/netbsd.pkrvars.hcl](packer/netbsd.pkrvars.hcl) and
+    [packer/openbsd.pkrvars.hcl](packer/openbsd.pkrvars.hcl).
 
 
 ## How it works
