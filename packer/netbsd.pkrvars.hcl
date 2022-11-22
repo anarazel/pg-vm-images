@@ -52,12 +52,12 @@ boot_command = [
   "echo '/sbin/dhcpcd -4' > /etc/rc.local<enter><wait5s>",
   "reboot<enter>"
 ]
-iso_checksum = "sha256:5f1bca14c4090122f31713dd86a926f63109dd6fb3c05f9b9b150a78acc8bc7e"
+iso_checksum = "sha256:7e7f03bfd0584480cd11ed8833963310e34361d105498a028a2ebf3c10354171"
 iso_urls = [
-  "NetBSD-9.2-amd64.iso",
-  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.2/images/NetBSD-9.2-amd64.iso"
+  "NetBSD-9.3-amd64.iso",
+  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/images/NetBSD-9.3-amd64.iso"
 ]
-output_file_name = "output/netbsd92.tar.gz"
-version = "9-2"
+output_file_name = "output/netbsd93.tar.gz"
+version = "9-3"
 vanilla_name = [ { name = "netbsd-vanilla" } ]
 postgres_name = [ { name = "netbsd-postgres" } ]
