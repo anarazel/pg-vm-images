@@ -78,6 +78,8 @@ Get-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentV
 New-ItemProperty -Path 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\AeDebug' `
   -Name 'Auto' -Value 1 -PropertyType DWord
 
+[Environment]::SetEnvironmentVariable('PATH',  'C:\Windows Kits\10\Debuggers\x64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+
 
 cd c:\
 Remove-Item C:\t -Force -Recurse

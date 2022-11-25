@@ -17,6 +17,8 @@ Start-Process -Wait `
       '--add', 'Microsoft.VisualStudio.Component.Windows10SDK.20348'
 if (!$?) { throw 'cmdfail' }
 
+[Environment]::SetEnvironmentVariable('PATH',  'C:\BuildTools\VC\Auxiliary\Build;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+
 # clear pdb files to download them later
 du -shc "C:\BuildTools\VC\Tools\MSVC"
 rm "C:\BuildTools\VC\Tools\MSVC\*\lib\**\**\*pdb"

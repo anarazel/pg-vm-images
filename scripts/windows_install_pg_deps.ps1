@@ -16,3 +16,9 @@ DownloadAndInstallDependency "icu" "https://github.com/unicode-org/icu/releases/
 DownloadAndInstallDependency "lz4" "https://github.com/lz4/lz4/releases/download/v1.9.3/lz4_win64_v1_9_3.zip";
 DownloadAndInstallDependency "zlib" "http://gnuwin32.sourceforge.net/downlinks/zlib-lib-zip.php";
 DownloadAndInstallDependency "zstd" "https://github.com/facebook/zstd/releases/download/v1.5.2/zstd-v1.5.2-win64.zip";
+
+[Environment]::SetEnvironmentVariable('PATH',  'C:\winflexbison;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+[Environment]::SetEnvironmentVariable('PATH',  'C:\icu;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+[Environment]::SetEnvironmentVariable('PATH',  'C:\lz4;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+[Environment]::SetEnvironmentVariable('PATH',  'C:\zlib;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+[Environment]::SetEnvironmentVariable('PATH',  'C:\zstd\zstd-v1.5.2-win64;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
