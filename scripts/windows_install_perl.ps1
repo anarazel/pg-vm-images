@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$perl_version = $args[0]
+$perl_version = $Env:TEMP_PERL_VERSION
 $filepath = "$Env:TEMP/perl.zip"
 
 echo "downloading perl $perl_vesion"

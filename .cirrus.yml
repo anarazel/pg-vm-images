@@ -94,6 +94,13 @@ task:
         - name: sid-newkernel
         - name: sid-newkernel-uring
 
+    - env:
+        PACKERFILE: packer/windows.pkr.hcl
+
+      matrix:
+        - name: windows-ci-vs-2019
+        - name: windows-ci-mingw64
+
   container:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
@@ -203,6 +210,8 @@ task:
     - sid
     - sid-newkernel
     - sid-newkernel-uring
+    - windows-ci-vs-2019
+    - windows-ci-mingw64
 
   <<: *gcp_auth_unix
 
@@ -265,38 +274,44 @@ task:
 
 
 docker_builder:
-  name: build-containers-windows
+  matrix:
+    - name: windows-ci-vs-2019-docker
+    - name: windows-ci-mingw64-docker
+
+  env:
+    PACKERFILE: packer/windows.pkr.hcl
+    PKRVARFILE: packer/windows.pkrvars.hcl
+    BUILD_TYPE: docker
 
   platform: windows
   os_version: 2019
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/windows_*', 'scripts/windows*')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', '$PACKERFILE', 'scripts/windows*')
 
   <<: *gcp_docker_auth_win
 
-  # FIXME: disabled caching for now, there doesn't appear to be a good builtin
-  # way of regenerating cached layers regularly.
-  build_script: |
-    rem docker pull %GCP_REPO%/windows_ci_base:latest || cmd /s /c
-    rem --cache-from %GCP_REPO%/windows_ci_base:latest
-    docker build --cache-from cirrusci/windowsservercore:2019-2022.06.23 --tag windows_ci_base:latest -f docker/windows_ci_base .
-    docker tag windows_ci_base:latest %GCP_REPO%/windows_ci_base:latest
-    docker push %GCP_REPO%/windows_ci_base:latest
+  install_packer_script: |
+    choco install packer -y
 
-    rem docker pull %GCP_REPO%/windows_ci_vs_base:latest || cmd /s /c
-    docker build --cache-from %GCP_REPO%/windows_ci_vs_base:latest --tag windows_ci_vs_base:latest -f docker/windows_ci_vs_base .
-    docker tag windows_ci_vs_base:latest %GCP_REPO%/windows_ci_vs_base:latest
-    docker push %GCP_REPO%/windows_ci_vs_base:latest
+  info_script: |
+    packer --version
 
-    rem docker pull %GCP_REPO%/windows_ci_vs_2019:latest || cmd /s /c
-    docker build --cache-from %GCP_REPO%/windows_ci_vs_2019:latest --tag windows_ci_vs_2019:latest -f docker/windows_ci_vs_2019 .
-    docker tag windows_ci_vs_2019:latest %GCP_REPO%/windows_ci_vs_2019:latest
-    docker push %GCP_REPO%/windows_ci_vs_2019:latest
+  build_script:
+    # cmd '^' line continuation didn't work
+    # switched to the powershell
+    - ps: |
+        echo "gcp_password = `"$(gcloud auth print-access-token)`"" | Out-File -Append -Encoding ASCII ${Env:PKRVARFILE}
 
-    rem docker pull %GCP_REPO%/windows_ci_mingw64:latest || cmd /s /c
-    docker build --cache-from %GCP_REPO%/windows_ci_mingw64:latest --tag windows_ci_mingw64:latest -f docker/windows_ci_mingw64 .
-    docker tag windows_ci_mingw64:latest %GCP_REPO%/windows_ci_mingw64:latest
-    docker push %GCP_REPO%/windows_ci_mingw64:latest
+        packer build `
+          -only "*.${Env:CIRRUS_TASK_NAME}" `
+          -timestamp-ui `
+          -force `
+          -var-file="${Env:PKRVARFILE}" `
+          -var "task_name=${Env:CIRRUS_TASK_NAME}" `
+          -var "docker_repo=${Env:GCP_REPO}" `
+          -var "docker_server=${Env:GCP_REGION}-docker.pkg.dev" `
+          -var "build_type=$Env:BUILD_TYPE" `
+          "$Env:PACKERFILE"
 
 
 task:
@@ -322,26 +337,21 @@ task:
 
 
 task:
-  name: test-windows-container-base-amd64
-  depends_on:
-    - build-containers-windows
-  windows_container:
-    image: $GCP_REPO/windows_ci_base:latest
-  test_script:
-    - ver
-    - set
-    - where perl
-    - perl --version
-    - python --version
-    - diff --version
+  matrix:
+    - name: test-windows-vs-2019
+      depends_on:
+        - windows-ci-vs-2019
+      compute_engine_instance:
+        image_project: $GCP_PROJECT
+        image: family/pg-ci-windows-ci-vs-2019
+        platform: windows
 
+    - name: test-windows-vs-2019-amd64-container
+      depends_on:
+        - windows-ci-vs-2019-docker
+      windows_container:
+        image: $GCP_REPO/windows-ci-vs-2019-docker:latest
 
-task:
-  name: test-windows-container-vs-2019-amd64
-  depends_on:
-    - build-containers-windows
-  windows_container:
-    image: $GCP_REPO/windows_ci_vs_2019:latest
   test_script:
     - ver
     - set
@@ -352,12 +362,23 @@ task:
     - bison --version
     - flex --version
 
+
 task:
-  name: test-windows-container-mingw64-amd64
-  depends_on:
-    - build-containers-windows
-  windows_container:
-    image: $GCP_REPO/windows_ci_mingw64:latest
+  matrix:
+    - name: test-windows-mingw64
+      depends_on:
+        - windows-ci-mingw64
+      compute_engine_instance:
+        image_project: $GCP_PROJECT
+        image: family/pg-ci-windows-ci-mingw64
+        platform: windows
+
+    - name: test-windows-mingw64-amd64-container
+      depends_on:
+        - windows-ci-mingw64-docker
+      windows_container:
+        image: $GCP_REPO/windows-ci-mingw64-docker:latest
+
   test_script:
     - ver
     - set
