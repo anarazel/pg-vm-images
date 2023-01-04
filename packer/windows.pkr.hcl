@@ -20,7 +20,7 @@ variable "gcp_password" {
   default = ""
 }
 
-variable "gcp_project" { 
+variable "gcp_project" {
   type = string
   default = ""
 }
@@ -48,9 +48,9 @@ locals {
 
   only = {
     vm = ["googlecompute.windows-ci-mingw64", "googlecompute.windows-ci-vs-2019"],
-    docker = ["docker.windows-ci-vs-2019-docker", "docker.windows-ci-mingw64-docker"],
-    vs_2019 = ["googlecompute.windows-ci-vs-2019", "docker.windows-ci-vs-2019-docker"],
-    mingw64 = ["googlecompute.windows-ci-mingw64", "docker.windows-ci-mingw64-docker"],
+    docker = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"],
+    vs_2019 = ["googlecompute.windows-ci-vs-2019", "docker.windows_ci_vs_2019"],
+    mingw64 = ["googlecompute.windows-ci-mingw64", "docker.windows_ci_mingw64"],
   }
 }
 
@@ -199,7 +199,7 @@ build {
         tags = ["latest"]
         # packer version is 1.6.6 while generating the vm images, and it complains
         # if local.only.docker is used here
-        only = ["docker.windows-ci-vs-2019-docker", "docker.windows-ci-mingw64-docker"]
+        only = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"]
       }
     post-processor "docker-push" {
       # https://cloud.google.com/container-registry/docs/advanced-authentication#token
@@ -207,7 +207,7 @@ build {
       login_username = "oauth2accesstoken"
       login_password = "${var.gcp_password}"
       login_server = "${var.docker_server}"
-      only = ["docker.windows-ci-vs-2019-docker", "docker.windows-ci-mingw64-docker"]
+      only = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"]
     }
   }
 }

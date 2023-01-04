@@ -275,8 +275,8 @@ task:
 
 docker_builder:
   matrix:
-    - name: windows-ci-vs-2019-docker
-    - name: windows-ci-mingw64-docker
+    - name: windows_ci_vs_2019
+    - name: windows_ci_mingw64
 
   env:
     PACKERFILE: packer/windows.pkr.hcl
@@ -348,9 +348,9 @@ task:
 
     - name: test-windows-vs-2019-amd64-container
       depends_on:
-        - windows-ci-vs-2019-docker
+        - windows_ci_vs_2019
       windows_container:
-        image: $GCP_REPO/windows-ci-vs-2019-docker:latest
+        image: $GCP_REPO/windows_ci_vs_2019:latest
 
   test_script:
     - ver
@@ -375,9 +375,9 @@ task:
 
     - name: test-windows-mingw64-amd64-container
       depends_on:
-        - windows-ci-mingw64-docker
+        - windows_ci_mingw64
       windows_container:
-        image: $GCP_REPO/windows-ci-mingw64-docker:latest
+        image: $GCP_REPO/windows_ci_mingw64:latest
 
   test_script:
     - ver
