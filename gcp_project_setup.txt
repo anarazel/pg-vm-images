@@ -49,6 +49,9 @@ gcloud projects add-iam-policy-binding $GCP_PROJECT \
     --member=serviceAccount:image-builder@$GCP_PROJECT.iam.gserviceaccount.com \
     --role=roles/compute.storageAdmin
 
+# For windows image generation winrm needs to work
+gcloud compute --project=pg-ci-images firewall-rules create allow-winrm --allow tcp:5986
+
 
 # docker image repository
 
