@@ -1,6 +1,7 @@
 FROM debian:bullseye
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DATE IMAGE_NAME
+ENV DEBIAN_FRONTEND=noninteractive IMAGE_IDENTITY=$IMAGE_NAME-$DATE
 
 COPY /scripts/linux_debian_install_deps.sh /scripts/
 

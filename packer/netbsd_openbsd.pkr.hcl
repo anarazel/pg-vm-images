@@ -18,6 +18,7 @@ variable "prefix" {
 
 locals {
   name = "${var.prefix}pg-ci"
+  image_identity = "${local.name}-${var.image_name}-${var.image_date}"
 }
 
 source "qemu" "qemu-gce-builder" {
@@ -85,6 +86,14 @@ build {
     inline = ["chmod 744 /etc/rc.local && chmod 744 /etc/rc.shutdown"]
   }
 
+  # set IMAGE_IDENTITY to distinguish images on CI runs
+  provisioner "shell" {
+    inline = [
+      "mkdir -p /etc/environment.d",
+      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
+    ]
+  }
+
   # reboot to verify we still boot
   provisioner "shell" {
     expect_disconnect = true
@@ -127,7 +136,7 @@ build {
       gcs_object_name   = "packer-${var.image_name}-${var.image_date}.tar.gz"
       bucket            = "${var.bucket}"
       image_family      = "${local.name}-${var.image_name}-${var.version}"
-      image_name        = "${local.name}-${var.image_name}-${var.image_date}"
+      image_name        = local.image_identity
       project_id        = "${var.gcp_project}"
     }
   }
@@ -141,7 +150,7 @@ source "googlecompute" "postgres" {
   source_image_family     = "${local.name}-${var.name}-vanilla-${var.version}"
   source_image_project_id = ["${var.gcp_project}"]
   image_family            = "${local.name}-${var.image_name}-${var.version}"
-  image_name              = "${local.name}-${var.image_name}-${var.image_date}"
+  image_name              = local.image_identity
   instance_name           = "build-${var.image_name}-${var.image_date}"
   zone                    = "us-west1-a"
   machine_type            = "e2-highcpu-4"
@@ -172,6 +181,14 @@ build {
   provisioner "shell" {
     script = "scripts/bsd/openbsd-prep-postgres.sh"
     only = ["googlecompute.openbsd-postgres"]
+  }
+
+  # set IMAGE_IDENTITY to distinguish images on CI runs
+  provisioner "shell" {
+    inline = [
+      "mkdir -p /etc/environment.d",
+      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
+    ]
   }
 
   # clear users and ssh keys

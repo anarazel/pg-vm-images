@@ -9,6 +9,7 @@ variable "prefix" {
 
 locals {
   name = "${var.prefix}pg-ci"
+  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
 
   freebsd_gcp_images = [
     {
@@ -125,6 +126,15 @@ build {
         echo 'kern.timecounter.smp_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc_adjust=1' | tee -a /boot/loader.conf
       SCRIPT
+    ]
+  }
+
+  # set IMAGE_IDENTITY to distinguish images on CI runs
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "mkdir -p /etc/environment.d",
+      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
     ]
   }
 

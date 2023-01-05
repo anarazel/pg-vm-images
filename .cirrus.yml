@@ -117,7 +117,7 @@ task:
     - packer --version
 
   build_image_script: |
-    DATE=$(date --utc +'%Y-%m-%dt%H-%M')
+    DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
 
     packer build \
       -only "*.${CIRRUS_TASK_NAME}" \
@@ -265,9 +265,14 @@ task:
   #
   # Disabled linux/arm64, fails currently due to reasons outside of our control
   build_script: |
+    DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
+
     docker buildx build \
       --platform linux/amd64 \
+      --build-arg DATE=$DATE \
+      --build-arg IMAGE_NAME=$IMAGE \
       --tag $GCP_REPO/$IMAGE:latest \
+      --tag $GCP_REPO/$IMAGE:$DATE \
       -f docker/$IMAGE \
       --push \
       .
@@ -303,6 +308,7 @@ docker_builder:
     # switched to the powershell
     - ps: |
         echo "gcp_password = `"$(gcloud auth print-access-token)`"" | Out-File -Append -Encoding ASCII ${Env:PKRVARFILE}
+        $DATE=[datetime]::Utcnow.Tostring("yyyy-MM-dd't'HH-mm-ss")
 
         packer build `
           -only "*.${Env:CIRRUS_TASK_NAME}" `
@@ -310,6 +316,7 @@ docker_builder:
           -force `
           -var-file="${Env:PKRVARFILE}" `
           -var "task_name=${Env:CIRRUS_TASK_NAME}" `
+          -var "image_date=${DATE}" `
           -var "docker_repo=${Env:GCP_REPO}" `
           -var "docker_server=${Env:GCP_REGION}-docker.pkg.dev" `
           -var "build_type=$Env:BUILD_TYPE" `
@@ -325,6 +332,7 @@ task:
   test_script:
     - uname -a
     - xsltproc --version
+    - env
 
 # Disabled linux/arm64, fails currently due to reasons outside of our control
 #task:
@@ -336,6 +344,31 @@ task:
 #  test_script:
 #    - uname -a
 #    - xsltproc --version
+
+
+task:
+  matrix:
+    - name: test-netbsd
+      env:
+        IMAGE_NAME: pg-ci-netbsd-postgres-9-3
+        PLATFORM: netbsd
+
+    - name: test-openbsd
+      env:
+        IMAGE_NAME: pg-ci-openbsd-postgres-7-2
+        PLATFORM: openbsd
+
+  depends_on:
+    - ${PLATFORM}-postgres
+
+  compute_engine_instance:
+    image_project: $GCP_PROJECT
+    image: family/${IMAGE_NAME}
+    platform: ${PLATFORM}
+
+  test_script:
+    - uname -a
+    - env
 
 
 task:
