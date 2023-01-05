@@ -1,4 +1,5 @@
 variable "task_name" { type = string }
+variable "image_date" { type = string }
 
 variable "build_type" {
   type = string
@@ -25,11 +26,6 @@ variable "gcp_project" {
   default = ""
 }
 
-variable "image_date" {
-  type = string
-  default = ""
-}
-
 variable "prefix" {
   type = string
   default = ""
@@ -37,6 +33,8 @@ variable "prefix" {
 
 locals {
   name = "${var.prefix}pg-ci"
+  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
+
   perl_version = "5.26.3.1"
   python_version = "3.10.6"
 
@@ -59,7 +57,7 @@ source "googlecompute" "windows" {
   disk_type               = "pd-ssd"
   project_id              = var.gcp_project
   source_image_family     = "windows-2022"
-  image_name              = "${local.name}-${var.task_name}-${var.image_date}"
+  image_name              = local.image_identity
   image_family            = "${local.name}-${var.task_name}"
   zone                    = "us-west1-a"
   machine_type            = "n2-standard-4"
@@ -115,6 +113,9 @@ build {
     inline = [
       # contains useful utilities, including a diff we can use
       "[Environment]::SetEnvironmentVariable('PATH',  'C:\\Program Files\\Git\\usr\\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
+
+      # set IMAGE_IDENTITY to distinguish images on CI runs
+      "[Environment]::SetEnvironmentVariable('IMAGE_IDENTITY', '${local.image_identity}', 'Machine')",
     ]
   }
 
@@ -196,7 +197,8 @@ build {
   post-processors {
     post-processor "docker-tag" {
         repository =  "${var.docker_repo}/${var.task_name}"
-        tags = ["latest"]
+        # tag image with both latest and image-date to distinguish images on CI runs
+        tags = ["${var.image_date}", "latest"]
         # packer version is 1.6.6 while generating the vm images, and it complains
         # if local.only.docker is used here
         only = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"]

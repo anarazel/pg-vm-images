@@ -2,6 +2,10 @@
 
 # Save to /etc/rc.local, to be ran on startup
 
+# Set IMAGE_IDENTITY variable
+. /etc/environment.d/image_identity.conf
+export IMAGE_IDENTITY
+
 if [ "$(uname)" = "NetBSD" ]
 then
     export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin

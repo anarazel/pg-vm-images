@@ -9,6 +9,7 @@ variable "prefix" {
 
 locals {
   name = "${var.prefix}pg-ci"
+  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
 
   debian_gcp_images = [
     {
@@ -292,6 +293,15 @@ build {
         apt-get clean && rm -rf /var/lib/apt/lists/*
         fstrim -v -a
       SCRIPT
+    ]
+  }
+
+  # set IMAGE_IDENTITY to distinguish images on CI runs
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "mkdir -p /etc/environment.d",
+      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
     ]
   }
 
