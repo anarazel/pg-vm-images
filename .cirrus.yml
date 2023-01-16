@@ -280,13 +280,13 @@ docker_builder:
 
   env:
     PACKERFILE: packer/windows.pkr.hcl
-    PKRVARFILE: packer/windows.pkrvars.hcl
+    PKRVARFILE: packer/windows_container.pkrvars.hcl
     BUILD_TYPE: docker
 
   platform: windows
   os_version: 2019
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', '$PACKERFILE', 'scripts/windows*')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', $PACKERFILE, 'scripts/windows*')
 
   <<: *gcp_docker_auth_win
 

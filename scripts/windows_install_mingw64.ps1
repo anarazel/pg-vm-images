@@ -11,7 +11,7 @@ if (!$?) { throw 'cmdfail' };
 Remove-Item msys2.exe ;
 
 echo "setting up msys2 for the first time"
-function msys() { C:\msys64\usr\bin\bash.exe @('-lc') + @Args; if (!$?) { throw 'cmdfail' };} ;
+function msys() { C:\msys64\usr\bin\bash.exe @('-elc') + @Args; if (!$?) { throw 'cmdfail' };} ;
 # When msys is used for the first time, it performs setup tasks. Doing other work in the same invocation does not reliably work.
 msys ' ' ;
 msys 'pacman --noconfirm -Syuu' ;

@@ -10,6 +10,15 @@ variable "docker_repo" {
   default = ""
 }
 
+# Execute command for VM instances, containers will overwrite this because
+# docker builder uses docker exec to run commands and that is hardcoded.
+# It doesn't capture errors correctly when VM's execute command is used.
+# So, containers have another execute_command.
+variable "execute_command" {
+  type = string
+  default = "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; $ErrorActionPreference = 'Stop' ;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }\""
+}
+
 variable "docker_server" {
   type = string
   default = ""
@@ -98,7 +107,9 @@ build {
   ### base installations
   # googlecompute only
   provisioner "powershell" {
+    execute_command = var.execute_command
     inline = [
+      "$ErrorActionPreference = 'Stop'",
       # disable antivirus
       "Set-MpPreference -DisableRealtimeMonitoring $true -SubmitSamplesConsent NeverSend -MAPSReporting Disable",
 
@@ -112,7 +123,9 @@ build {
   }
 
   provisioner "powershell" {
+    execute_command = var.execute_command
     inline = [
+      "$ErrorActionPreference = 'Stop'",
       # contains useful utilities, including a diff we can use
       "[Environment]::SetEnvironmentVariable('PATH',  'C:\\Program Files\\Git\\usr\\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
     ]
@@ -120,29 +133,38 @@ build {
 
   # install windows debugger
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_dbg.ps1"
   }
 
   # install python
   provisioner "powershell" {
+    execute_command = var.execute_command
     environment_vars = ["TEMP_PYTHON_VERSION=${local.python_version}"]
     script = "scripts/windows_install_python.ps1"
   }
 
   # install meson and ninja
   provisioner "powershell" {
-    inline = ["py -m pip install meson ninja"]
+    execute_command = var.execute_command
+    inline = [
+      "$ErrorActionPreference = 'Stop'",
+      "py -m pip install meson ninja"
+    ]
   }
 
   # install perl
   provisioner "powershell" {
+    execute_command = var.execute_command
     environment_vars = ["TEMP_PERL_VERSION=${local.perl_version}"]
     script = "scripts/windows_install_perl.ps1"
   }
 
   # set env vars for perl
   provisioner "powershell" {
+    execute_command = var.execute_command
     inline = [
+      "$ErrorActionPreference = 'Stop'",
       "[Environment]::SetEnvironmentVariable('DEFAULT_PERL_VERSION', '${local.perl_version}', 'Machine')",
       "[Environment]::SetEnvironmentVariable('PATH',  \"C:\\strawberry\\${local.perl_version}\\perl\\bin;\" + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
     ]
@@ -150,13 +172,16 @@ build {
 
   # install openssl
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_openssl.ps1"
   }
   ### end of base installations
 
   ### mingw installations
   provisioner "powershell" {
+    execute_command = var.execute_command
     inline = [
+      "$ErrorActionPreference = 'Stop'",
       "[Environment]::SetEnvironmentVariable('MSYSTEM', 'UCRT64', 'Machine')",
       # this could be reduntant
       "$env:MSYSTEM = 'UCRT64'",
@@ -165,29 +190,37 @@ build {
   }
 
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_mingw64.ps1"
     only = local.only.mingw64
   }
 
   # Change default console code page (0) with Windows code page (65001) to get rid of warnings in postgres tests
   provisioner "powershell" {
-    inline = ["chcp 65001"]
+    execute_command = var.execute_command
+    inline = [
+      "$ErrorActionPreference = 'Stop'",
+      "chcp 65001"
+    ]
     only = local.only.mingw64
   }
   ### end of mingw installations
 
   ### vs-2019 installations
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_winflexbison.ps1"
     only = local.only.vs_2019
   }
 
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_pg_deps.ps1"
     only = local.only.vs_2019
   }
 
   provisioner "powershell" {
+    execute_command = var.execute_command
     script = "scripts/windows_install_vs_2019.ps1"
     only = local.only.vs_2019
   }
