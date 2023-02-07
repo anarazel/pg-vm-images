@@ -87,6 +87,7 @@ task:
 
     - env:
         PACKERFILE: packer/linux_debian.pkr.hcl
+        SCRIPTS: scripts/linux_debian_*
 
       matrix:
         - name: bullseye
@@ -96,6 +97,7 @@ task:
 
     - env:
         PACKERFILE: packer/windows.pkr.hcl
+        SCRIPTS: scripts/windows*
 
       matrix:
         - name: windows-ci-vs-2019
@@ -106,7 +108,7 @@ task:
     cpu: 0.5
     memory: 256Mi
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'scripts/linux_debian_*', $PACKERFILE)
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $SCRIPTS, $PACKERFILE)
   auto_cancellation: false
 
   <<: *gcp_auth_unix
