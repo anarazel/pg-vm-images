@@ -93,9 +93,11 @@ build {
 
         # Remove unnecessary packages, to reduce image size
         apt-get purge -y \
-          man-db google-cloud-sdk unattended-upgrades gnupg shim-unsigned publicsuffix mokutil grub-efi-amd64-signed \
+          man-db unattended-upgrades gnupg shim-unsigned publicsuffix mokutil grub-efi-amd64-signed \
           \
           grub-efi-amd64-bin+ grub2-common+
+        # For unknown reasons occasionally the source image doesn't contain google-cloud-sdk, making the uninstallation fail
+        apt-get purge -y google-cloud-sdk || true
         apt-get autoremove -y
 
         cat /etc/default/grub
