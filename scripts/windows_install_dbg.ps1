@@ -30,7 +30,7 @@ New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting
 
 
 echo "downloading windows sdk (for debugger)"
-curl.exe -sSL -o 'windsdksetup.exe' `
+curl.exe -fsSL -o 'windsdksetup.exe' `
   https://download.microsoft.com/download/9/7/9/97982c1d-d687-41be-9dd3-6d01e52ceb68/windowssdk/winsdksetup.exe
 if (!$?) { throw 'cmdfail' }
 

@@ -4,7 +4,7 @@ mkdir c:\t
 cd c:\t
 
 echo "downloading visual studio installer"
-curl.exe -sSL -o c:\t\vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe
+curl.exe -fsSL -o c:\t\vs_buildtools.exe https://aka.ms/vs/16/release/vs_buildtools.exe
 if (!$?) { throw 'cmdfail' }
 
 echo "starting visual studio installation"

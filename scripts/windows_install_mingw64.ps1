@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 echo "downloading msys2"
 
-curl.exe -sSL "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe" -o msys2.exe
+curl.exe -fsSL "https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe" -o msys2.exe
 if (!$?) { throw 'cmdfail' };
 
 echo "starting msys2 installation"

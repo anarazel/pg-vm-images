@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 function DownloadAndInstallDependency($DependencyName, $SourceUri)
 {
     echo "downloading $($DependencyName)"
-    curl.exe -sSL -o "c:\$($DependencyName).zip" $SourceUri;
+    curl.exe -fsSL -o "c:\$($DependencyName).zip" $SourceUri;
     if (!$?) { throw 'cmdfail' }
 
     echo "installing $($DependencyName)"
