@@ -4,7 +4,7 @@ $python_version = $Env:TEMP_PYTHON_VERSION
 $filepath = "$Env:TEMP/python.exe"
 
 echo "downloading python $python_version"
-curl.exe -sSL -o "$filepath" https://www.python.org/ftp/python/$python_version/python-$python_version-amd64.exe
+curl.exe -fsSL -o "$filepath" https://www.python.org/ftp/python/$python_version/python-$python_version-amd64.exe
 if (!$?) { throw 'cmdfail' }
 
 echo 'installing python'

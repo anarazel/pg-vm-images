@@ -4,7 +4,7 @@ $perl_version = $Env:TEMP_PERL_VERSION
 $filepath = "$Env:TEMP/perl.zip"
 
 echo "downloading perl $perl_vesion"
-curl.exe -sSL -o "$filepath" `
+curl.exe -fsSL -o "$filepath" `
     https://strawberryperl.com/download/$perl_version/strawberry-perl-$perl_version-64bit-portable.zip
 if (!$?) { throw 'cmdfail' }
 

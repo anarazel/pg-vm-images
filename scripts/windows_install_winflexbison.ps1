@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $filepath = "$Env:TEMP/winflexbison.zip"
 
 echo "downloading winflexbison"
-curl.exe -sSL -o "$filepath" `
+curl.exe -fsSL -o "$filepath" `
     https://github.com/lexxmark/winflexbison/releases/download/v2.5.24/win_flex_bison-2.5.24.zip ;
 if (!$?) { throw 'cmdfail' }
 

@@ -44,7 +44,7 @@ fi
 
 ### get instance hostname ###
 
-instance_hostname=$(curl -s -H "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/instance/name)
+instance_hostname=$(curl -fsH "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/instance/name)
 current_hostname=$(hostname)
 
 if [ "$instance_hostname" != "" ]
