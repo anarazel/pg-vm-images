@@ -95,13 +95,17 @@ task:
         - name: sid-newkernel
         - name: sid-newkernel-uring
 
-    - env:
+    - name: windows-ci-vs-2019-VM
+      env:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
+        TASK_NAME: windows-ci-vs-2019
 
-      matrix:
-        - name: windows-ci-vs-2019
-        - name: windows-ci-mingw64
+    - name: windows-ci-mingw64-VM
+      env:
+        PACKERFILE: packer/windows.pkr.hcl
+        SCRIPTS: scripts/windows*
+        TASK_NAME: windows-ci-mingw64
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -119,19 +123,25 @@ task:
   build_image_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
 
+    # if TASK_NAME is not set use CIRRUS_TASK_NAME instead
+    if [[ ! -v TASK_NAME ]]; then
+      TASK_NAME=${CIRRUS_TASK_NAME}
+    fi
+    echo "TASK_NAME = ${TASK_NAME}"
+
     packer build \
-      -only "*.${CIRRUS_TASK_NAME}" \
+      -only "*.${TASK_NAME}" \
       -timestamp-ui \
       -force \
       -var "image_date=$DATE" \
-      -var "task_name=${CIRRUS_TASK_NAME}" \
+      -var "task_name=${TASK_NAME}" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
     gcloud compute images add-iam-policy-binding \
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
-      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+      pg-ci-${TASK_NAME}-${DATE}
 
 
 task:
@@ -212,8 +222,8 @@ task:
     - sid
     - sid-newkernel
     - sid-newkernel-uring
-    - windows-ci-vs-2019
-    - windows-ci-mingw64
+    - windows-ci-vs-2019-VM
+    - windows-ci-mingw64-VM
 
   <<: *gcp_auth_unix
 
@@ -282,8 +292,13 @@ task:
 
 docker_builder:
   matrix:
-    - name: windows_ci_vs_2019
-    - name: windows_ci_mingw64
+    - name: windows-ci-vs-2019-Docker
+      env:
+        TASK_NAME: windows_ci_vs_2019
+
+    - name: windows-ci-mingw64-Docker
+      env:
+        TASK_NAME: windows_ci_mingw64
 
   env:
     PACKERFILE: packer/windows.pkr.hcl
@@ -311,11 +326,11 @@ docker_builder:
         $DATE=[datetime]::Utcnow.Tostring("yyyy-MM-dd't'HH-mm-ss")
 
         packer build `
-          -only "*.${Env:CIRRUS_TASK_NAME}" `
+          -only "*.${Env:TASK_NAME}" `
           -timestamp-ui `
           -force `
           -var-file="${Env:PKRVARFILE}" `
-          -var "task_name=${Env:CIRRUS_TASK_NAME}" `
+          -var "task_name=${Env:TASK_NAME}" `
           -var "image_date=${DATE}" `
           -var "docker_repo=${Env:GCP_REPO}" `
           -var "docker_server=${Env:GCP_REGION}-docker.pkg.dev" `
@@ -375,7 +390,7 @@ task:
   matrix:
     - name: test-windows-vs-2019
       depends_on:
-        - windows-ci-vs-2019
+        - windows-ci-vs-2019-VM
       compute_engine_instance:
         image_project: $GCP_PROJECT
         image: family/pg-ci-windows-ci-vs-2019
@@ -383,7 +398,7 @@ task:
 
     - name: test-windows-vs-2019-amd64-container
       depends_on:
-        - windows_ci_vs_2019
+        - windows-ci-vs-2019-Docker
       windows_container:
         image: $GCP_REPO/windows_ci_vs_2019:latest
 
@@ -402,7 +417,7 @@ task:
   matrix:
     - name: test-windows-mingw64
       depends_on:
-        - windows-ci-mingw64
+        - windows-ci-mingw64-VM
       compute_engine_instance:
         image_project: $GCP_PROJECT
         image: family/pg-ci-windows-ci-mingw64
@@ -410,7 +425,7 @@ task:
 
     - name: test-windows-mingw64-amd64-container
       depends_on:
-        - windows_ci_mingw64
+        - windows-ci-mingw64-Docker
       windows_container:
         image: $GCP_REPO/windows_ci_mingw64:latest
 
