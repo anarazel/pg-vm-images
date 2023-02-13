@@ -79,6 +79,15 @@ gcp_docker_auth_win: &gcp_docker_auth_win
     - gcloud auth configure-docker --quiet %GCP_REGION%-docker.pkg.dev
 
 
+# Occasionally image creation succeeds despite signalling a failure.
+# Without further action that'd result in accesses to the image failing
+# due to lacking privileges. Deprecating the image avoids it being used
+# by default, but leaves the image around for potential investigation.
+on_failure_googlecompute: &on_failure_googlecompute
+  deprecate_images_script: |
+    gcloud compute images deprecate pg-ci-${CIRRUS_TASK_NAME}-${DATE} --state=DEPRECATED
+
+
 task:
   matrix:
     - name: freebsd-13
@@ -116,9 +125,11 @@ task:
   info_script:
     - packer --version
 
-  build_image_script: |
+  export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
+    echo "DATE=${DATE}" | tee -a $CIRRUS_ENV
 
+  build_image_script: |
     packer build \
       -only "*.${CIRRUS_TASK_NAME}" \
       -timestamp-ui \
@@ -132,6 +143,9 @@ task:
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
       pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+
+  on_failure:
+    <<: *on_failure_googlecompute
 
 
 task:
@@ -167,8 +181,11 @@ task:
   info_script:
     - packer --version
 
-  build_image_script: |
+  export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
+    echo "DATE=${DATE}" | tee -a $CIRRUS_ENV
+
+  build_image_script: |
     export PACKER_LOG=1
 
     packer build \
@@ -186,6 +203,9 @@ task:
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
       pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+
+  on_failure:
+    <<: *on_failure_googlecompute
 
 
 # Clean up old images regularly - after a while the individually small cost
