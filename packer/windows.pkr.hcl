@@ -76,6 +76,7 @@ source "googlecompute" "windows" {
   winrm_insecure          = true
   winrm_use_ssl           = true
   winrm_timeout           = "10m"
+  state_timeout           = "10m"
   metadata = {
     windows-startup-script-cmd = "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
   }
