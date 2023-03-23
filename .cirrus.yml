@@ -85,7 +85,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 # by default, but leaves the image around for potential investigation.
 on_failure_googlecompute: &on_failure_googlecompute
   deprecate_images_script: |
-    gcloud compute images deprecate pg-ci-${CIRRUS_TASK_NAME}-${DATE} --state=DEPRECATED
+    gcloud compute images deprecate --project "$GCP_PROJECT" pg-ci-${CIRRUS_TASK_NAME}-${DATE} --state=DEPRECATED
 
 
 task:
