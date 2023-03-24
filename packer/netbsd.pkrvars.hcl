@@ -58,6 +58,5 @@ iso_urls = [
   "https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/images/NetBSD-9.3-amd64.iso"
 ]
 output_file_name = "output/netbsd93.tar.gz"
-version = "9-3"
 vanilla_name = [ { name = "netbsd-vanilla" } ]
 postgres_name = [ { name = "netbsd-postgres" } ]

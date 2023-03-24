@@ -79,15 +79,6 @@ gcp_docker_auth_win: &gcp_docker_auth_win
     - gcloud auth configure-docker --quiet %GCP_REGION%-docker.pkg.dev
 
 
-# Occasionally image creation succeeds despite signalling a failure.
-# Without further action that'd result in accesses to the image failing
-# due to lacking privileges. Deprecating the image avoids it being used
-# by default, but leaves the image around for potential investigation.
-on_failure_googlecompute: &on_failure_googlecompute
-  deprecate_images_script: |
-    gcloud compute images deprecate --project "$GCP_PROJECT" pg-ci-${CIRRUS_TASK_NAME}-${DATE} --state=DEPRECATED
-
-
 task:
   matrix:
     - name: freebsd-13
@@ -138,14 +129,18 @@ task:
       -var "task_name=${CIRRUS_TASK_NAME}" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
+
+  make_image_public_script: |
     gcloud compute images add-iam-policy-binding \
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
       pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
-  on_failure:
-    <<: *on_failure_googlecompute
+    gcloud compute images update \
+      --project "$GCP_PROJECT" \
+      --family pg-ci-${CIRRUS_TASK_NAME} \
+      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
 
 task:
@@ -153,6 +148,7 @@ task:
     - env:
         PACKERFILE: packer/netbsd_openbsd.pkr.hcl
         PKRVARFILE: packer/openbsd.pkrvars.hcl
+        VERSION: 7-2
       matrix:
         - name: openbsd-vanilla
         - name: openbsd-postgres
@@ -162,6 +158,7 @@ task:
     - env:
         PACKERFILE: packer/netbsd_openbsd.pkr.hcl
         PKRVARFILE: packer/netbsd.pkrvars.hcl
+        VERSION: 9-3
       matrix:
         - name: netbsd-vanilla
         - name: netbsd-postgres
@@ -193,19 +190,24 @@ task:
       -timestamp-ui \
       -force \
       -var-file="${PKRVARFILE}" \
+      -var "version=${VERSION}" \
       -var "image_date=$DATE" \
       -var "image_name=${CIRRUS_TASK_NAME}" \
       -var "bucket=$BUCKET" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
+
+  make_image_public_script: |
     gcloud compute images add-iam-policy-binding \
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
       pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
-  on_failure:
-    <<: *on_failure_googlecompute
+    gcloud compute images update \
+      --project "$GCP_PROJECT" \
+      --family pg-ci-${CIRRUS_TASK_NAME}-${VERSION} \
+      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
 
 
 # Clean up old images regularly - after a while the individually small cost

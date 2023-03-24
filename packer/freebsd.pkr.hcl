@@ -46,7 +46,6 @@ build {
       # it in the name above, but it seems nicer to have shorter task names anyway
       name = tag.value.name
       image_name = "${local.name}-${tag.value.name}-${var.image_date}"
-      image_family = "${local.name}-${tag.value.name}"
 
       zone = tag.value.zone
       machine_type = tag.value.machine
