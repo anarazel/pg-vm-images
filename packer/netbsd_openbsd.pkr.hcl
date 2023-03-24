@@ -135,7 +135,6 @@ build {
     post-processor "googlecompute-import" {
       gcs_object_name   = "packer-${var.image_name}-${var.image_date}.tar.gz"
       bucket            = "${var.bucket}"
-      image_family      = "${local.name}-${var.image_name}-${var.version}"
       image_name        = local.image_identity
       project_id        = "${var.gcp_project}"
     }
@@ -149,7 +148,6 @@ source "googlecompute" "postgres" {
   project_id              = "${var.gcp_project}"
   source_image_family     = "${local.name}-${var.name}-vanilla-${var.version}"
   source_image_project_id = ["${var.gcp_project}"]
-  image_family            = "${local.name}-${var.image_name}-${var.version}"
   image_name              = local.image_identity
   instance_name           = "build-${var.image_name}-${var.image_date}"
   zone                    = "us-west1-a"

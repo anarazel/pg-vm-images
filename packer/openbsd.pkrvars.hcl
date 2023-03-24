@@ -18,6 +18,5 @@ iso_urls                = [
   "https://cdn.openbsd.org/pub/OpenBSD/7.2/amd64/install72.iso"
 ]
 output_file_name = "output/openbsd72.tar.gz"
-version = "7-2"
 vanilla_name = [ { name = "openbsd-vanilla" } ]
 postgres_name = [ { name = "openbsd-postgres" } ]

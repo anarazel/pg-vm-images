@@ -63,7 +63,6 @@ build {
       # can't reference local. / var. here?!?
       name = tag.value.name
       image_name = "${local.name}-${tag.value.name}-${var.image_date}"
-      image_family = "${local.name}-${tag.value.name}"
 
       zone = tag.value.zone
       machine_type = tag.value.machine
