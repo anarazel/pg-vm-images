@@ -205,6 +205,17 @@ build {
     ]
     only = local.only.mingw64
   }
+
+  # MSYS2 might spawn processes that will stay around in the background forever.
+  # They need to be killed. See: https://www.msys2.org/docs/ci/
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    inline = [
+      "$ErrorActionPreference = 'Stop'",
+      "taskkill /F /FI \"MODULES eq msys-2.0.dll\""
+    ]
+    only = local.only.mingw64
+  }
   ### end of mingw installations
 
   ### vs-2019 installations
