@@ -226,7 +226,8 @@ build {
       <<-SCRIPT
         DEBIAN_FRONTEND=noninteractive apt-get install -y \
           time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev \
-          binutils-dev  libnuma-dev libcap-dev libiberty-dev libbabeltrace-dev systemtap-sdt-dev
+          binutils-dev  libnuma-dev libcap-dev libiberty-dev libbabeltrace-dev systemtap-sdt-dev \
+	  libpfm4-dev libtraceevent-dev python3-dev
 
         cd /usr/src/linux
         echo linux git revision from $(git remote) is: $(git rev-list HEAD)
@@ -270,7 +271,8 @@ build {
 
         cd tools/perf
         # LIBBPF causes build failure due to signature change of BFD's init_disassemble_info
-        make install prefix=/usr/local/ NO_LIBBPF=1
+	# dependencies for java integration would be large, and aren't needed
+        make install prefix=/usr/local/ NO_LIBBPF=1 NO_JVMTI=1
 
         # build liburing
         DEBIAN_FRONTEND=noninteractive apt-get purge -y -q 'liburing*'
