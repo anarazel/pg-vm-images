@@ -13,11 +13,11 @@ RUN \
     colorized-logs \
     expect \
     && \
-  echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" > \
+  echo "deb [signed-by=/usr/share/keyrings/cloud.google.asc] http://packages.cloud.google.com/apt cloud-sdk main" > \
     /etc/apt/sources.list.d/google-cloud-sdk.list && \
   curl \
     -fs \
-    -o /usr/share/keyrings/cloud.google.gpg \
+    -o /usr/share/keyrings/cloud.google.asc \
     https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
   apt-get update -y && \
   apt-get install --no-install-recommends -y \
