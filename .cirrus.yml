@@ -80,6 +80,20 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 
 task:
+  name: cleanup-leftover-running
+
+  container:
+    dockerfile: docker/linux_debian_packer
+    cpu: 0.5
+    memory: 256Mi
+
+  <<: *gcp_auth_unix
+
+  cleanup_leftover_running_script:
+    ./gcp_delete_leftover_running.py
+
+
+task:
   matrix:
     - name: freebsd-13
       env:
@@ -102,6 +116,8 @@ task:
       matrix:
         - name: windows-ci-vs-2019
         - name: windows-ci-mingw64
+
+  depends_on: cleanup-leftover-running
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -151,6 +167,8 @@ task:
         VERSION: 7-2
       matrix:
         - name: openbsd-vanilla
+          depends_on:
+            - cleanup-leftover-running
         - name: openbsd-postgres
           depends_on:
             - openbsd-vanilla
@@ -161,6 +179,8 @@ task:
         VERSION: 9-3
       matrix:
         - name: netbsd-vanilla
+          depends_on:
+            - cleanup-leftover-running
         - name: netbsd-postgres
           depends_on:
             - netbsd-vanilla
@@ -314,6 +334,8 @@ docker_builder:
 
   platform: windows
   os_version: 2019
+
+  depends_on: cleanup-leftover-running
 
   skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', $PACKERFILE, 'scripts/windows*')
 
