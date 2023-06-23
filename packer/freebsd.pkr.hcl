@@ -89,6 +89,7 @@ build {
           krb5 \
           openldap25-client \
           openldap25-server
+        python3 -m ensurepip --upgrade
         pkg clean -y
         rm -fr /usr/ports /usr/src /usr/lib/debug
         cat /etc/rc.conf

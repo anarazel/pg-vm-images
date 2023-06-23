@@ -15,11 +15,15 @@ pkgin -y install \
     flex \
     pkgconf \
     python39 \
+    py39-pip \
     icu \
     lz4 \
     libxslt \
     tcl \
     zstd
+
+echo "alias python3=python3.9" >> ~/.bashrc
+echo "alias pip3=pip3.9" >> ~/.bashrc
 
 # Set kernel parameters for running postgres tests
 echo "sysctl -w kern.ipc.semmni=2048" >> /etc/rc.local

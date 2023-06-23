@@ -22,6 +22,7 @@ apt-get -y install --no-install-recommends \
   g++ \
   gcc \
   gettext \
+  python3-pip \
   \
   libio-pty-perl \
   libipc-run-perl \
