@@ -4,8 +4,8 @@ gcloud projects create $GCP_PROJECT
 # Must enable billing, I only know how to do so in web console
 
 # Also request increases in quota for:
-# compute engine: images -> 500
-# compute engine: c2 cpus us-west 1,2,3 -> 24
+# compute engine: images -> 1000
+# compute engine: c2 cpus us-west 1 -> 48
 
 gcloud services enable --project $GCP_PROJECT iam.googleapis.com
 gcloud services enable --project $GCP_PROJECT compute.googleapis.com
