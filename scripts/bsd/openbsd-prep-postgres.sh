@@ -27,6 +27,7 @@ pkg_add -I \
     login_krb5 \
     openldap-client--gssapi \
     openldap-server--gssapi
+python3 -m ensurepip --upgrade
 
 #####
 # Add 'noatime' and 'softdep' to the mount points
