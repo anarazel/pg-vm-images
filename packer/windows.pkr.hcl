@@ -68,7 +68,7 @@ source "googlecompute" "windows" {
   source_image_family     = "windows-2022"
   image_name              = local.image_identity
   zone                    = "us-west1-a"
-  machine_type            = "n2-standard-4"
+  machine_type            = "c2-standard-4"
   instance_name           = "build-${var.task_name}-${var.image_date}"
   communicator            = "winrm"
   winrm_username          = "packer_user"
