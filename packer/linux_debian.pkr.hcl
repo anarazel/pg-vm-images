@@ -15,12 +15,12 @@ locals {
     {
       name = "bullseye"
       zone = "us-west1-a"
-      machine = "e2-highcpu-4"
+      machine = "c2-standard-4"
     },
     {
       name = "sid"
       zone = "us-west1-a"
-      machine = "e2-highcpu-4"
+      machine = "c2-standard-4"
     },
     {
       name = "sid-newkernel"

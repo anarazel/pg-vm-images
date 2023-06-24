@@ -15,7 +15,6 @@ locals {
     {
       name = "${var.task_name}"
       zone = "us-west1-a"
-      machine = "e2-highcpu-4"
     },
   ]
 }
@@ -27,6 +26,7 @@ source "googlecompute" "freebsd-vanilla" {
   project_id              = var.gcp_project
   source_image_family     = "freebsd-13-1"
   source_image_project_id = ["freebsd-org-cloud-dev"]
+  machine_type            = "c2-standard-4"
   ssh_pty                 = "true"
   ssh_username            = "packer"
 }
@@ -48,7 +48,6 @@ build {
       image_name = "${local.name}-${tag.value.name}-${var.image_date}"
 
       zone = tag.value.zone
-      machine_type = tag.value.machine
       instance_name = "build-${tag.value.name}-${var.image_date}"
     }
   }
