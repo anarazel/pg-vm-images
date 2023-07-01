@@ -69,7 +69,7 @@ build {
         # remove superfluous packages
         pkg autoremove -y
 
-        pkg install -y \
+        pkg install -y -g \
           bash \
           git-tiny \
           gmake \
@@ -89,6 +89,7 @@ build {
           libxml2 \
           libxslt \
           python3 \
+          'py*-pip' \
           readline \
           tcl86 \
           zstd \
@@ -96,7 +97,6 @@ build {
           krb5 \
           openldap25-client \
           openldap25-server
-        python3 -m ensurepip --upgrade
 
         pkg clean -ay
         rm -fr /usr/ports /usr/src /usr/tests /usr/lib/debug
