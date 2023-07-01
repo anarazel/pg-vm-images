@@ -97,8 +97,12 @@ build {
           openldap25-client \
           openldap25-server
         python3 -m ensurepip --upgrade
-        pkg clean -y
-        rm -fr /usr/ports /usr/src /usr/lib/debug
+
+        pkg clean -ay
+        rm -fr /usr/ports /usr/src /usr/tests /usr/lib/debug
+        rm -fr /var/db/freebsd-update /var/db/pkg/repo-*
+        find / -name '*.pkgsave' -type f|xargs rm -v
+
         cat /etc/rc.conf
 
         # the firstboot stuff delays boot and sometimes fails - we rebuild images anyway
