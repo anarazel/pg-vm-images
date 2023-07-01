@@ -71,7 +71,7 @@ build {
           pkgconf \
           \
           bison \
-          ccache \
+          ccache4 \
           flex \
           gettext \
           \
