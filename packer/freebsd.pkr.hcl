@@ -98,10 +98,15 @@ build {
           openldap25-client \
           openldap25-server
 
+        # remove temporary files
         pkg clean -ay
         rm -fr /usr/ports /usr/src /usr/tests /usr/lib/debug
         rm -fr /var/db/freebsd-update /var/db/pkg/repo-*
         find / -name '*.pkgsave' -type f|xargs rm -v
+
+        # remove parts of required packages that we don't need and that are reasonably large
+        rm -rf /usr/share/doc/ /usr/local/share/doc/ /usr/local/include/boost/
+        rm /usr/local/lib/*boost*.a /usr/local/lib/python*/config-*/*.a /usr/local/lib/libsource-highlight.a
 
         cat /etc/rc.conf
 
