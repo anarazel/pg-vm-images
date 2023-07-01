@@ -61,6 +61,14 @@ build {
         pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
         pkg update
         pkg upgrade -y
+
+        # Avoid having both python 3.8 and 2.7 installed
+        pkg install -y -g 'py*-google-compute-engine'
+        pkg remove -y python2* python38
+
+        # remove superfluous packages
+        pkg autoremove -y
+
         pkg install -y \
           bash \
           git-tiny \
