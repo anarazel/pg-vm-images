@@ -236,9 +236,6 @@ task:
 #
 # Leave old images around for two weeks, to allow recreating CI failures
 # precisely.
-#
-# Only do so after a run successfully creating all images, to avoid deleting
-# all image versions when image creation has failed for a few days.
 task:
   name: cleanup-old
 
@@ -246,17 +243,6 @@ task:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
     memory: 256Mi
-
-  depends_on:
-    - freebsd-13
-    - netbsd-postgres
-    - openbsd-postgres
-    - bullseye
-    - sid
-    - sid-newkernel
-    - sid-newkernel-uring
-    - windows-ci-vs-2019
-    - windows-ci-mingw64
 
   <<: *gcp_auth_unix
 
