@@ -314,6 +314,9 @@ docker_builder:
     - name: windows_ci_vs_2019
     - name: windows_ci_mingw64
 
+  # disable windows container generation, it will be dropped later
+  trigger_type: manual
+
   env:
     PACKERFILE: packer/windows.pkr.hcl
     PKRVARFILE: packer/windows_container.pkrvars.hcl
