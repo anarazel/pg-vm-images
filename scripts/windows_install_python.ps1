@@ -16,4 +16,7 @@ Start-Process -Wait -FilePath "$filepath" `
     'Include_docs=0', 'Include_tcltk=0', 'Include_tests=0'
 if (!$?) { throw 'cmdfail' }
 
+# create symbolic link for python3
+New-Item -ItemType SymbolicLink -Path "C:\python" -Name "python3.exe" -Value "C:\python\python.exe"
+
 Remove-Item "$filepath" -Force
