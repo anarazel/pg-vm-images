@@ -78,6 +78,7 @@ build {
           p5-IPC-Run \
           \
           liblz4 \
+          libbacktrace \
           libxml2 \
           libxslt \
           python3 \
