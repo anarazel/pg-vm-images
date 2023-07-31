@@ -61,7 +61,15 @@ build {
         pkg remove -y google-cloud-sdk firstboot-freebsd-update firstboot-pkgs
         pkg update
         pkg upgrade -y
-        pkg install -y \
+
+        # Avoid having both python 3.8 and 2.7 installed
+        pkg install -y -g 'py*-google-compute-engine'
+        pkg remove -y python2* python38
+
+        # remove superfluous packages
+        pkg autoremove -y
+
+        pkg install -y -g \
           bash \
           git-tiny \
           gmake \
@@ -71,7 +79,7 @@ build {
           pkgconf \
           \
           bison \
-          ccache \
+          ccache4 \
           flex \
           gettext \
           \
@@ -82,6 +90,7 @@ build {
           libxml2 \
           libxslt \
           python3 \
+          'py*-pip' \
           readline \
           tcl86 \
           zstd \
@@ -89,9 +98,17 @@ build {
           krb5 \
           openldap25-client \
           openldap25-server
-        python3 -m ensurepip --upgrade
-        pkg clean -y
-        rm -fr /usr/ports /usr/src /usr/lib/debug
+
+        # remove temporary files
+        pkg clean -ay
+        rm -fr /usr/ports /usr/src /usr/tests /usr/lib/debug
+        rm -fr /var/db/freebsd-update /var/db/pkg/repo-*
+        find / -name '*.pkgsave' -type f|xargs rm -v
+
+        # remove parts of required packages that we don't need and that are reasonably large
+        rm -rf /usr/share/doc/ /usr/local/share/doc/ /usr/local/include/boost/
+        rm /usr/local/lib/*boost*.a /usr/local/lib/python*/config-*/*.a /usr/local/lib/libsource-highlight.a
+
         cat /etc/rc.conf
 
         # the firstboot stuff delays boot and sometimes fails - we rebuild images anyway
