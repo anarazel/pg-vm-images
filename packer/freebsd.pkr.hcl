@@ -24,7 +24,7 @@ source "googlecompute" "freebsd-vanilla" {
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
-  source_image_family     = "freebsd-13-1"
+  source_image_family     = "freebsd-13-2"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   machine_type            = "c2-standard-4"
   ssh_pty                 = "true"
@@ -142,6 +142,10 @@ build {
         echo 'kern.timecounter.invariant_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc_adjust=1' | tee -a /boot/loader.conf
+
+        # Freebsd 13.2 causes problems with tcl if the timezone is not explicitly configured
+        # https://postgr.es/m/20230731191510.pebqeiuo2sbmlcfh%40awork3.anarazel.de
+        tzsetup UTC
       SCRIPT
     ]
   }
