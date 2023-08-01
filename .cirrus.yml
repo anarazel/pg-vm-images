@@ -246,19 +246,8 @@ task:
 
   <<: *gcp_auth_unix
 
-  cleanup_vm_images_script:
+  cleanup_images_script:
     ./gcp_delete_old_images.py
-
-  # FIXME: deletion doesn't work 100% reliable, because this doesn't correctly
-  # deal with multi-arch containers (gcloud shows the individual architecture
-  # specific containers without tags, even if the manifest has tags)
-  cleanup_container_images_script: |
-    gcloud artifacts docker images list \
-      --include-tags \
-      --format 'value[separator=@](package,version)' \
-      --filter='createTime < -P14d AND -tags:*' \
-      $GCP_REPO | \
-        xargs --verbose --no-run-if-empty -n 1 gcloud artifacts docker images delete || true
 
 
 task:
