@@ -309,54 +309,6 @@ task:
     docker buildx imagetools inspect $GCP_REPO/$IMAGE:latest
 
 
-docker_builder:
-  matrix:
-    - name: windows_ci_vs_2019
-    - name: windows_ci_mingw64
-
-  # disable windows container generation, it will be dropped later
-  trigger_type: manual
-
-  env:
-    PACKERFILE: packer/windows.pkr.hcl
-    PKRVARFILE: packer/windows_container.pkrvars.hcl
-    BUILD_TYPE: docker
-
-  platform: windows
-  os_version: 2019
-
-  depends_on: cleanup-leftover-running
-
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', $PACKERFILE, 'scripts/windows*')
-
-  <<: *gcp_docker_auth_win
-
-  install_packer_script: |
-    choco install packer -y
-
-  info_script: |
-    packer --version
-
-  build_script:
-    # cmd '^' line continuation didn't work
-    # switched to the powershell
-    - ps: |
-        echo "gcp_password = `"$(gcloud auth print-access-token)`"" | Out-File -Append -Encoding ASCII ${Env:PKRVARFILE}
-        $DATE=[datetime]::Utcnow.Tostring("yyyy-MM-dd't'HH-mm-ss")
-
-        packer build `
-          -only "*.${Env:CIRRUS_TASK_NAME}" `
-          -timestamp-ui `
-          -force `
-          -var-file="${Env:PKRVARFILE}" `
-          -var "task_name=${Env:CIRRUS_TASK_NAME}" `
-          -var "image_date=${DATE}" `
-          -var "docker_repo=${Env:GCP_REPO}" `
-          -var "docker_server=${Env:GCP_REGION}-docker.pkg.dev" `
-          -var "build_type=$Env:BUILD_TYPE" `
-          "$Env:PACKERFILE"
-
-
 task:
   name: test-linux-container-amd64
   depends_on:
@@ -406,20 +358,13 @@ task:
 
 
 task:
-  matrix:
-    - name: test-windows-vs-2019
-      depends_on:
-        - windows-ci-vs-2019
-      compute_engine_instance:
-        image_project: $GCP_PROJECT
-        image: family/pg-ci-windows-ci-vs-2019
-        platform: windows
-
-    - name: test-windows-vs-2019-amd64-container
-      depends_on:
-        - windows_ci_vs_2019
-      windows_container:
-        image: $GCP_REPO/windows_ci_vs_2019:latest
+  name: test-windows-vs-2019
+  depends_on:
+    - windows-ci-vs-2019
+  compute_engine_instance:
+    image_project: $GCP_PROJECT
+    image: family/pg-ci-windows-ci-vs-2019
+    platform: windows
 
   test_script:
     - ver
@@ -433,20 +378,13 @@ task:
 
 
 task:
-  matrix:
-    - name: test-windows-mingw64
-      depends_on:
-        - windows-ci-mingw64
-      compute_engine_instance:
-        image_project: $GCP_PROJECT
-        image: family/pg-ci-windows-ci-mingw64
-        platform: windows
-
-    - name: test-windows-mingw64-amd64-container
-      depends_on:
-        - windows_ci_mingw64
-      windows_container:
-        image: $GCP_REPO/windows_ci_mingw64:latest
+  name: test-windows-mingw64
+  depends_on:
+    - windows-ci-mingw64
+  compute_engine_instance:
+    image_project: $GCP_PROJECT
+    image: family/pg-ci-windows-ci-mingw64
+    platform: windows
 
   test_script:
     - ver

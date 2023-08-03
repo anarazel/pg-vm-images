@@ -6,28 +6,12 @@ variable "build_type" {
   default = "googlecompute"
 }
 
-variable "docker_repo" {
-  type = string
-  default = ""
-}
-
-# Execute command for VM instances, containers will overwrite this because
-# docker builder uses docker exec to run commands and that is hardcoded.
-# It doesn't capture errors correctly when VM's execute command is used.
-# So, containers have another execute_command.
+# Packer doesn't capture errors correctly when default execute command is used.
+# See $ErrorActionPreference = 'Stop' in the new execute_command.
+# So, use new execute_command to handle VM errors correctly
 variable "execute_command" {
   type = string
   default = "powershell -executionpolicy bypass \"& { if (Test-Path variable:global:ProgressPreference){$ProgressPreference='SilentlyContinue'}; $ErrorActionPreference = 'Stop' ;. {{.Vars}}; &'{{.Path}}'; exit $LastExitCode }\""
-}
-
-variable "docker_server" {
-  type = string
-  default = ""
-}
-
-variable "gcp_password" {
-  type = string
-  default = ""
 }
 
 variable "gcp_project" {
@@ -54,10 +38,8 @@ locals {
   ]
 
   only = {
-    vm = ["googlecompute.windows-ci-mingw64", "googlecompute.windows-ci-vs-2019"],
-    docker = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"],
-    vs_2019 = ["googlecompute.windows-ci-vs-2019", "docker.windows_ci_vs_2019"],
-    mingw64 = ["googlecompute.windows-ci-mingw64", "docker.windows_ci_mingw64"],
+    vs_2019 = ["googlecompute.windows-ci-vs-2019"],
+    mingw64 = ["googlecompute.windows-ci-mingw64"],
   }
 }
 
@@ -79,12 +61,6 @@ source "googlecompute" "windows" {
   metadata = {
     windows-startup-script-cmd = "winrm quickconfig -quiet & net user /add packer_user & net localgroup administrators packer_user /add & winrm set winrm/config/service/auth @{Basic=\"true\"}"
   }
-}
-
-source "docker" "windows" {
-  image = "docker.io/cirrusci/windowsservercore:2019-2022.06.23"
-  windows_container = true
-  commit = true
 }
 
 build {
@@ -117,7 +93,6 @@ build {
       "choco install -y --no-progress 7zip",
       "choco install -y --no-progress git --parameters=\"/GitAndUnixToolsOnPath\"",
     ]
-    only = local.only.vm
   }
 
   provisioner "powershell" {
@@ -237,23 +212,4 @@ build {
     only = local.only.vs_2019
   }
   ### end of vs-2019 installations
-
-  post-processors {
-    post-processor "docker-tag" {
-        repository =  "${var.docker_repo}/${var.task_name}"
-        # tag image with both latest and image-date to distinguish images on CI runs
-        tags = ["${var.image_date}", "latest"]
-        # packer version is 1.6.6 while generating the vm images, and it complains
-        # if local.only.docker is used here
-        only = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"]
-      }
-    post-processor "docker-push" {
-      # https://cloud.google.com/container-registry/docs/advanced-authentication#token
-      login = true
-      login_username = "oauth2accesstoken"
-      login_password = "${var.gcp_password}"
-      login_server = "${var.docker_server}"
-      only = ["docker.windows_ci_vs_2019", "docker.windows_ci_mingw64"]
-    }
-  }
 }
