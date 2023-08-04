@@ -1,4 +1,4 @@
-variable "task_name" { type = string }
+variable "image_name" { type = string }
 variable "image_date" { type = string }
 
 variable "build_type" {
@@ -19,21 +19,24 @@ variable "gcp_project" {
   default = ""
 }
 
-variable "prefix" {
-  type = string
-  default = ""
-}
-
 locals {
-  name = "${var.prefix}pg-ci"
-  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
+  image_identity = "${var.image_name}-${var.image_date}"
 
   perl_version = "5.26.3.1"
   python_version = "3.10.6"
 
   windows_gcp_images = [
     {
-      name = "${var.task_name}"
+      task_name = "windows-ci-vs-2019"
+    },
+    {
+      task_name = "windows-ci-mingw64"
+    },
+    {
+      task_name = "windows_ci_vs_2019"
+    },
+    {
+      task_name = "windows_ci_mingw64"
     },
   ]
 
@@ -51,7 +54,7 @@ source "googlecompute" "windows" {
   image_name              = local.image_identity
   zone                    = "us-west1-a"
   machine_type            = "c2-standard-4"
-  instance_name           = "build-${var.task_name}-${var.image_date}"
+  instance_name           = "build-${local.image_identity}"
   communicator            = "winrm"
   winrm_username          = "packer_user"
   winrm_insecure          = true
@@ -66,7 +69,7 @@ source "googlecompute" "windows" {
 build {
   name = "windows"
 
-  # for using -only '*.${CIRRUS_TASK_NAME}' while building images,
+  # for using -only '*.${IMAGE_NAME}' while building images,
   # so we can easily combine the packer invocations later
   dynamic "source" {
     for_each = local.windows_gcp_images
@@ -74,7 +77,7 @@ build {
     iterator = tag
 
     content {
-      name = tag.value.name
+      name = tag.value.task_name
     }
   }
 

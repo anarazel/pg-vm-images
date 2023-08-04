@@ -5,6 +5,9 @@ only_if: $CIRRUS_REPO_OWNER == 'anarazel' && $CIRRUS_REPO_NAME == 'pg-vm-images'
 env:
   CIRRUS_LOG_TIMESTAMP: true
 
+  # Prefix for image names
+  PREFIX: pg-ci
+
   # See gcp_project_setup.txt for setup instructions
   GCP_PROJECT_MAIN: pg-ci-images
   GCP_PROJECT_DEV: pg-ci-images-dev
@@ -80,7 +83,8 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 
 
 task:
-  name: cleanup-leftover-running
+  name: Clean up leftover running
+  alias: cleanup-leftover-running
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -94,9 +98,11 @@ task:
 
 
 task:
+  name: 'Building VM Image: ${IMAGE_NAME}'
+  alias: vmbuild-${TASK_NAME}
   matrix:
-    - name: freebsd-13
-      env:
+    - env:
+        TASK_NAME: freebsd-13
         PACKERFILE: packer/freebsd.pkr.hcl
 
     - env:
@@ -104,18 +110,27 @@ task:
         SCRIPTS: scripts/linux_debian_*
 
       matrix:
-        - name: bullseye
-        - name: sid
-        - name: sid-newkernel
-        - name: sid-newkernel-uring
+        - env:
+            TASK_NAME: bullseye
+        - env:
+            TASK_NAME: sid
+        - env:
+            TASK_NAME: sid-newkernel
+        - env:
+            TASK_NAME: sid-newkernel-uring
 
     - env:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
 
       matrix:
-        - name: windows-ci-vs-2019
-        - name: windows-ci-mingw64
+        - env:
+            TASK_NAME: windows-ci-vs-2019
+        - env:
+            TASK_NAME: windows-ci-mingw64
+
+  env:
+    IMAGE_NAME: ${PREFIX}-${TASK_NAME}
 
   depends_on: cleanup-leftover-running
 
@@ -139,11 +154,11 @@ task:
 
   build_image_script: |
     packer build \
-      -only "*.${CIRRUS_TASK_NAME}" \
+      -only "*.${TASK_NAME}" \
       -timestamp-ui \
       -force \
       -var "image_date=$DATE" \
-      -var "task_name=${CIRRUS_TASK_NAME}" \
+      -var "image_name=${IMAGE_NAME}" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
 
@@ -152,39 +167,49 @@ task:
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
-      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+      ${IMAGE_NAME}-${DATE}
 
     gcloud compute images update \
       --project "$GCP_PROJECT" \
-      --family pg-ci-${CIRRUS_TASK_NAME} \
-      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+      --family ${IMAGE_NAME} \
+      ${IMAGE_NAME}-${DATE}
 
 
 task:
+  name: 'Building VM Image: ${IMAGE_NAME}'
+  alias: vmbuild-${TASK_NAME}
+
   matrix:
     - env:
-        PACKERFILE: packer/netbsd_openbsd.pkr.hcl
         PKRVARFILE: packer/openbsd.pkrvars.hcl
         VERSION: 7-3
       matrix:
-        - name: openbsd-vanilla
+        - env:
+            TASK_NAME: openbsd-vanilla
           depends_on:
             - cleanup-leftover-running
-        - name: openbsd-postgres
+        - env:
+            TASK_NAME: openbsd-postgres
           depends_on:
-            - openbsd-vanilla
+            - vmbuild-openbsd-vanilla
 
     - env:
-        PACKERFILE: packer/netbsd_openbsd.pkr.hcl
         PKRVARFILE: packer/netbsd.pkrvars.hcl
         VERSION: 9-3
+
       matrix:
-        - name: netbsd-vanilla
+        - env:
+            TASK_NAME: netbsd-vanilla
           depends_on:
             - cleanup-leftover-running
-        - name: netbsd-postgres
+        - env:
+            TASK_NAME: netbsd-postgres
           depends_on:
-            - netbsd-vanilla
+            - vmbuild-netbsd-vanilla
+
+  env:
+    PACKERFILE: packer/netbsd_openbsd.pkr.hcl
+    IMAGE_NAME: ${PREFIX}-${TASK_NAME}
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -207,13 +232,14 @@ task:
     export PACKER_LOG=1
 
     packer build \
-      -only "*.${CIRRUS_TASK_NAME}" \
+      -only "*.${TASK_NAME}" \
       -timestamp-ui \
       -force \
       -var-file="${PKRVARFILE}" \
       -var "version=${VERSION}" \
       -var "image_date=$DATE" \
-      -var "image_name=${CIRRUS_TASK_NAME}" \
+      -var "image_name=${IMAGE_NAME}" \
+      -var "prefix=${PREFIX}" \
       -var "bucket=$BUCKET" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
@@ -223,12 +249,12 @@ task:
       --project "$GCP_PROJECT" \
       --member=allAuthenticatedUsers \
       --role=roles/compute.imageUser \
-      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+      ${IMAGE_NAME}-${DATE}
 
     gcloud compute images update \
       --project "$GCP_PROJECT" \
-      --family pg-ci-${CIRRUS_TASK_NAME}-${VERSION} \
-      pg-ci-${CIRRUS_TASK_NAME}-${DATE}
+      --family ${IMAGE_NAME}-${VERSION} \
+      ${IMAGE_NAME}-${DATE}
 
 
 # Clean up old images regularly - after a while the individually small cost
@@ -237,7 +263,7 @@ task:
 # Leave old images around for two weeks, to allow recreating CI failures
 # precisely.
 task:
-  name: cleanup-old
+  name: Clean up old images
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -251,7 +277,8 @@ task:
 
 
 task:
-  name: build-containers-linux
+  name: 'Building Container Image: ${IMAGE}'
+  alias: dockerbuild-${IMAGE}
 
   compute_engine_instance:
     image_project: cirrus-images
@@ -299,11 +326,13 @@ task:
 
 
 task:
-  name: test-linux-container-amd64
+  name: 'Testing Container Image: ${IMAGE_NAME}'
+  env:
+    IMAGE_NAME: linux_debian_bullseye_ci
   depends_on:
-    - build-containers-linux
+    - dockerbuild-${IMAGE_NAME}
   container:
-    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+    image: $GCP_REPO/${IMAGE_NAME}:latest
   test_script:
     - uname -a
     - xsltproc --version
@@ -313,7 +342,7 @@ task:
 #task:
 #  name: test-linux-container-arm64
 #  depends_on:
-#    - build-containers-linux
+#    - linux_debian_bullseye_ci
 #  arm_container:
 #    image: $GCP_REPO/linux_debian_bullseye_ci:latest
 #  test_script:
@@ -322,19 +351,18 @@ task:
 
 
 task:
+  name: 'Testing VM Image: ${IMAGE_NAME}'
   matrix:
-    - name: test-netbsd
-      env:
+    - env:
         IMAGE_NAME: pg-ci-netbsd-postgres-9-3
         PLATFORM: netbsd
 
-    - name: test-openbsd
-      env:
+    - env:
         IMAGE_NAME: pg-ci-openbsd-postgres-7-2
         PLATFORM: openbsd
 
   depends_on:
-    - ${PLATFORM}-postgres
+    - vmbuild-${PLATFORM}-postgres
 
   compute_engine_instance:
     image_project: $GCP_PROJECT
@@ -347,12 +375,14 @@ task:
 
 
 task:
-  name: test-windows-vs-2019
+  name: 'Testing VM Image: ${IMAGE_NAME}'
+  env:
+    IMAGE_NAME: windows-ci-vs-2019
   depends_on:
-    - windows-ci-vs-2019
+    - vmbuild-${IMAGE_NAME}
   compute_engine_instance:
     image_project: $GCP_PROJECT
-    image: family/pg-ci-windows-ci-vs-2019
+    image: family/pg-ci-${IMAGE_NAME}
     platform: windows
 
   test_script:
@@ -367,12 +397,14 @@ task:
 
 
 task:
-  name: test-windows-mingw64
+  name: 'Testing VM Image: ${IMAGE_NAME}'
+  env:
+    IMAGE_NAME: windows-ci-mingw64
   depends_on:
-    - windows-ci-mingw64
+    - vmbuild-${IMAGE_NAME}
   compute_engine_instance:
     image_project: $GCP_PROJECT
-    image: family/pg-ci-windows-ci-mingw64
+    image: family/pg-ci-${IMAGE_NAME}
     platform: windows
 
   test_script:

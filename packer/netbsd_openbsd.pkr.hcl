@@ -10,19 +10,14 @@ variable "output_file_name" { type = string }
 variable "postgres_name" { type = list(map(string)) }
 variable "vanilla_name" { type = list(map(string)) }
 variable "version" { type = string }
-
-variable "prefix" {
-  type = string
-  default = ""
-}
+variable "prefix" {type = string }
 
 locals {
-  name = "${var.prefix}pg-ci"
-  image_identity = "${local.name}-${var.image_name}-${var.image_date}"
+  image_identity = "${var.image_name}-${var.image_date}"
 }
 
 source "qemu" "qemu-gce-builder" {
-  boot_command = "${var.boot_command}"
+  boot_command            = "${var.boot_command}"
   boot_wait               = "120s"
   cpus                    = 2
   disk_size               = 25600
@@ -133,7 +128,7 @@ build {
     }
 
     post-processor "googlecompute-import" {
-      gcs_object_name   = "packer-${var.image_name}-${var.image_date}.tar.gz"
+      gcs_object_name   = "packer-${local.image_identity}.tar.gz"
       bucket            = "${var.bucket}"
       image_name        = local.image_identity
       project_id        = "${var.gcp_project}"
@@ -146,10 +141,10 @@ source "googlecompute" "postgres" {
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = "${var.gcp_project}"
-  source_image_family     = "${local.name}-${var.name}-vanilla-${var.version}"
+  source_image_family     = "${var.prefix}-${var.name}-vanilla-${var.version}"
   source_image_project_id = ["${var.gcp_project}"]
   image_name              = local.image_identity
-  instance_name           = "build-${var.image_name}-${var.image_date}"
+  instance_name           = "build-${local.image_identity}"
   zone                    = "us-west1-a"
   machine_type            = "c2-standard-4"
   ssh_username            = "root"

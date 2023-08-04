@@ -1,19 +1,13 @@
 variable "image_date" { type = string }
 variable "gcp_project" { type = string }
-variable "task_name" { type = string }
-
-variable "prefix" {
-  type = string
-  default = ""
-}
+variable "image_name" { type = string }
 
 locals {
-  name = "${var.prefix}pg-ci"
-  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
+  image_identity = "${var.image_name}-${var.image_date}"
 
   freebsd_gcp_images = [
     {
-      name = "${var.task_name}"
+      task_name = "freebsd-13"
       zone = "us-west1-a"
     },
   ]
@@ -24,6 +18,8 @@ source "googlecompute" "freebsd-vanilla" {
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
+  image_name              = "${local.image_identity}"
+  instance_name           = "build-${local.image_identity}"
   source_image_family     = "freebsd-13-2"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   machine_type            = "c2-standard-4"
@@ -44,11 +40,9 @@ build {
     content {
       # can't reference local. / var. here - we could just fix that by including
       # it in the name above, but it seems nicer to have shorter task names anyway
-      name = tag.value.name
-      image_name = "${local.name}-${tag.value.name}-${var.image_date}"
+      name = tag.value.task_name
 
       zone = tag.value.zone
-      instance_name = "build-${tag.value.name}-${var.image_date}"
     }
   }
 
