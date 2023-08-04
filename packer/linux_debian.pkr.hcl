@@ -1,34 +1,28 @@
 variable "image_date" { type = string }
 variable "gcp_project" { type = string }
-variable "task_name" { type = string }
-
-variable "prefix" {
-  type = string
-  default = ""
-}
+variable "image_name" { type = string }
 
 locals {
-  name = "${var.prefix}pg-ci"
-  image_identity = "${local.name}-${var.task_name}-${var.image_date}"
+  image_identity = "${var.image_name}-${var.image_date}"
 
   debian_gcp_images = [
     {
-      name = "bullseye"
+      task_name = "bullseye"
       zone = "us-west1-a"
       machine = "c2-standard-4"
     },
     {
-      name = "sid"
+      task_name = "sid"
       zone = "us-west1-a"
       machine = "c2-standard-4"
     },
     {
-      name = "sid-newkernel"
+      task_name = "sid-newkernel"
       zone = "us-west2-a"
       machine = "c2-standard-8"
     },
     {
-      name = "sid-newkernel-uring"
+      task_name = "sid-newkernel-uring"
       zone = "us-west2-a"
       machine = "c2-standard-8"
     },
@@ -40,6 +34,8 @@ source "googlecompute" "bullseye-vanilla" {
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
+  image_name              = "${local.image_identity}"
+  instance_name           = "build-${local.image_identity}"
   source_image_family     = "debian-11"
   source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"
@@ -61,12 +57,10 @@ build {
 
     content {
       # can't reference local. / var. here?!?
-      name = tag.value.name
-      image_name = "${local.name}-${tag.value.name}-${var.image_date}"
+      name = tag.value.task_name
 
       zone = tag.value.zone
       machine_type = tag.value.machine
-      instance_name = "build-${tag.value.name}-${var.image_date}"
     }
   }
 
