@@ -351,14 +351,14 @@ task:
 
 
 task:
-  name: 'Testing VM Image: ${IMAGE_NAME}'
+  name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   matrix:
     - env:
-        IMAGE_NAME: pg-ci-netbsd-postgres-9-3
+        IMAGE_NAME: netbsd-postgres-9-3
         PLATFORM: netbsd
 
     - env:
-        IMAGE_NAME: pg-ci-openbsd-postgres-7-2
+        IMAGE_NAME: openbsd-postgres-7-2
         PLATFORM: openbsd
 
   depends_on:
@@ -366,7 +366,7 @@ task:
 
   compute_engine_instance:
     image_project: $GCP_PROJECT
-    image: family/${IMAGE_NAME}
+    image: family/${PREFIX}-${IMAGE_NAME}
     platform: ${PLATFORM}
 
   test_script:
@@ -375,14 +375,14 @@ task:
 
 
 task:
-  name: 'Testing VM Image: ${IMAGE_NAME}'
+  name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   env:
     IMAGE_NAME: windows-ci-vs-2019
   depends_on:
     - vmbuild-${IMAGE_NAME}
   compute_engine_instance:
     image_project: $GCP_PROJECT
-    image: family/pg-ci-${IMAGE_NAME}
+    image: family/${PREFIX}-${IMAGE_NAME}
     platform: windows
 
   test_script:
@@ -397,14 +397,14 @@ task:
 
 
 task:
-  name: 'Testing VM Image: ${IMAGE_NAME}'
+  name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   env:
     IMAGE_NAME: windows-ci-mingw64
   depends_on:
     - vmbuild-${IMAGE_NAME}
   compute_engine_instance:
     image_project: $GCP_PROJECT
-    image: family/pg-ci-${IMAGE_NAME}
+    image: family/${PREFIX}-${IMAGE_NAME}
     platform: windows
 
   test_script:
