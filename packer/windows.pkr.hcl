@@ -27,23 +27,9 @@ locals {
 
   windows_gcp_images = [
     {
-      task_name = "windows-ci-vs-2019"
-    },
-    {
-      task_name = "windows-ci-mingw64"
-    },
-    {
-      task_name = "windows_ci_vs_2019"
-    },
-    {
-      task_name = "windows_ci_mingw64"
+      task_name = "windows-ci"
     },
   ]
-
-  only = {
-    vs_2019 = ["googlecompute.windows-ci-vs-2019"],
-    mingw64 = ["googlecompute.windows-ci-mingw64"],
-  }
 }
 
 source "googlecompute" "windows" {
@@ -165,13 +151,11 @@ build {
       # this could be reduntant
       "$env:MSYSTEM = 'UCRT64'",
     ]
-    only = local.only.mingw64
   }
 
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_mingw64.ps1"
-    only = local.only.mingw64
   }
 
   # Change default console code page (0) with Windows code page (65001) to get rid of warnings in postgres tests
@@ -181,7 +165,6 @@ build {
       "$ErrorActionPreference = 'Stop'",
       "chcp 65001"
     ]
-    only = local.only.mingw64
   }
 
   # MSYS2 might spawn processes that will stay around in the background forever.
@@ -192,7 +175,6 @@ build {
       "$ErrorActionPreference = 'Stop'",
       "taskkill /F /FI \"MODULES eq msys-2.0.dll\""
     ]
-    only = local.only.mingw64
   }
   ### end of mingw installations
 
@@ -200,19 +182,16 @@ build {
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_winflexbison.ps1"
-    only = local.only.vs_2019
   }
 
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_pg_deps.ps1"
-    only = local.only.vs_2019
   }
 
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_vs_2019.ps1"
-    only = local.only.vs_2019
   }
   ### end of vs-2019 installations
 }
