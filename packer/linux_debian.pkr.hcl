@@ -1,6 +1,8 @@
 variable "image_date" { type = string }
 variable "gcp_project" { type = string }
 variable "image_name" { type = string }
+variable "meson_repo" { type = string }
+variable "meson_branch" { type = string }
 
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
@@ -187,6 +189,21 @@ build {
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     script = "scripts/linux_debian_install_deps.sh"
+  }
+
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = ["python3 -m pip install git+${var.meson_repo}@${var.meson_branch} ninja"]
+    only = ["googlecompute.bullseye"]
+  }
+
+  # These gives 'error: externally-managed-environment'
+  # Also, these images install one of the latest version of meson
+  # See PEP 668 for the detailed specification.
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = ["apt-get -y install --no-install-recommends meson"]
+    only = ["googlecompute.sid", "googlecompute.sid-newkernel", "googlecompute.sid-newkernel-uring"]
   }
 
   provisioner "shell" {

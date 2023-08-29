@@ -11,7 +11,6 @@ apt-get -y install --no-install-recommends \
   gdb \
   git \
   make \
-  meson \
   perl \
   pkg-config \
   \

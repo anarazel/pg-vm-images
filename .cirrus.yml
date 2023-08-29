@@ -12,6 +12,10 @@ env:
   GCP_PROJECT_MAIN: pg-ci-images
   GCP_PROJECT_DEV: pg-ci-images-dev
 
+  # default variables to use in local meson installations
+  MESON_REPO: https://github.com/mesonbuild/meson.git
+  MESON_BRANCH: master
+
   # the following variables are chosen in .cirrus.star, based on the branch
   # being built etc
   # BRANCH_TYPE = dev|main
@@ -154,6 +158,8 @@ task:
       -force \
       -var "image_date=$DATE" \
       -var "image_name=${IMAGE_NAME}" \
+      -var "meson_repo=${MESON_REPO}" \
+      -var "meson_branch=${MESON_BRANCH}" \
       -var gcp_project=$GCP_PROJECT \
       "$PACKERFILE"
 
