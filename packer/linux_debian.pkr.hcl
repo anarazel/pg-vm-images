@@ -221,7 +221,7 @@ build {
         DEBIAN_FRONTEND=noninteractive apt-get install -y \
           time libelf-dev bc htop libdw-dev libdwarf-dev libunwind-dev libslang2-dev libzstd-dev \
           binutils-dev  libnuma-dev libcap-dev libiberty-dev libbabeltrace-dev systemtap-sdt-dev \
-	  libpfm4-dev libtraceevent-dev python3-dev
+	  libpfm4-dev libtraceevent-dev python3-dev zstd
 
         cd /usr/src/linux
         echo linux git revision from $(git remote) is: $(git rev-list HEAD)
