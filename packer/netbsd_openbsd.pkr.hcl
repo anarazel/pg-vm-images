@@ -9,7 +9,6 @@ variable "name" { type = string }
 variable "output_file_name" { type = string }
 variable "postgres_name" { type = list(map(string)) }
 variable "vanilla_name" { type = list(map(string)) }
-variable "version" { type = string }
 variable "prefix" {type = string }
 
 locals {
@@ -141,7 +140,7 @@ source "googlecompute" "postgres" {
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = "${var.gcp_project}"
-  source_image_family     = "${var.prefix}-${var.name}-vanilla-${var.version}"
+  source_image_family     = "${var.prefix}-${var.name}-vanilla"
   source_image_project_id = ["${var.gcp_project}"]
   image_name              = local.image_identity
   instance_name           = "build-${local.image_identity}"
