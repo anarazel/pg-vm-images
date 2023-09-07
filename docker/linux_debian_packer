@@ -24,4 +24,5 @@ RUN \
   apt-get install --no-install-recommends -y \
     google-cloud-sdk \
     && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
+  apt-get clean && rm -rf /var/lib/apt/lists/* && \
+  dpkg -l
