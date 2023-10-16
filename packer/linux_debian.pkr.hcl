@@ -79,18 +79,10 @@ build {
         rm -f /etc/apt/sources.list.d/google-cloud.list /etc/apt/sources.list.d/gce_sdk.list
         apt-get update
 
-        # remove, instead of purge, grub-cloud-amd64, we want to keep its version of
-        # /etc/default/grub
-        apt-get remove -y grub-cloud-amd64
-
-        # mark as installed, to prevent them from getting auto-removed
-        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y grub-efi-amd64-bin grub2-common
-
         # Remove unnecessary packages, to reduce image size
         apt-get purge -y \
-          man-db unattended-upgrades gnupg shim-unsigned publicsuffix mokutil grub-efi-amd64-signed \
-          \
-          grub-efi-amd64-bin+ grub2-common+
+          man-db unattended-upgrades gnupg publicsuffix \
+
         # For unknown reasons occasionally the source image doesn't contain google-cloud-sdk, making the uninstallation fail
         apt-get purge -y google-cloud-sdk || true
         apt-get autoremove -y
