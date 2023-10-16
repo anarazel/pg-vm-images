@@ -9,22 +9,22 @@ locals {
     {
       task_name = "bullseye"
       zone = "us-west1-a"
-      machine = "c2-standard-4"
+      machine = "t2d-standard-2"
     },
     {
       task_name = "sid"
       zone = "us-west1-a"
-      machine = "c2-standard-4"
+      machine = "t2d-standard-2"
     },
     {
       task_name = "sid-newkernel"
-      zone = "us-west2-a"
-      machine = "c2-standard-8"
+      zone = "us-west1-a"
+      machine = "t2d-standard-4"
     },
     {
       task_name = "sid-newkernel-uring"
-      zone = "us-west2-a"
-      machine = "c2-standard-8"
+      zone = "us-west1-a"
+      machine = "t2d-standard-4"
     },
   ]
 }
@@ -42,6 +42,7 @@ source "googlecompute" "bullseye-vanilla" {
   ssh_username            = "packer"
   # Debian sid doesn't accept the packer default of rsa anymore.
   temporary_key_pair_type = "ed25519"
+  enable_secure_boot = false
 }
 
 build {

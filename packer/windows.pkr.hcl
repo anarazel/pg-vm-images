@@ -39,7 +39,7 @@ source "googlecompute" "windows" {
   source_image_family     = "windows-2022"
   image_name              = local.image_identity
   zone                    = "us-west1-a"
-  machine_type            = "c2-standard-4"
+  machine_type            = "t2d-standard-4"
   instance_name           = "build-${local.image_identity}"
   communicator            = "winrm"
   winrm_username          = "packer_user"

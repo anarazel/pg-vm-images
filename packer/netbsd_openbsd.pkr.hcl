@@ -146,7 +146,7 @@ source "googlecompute" "postgres" {
   image_name              = local.image_identity
   instance_name           = "build-${local.image_identity}"
   zone                    = "us-west1-a"
-  machine_type            = "c2-standard-4"
+  machine_type            = "t2d-standard-2"
   ssh_username            = "root"
   temporary_key_pair_type = "ed25519"
   ssh_timeout             = "300s"

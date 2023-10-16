@@ -22,7 +22,7 @@ source "googlecompute" "freebsd-vanilla" {
   instance_name           = "build-${local.image_identity}"
   source_image_family     = "freebsd-13-2"
   source_image_project_id = ["freebsd-org-cloud-dev"]
-  machine_type            = "c2-standard-4"
+  machine_type            = "t2d-standard-2"
   ssh_pty                 = "true"
   ssh_username            = "packer"
 }

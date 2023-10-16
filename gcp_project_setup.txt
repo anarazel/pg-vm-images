@@ -5,7 +5,7 @@ gcloud projects create $GCP_PROJECT
 
 # Also request increases in quota for:
 # compute engine: images -> 1000
-# compute engine: c2 cpus us-west 1 -> 48
+# compute engine: t2d cpus us-west 1 -> 64
 
 gcloud services enable --project $GCP_PROJECT iam.googleapis.com
 gcloud services enable --project $GCP_PROJECT compute.googleapis.com
