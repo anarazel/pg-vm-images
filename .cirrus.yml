@@ -111,7 +111,7 @@ task:
 
       matrix:
         - env:
-            TASK_NAME: bullseye
+            TASK_NAME: bookworm
         - env:
             TASK_NAME: sid
         - env:
@@ -282,9 +282,9 @@ task:
     cpu: 2
     memory: 8G
   env:
-    IMAGE: linux_debian_bullseye_ci
+    IMAGE: linux_debian_bookworm_ci
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bookworm_ci')
 
   <<: *gcp_docker_auth_unix
 
@@ -323,7 +323,7 @@ task:
 task:
   name: 'Testing Container Image: ${IMAGE_NAME}'
   env:
-    IMAGE_NAME: linux_debian_bullseye_ci
+    IMAGE_NAME: linux_debian_bookworm_ci
   depends_on:
     - dockerbuild-${IMAGE_NAME}
   container:
@@ -337,9 +337,9 @@ task:
 #task:
 #  name: test-linux-container-arm64
 #  depends_on:
-#    - linux_debian_bullseye_ci
+#    - linux_debian_bookworm_ci
 #  arm_container:
-#    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+#    image: $GCP_REPO/linux_debian_bookworm_ci:latest
 #  test_script:
 #    - uname -a
 #    - xsltproc --version

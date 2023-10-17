@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 ARG DATE IMAGE_NAME
 ENV DEBIAN_FRONTEND=noninteractive IMAGE_IDENTITY=$IMAGE_NAME-$DATE

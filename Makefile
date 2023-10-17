@@ -12,7 +12,7 @@ pre-commit:
 	packer validate \
 	  -var gcp_project=pg-ci-images-dev \
 	  -var "image_date=$(image_date)" \
-	  -var "task_name=bullseye" \
+	  -var "task_name=bookworm" \
 	  packer/linux_debian.pkr.hcl
 #	Windows VS-2019 VM
 	packer validate \
