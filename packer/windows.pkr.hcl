@@ -1,5 +1,7 @@
 variable "image_name" { type = string }
 variable "image_date" { type = string }
+variable "meson_repo" { type = string }
+variable "meson_branch" { type = string }
 
 variable "build_type" {
   type = string
@@ -114,7 +116,7 @@ build {
     execute_command = var.execute_command
     inline = [
       "$ErrorActionPreference = 'Stop'",
-      "py -m pip install meson ninja"
+      "python3 -m pip install git+${var.meson_repo}@${var.meson_branch} ninja",
     ]
   }
 

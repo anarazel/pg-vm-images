@@ -1,6 +1,8 @@
 variable "image_date" { type = string }
 variable "gcp_project" { type = string }
 variable "image_name" { type = string }
+variable "meson_repo" { type = string }
+variable "meson_branch" { type = string }
 
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
@@ -67,7 +69,6 @@ build {
           bash \
           git-tiny \
           gmake \
-          meson \
           ninja \
           perl5 \
           pkgconf \
@@ -92,6 +93,8 @@ build {
           krb5 \
           openldap25-client \
           openldap25-server
+
+        python3 -m pip install git+${var.meson_repo}@${var.meson_branch}
 
         # remove temporary files
         pkg clean -ay
