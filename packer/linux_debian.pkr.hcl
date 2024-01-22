@@ -7,7 +7,7 @@ locals {
 
   debian_gcp_images = [
     {
-      task_name = "bullseye"
+      task_name = "bookworm"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
     },
@@ -29,14 +29,14 @@ locals {
   ]
 }
 
-source "googlecompute" "bullseye-vanilla" {
+source "googlecompute" "debian-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
   image_name              = "${local.image_identity}"
   instance_name           = "build-${local.image_identity}"
-  source_image_family     = "debian-11"
+  source_image_family     = "debian-12"
   source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"
   ssh_username            = "packer"
@@ -53,7 +53,7 @@ build {
 
   dynamic "source" {
     for_each = local.debian_gcp_images
-    labels = ["source.googlecompute.bullseye-vanilla"]
+    labels = ["source.googlecompute.debian-vanilla"]
     iterator = tag
 
     content {
@@ -97,18 +97,18 @@ build {
     inline = [
       <<-SCRIPT
         tee /etc/apt/sources.list <<-EOF
-          deb http://deb.debian.org/debian bullseye main
-          deb-src http://deb.debian.org/debian bullseye main
-          deb http://security.debian.org/debian-security bullseye-security main
-          deb-src http://security.debian.org/debian-security bullseye-security main
-          deb http://deb.debian.org/debian bullseye-updates main
-          deb-src http://deb.debian.org/debian bullseye-updates main
+          deb http://deb.debian.org/debian bookworm main
+          deb-src http://deb.debian.org/debian bookworm main
+          deb http://security.debian.org/debian-security bookworm-security main
+          deb-src http://security.debian.org/debian-security bookworm-security main
+          deb http://deb.debian.org/debian bookworm-updates main
+          deb-src http://deb.debian.org/debian bookworm-updates main
         EOF
 
         apt-get update -y
       SCRIPT
     ]
-    only = ["googlecompute.bullseye"]
+    only = ["googlecompute.bookworm"]
   }
 
   provisioner "shell" {
@@ -131,6 +131,10 @@ build {
     inline = [
       <<-SCRIPT
         apt-get update -y
+
+        # first update grub2-common, otherwise grub-cloud-amd64 fails
+        DEBIAN_FRONTEND=noninteractive apt-get upgrade grub2-common -y
+
         DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade --no-install-recommends -y
 
         # prevent some to-be-installed services from automatically starting
