@@ -34,10 +34,7 @@ The following images are available:
     [official GCP images](https://cloud.google.com/compute/docs/images#freebsd).)
 
 -   NetBSD and OpenBSD images are available both with and without Postgres,
-    in families `pg-ci-{net,open}bsd-{vanilla,postgres}-$version`. Find
-    the current value of `$version` in
-    [packer/netbsd.pkrvars.hcl](packer/netbsd.pkrvars.hcl) and
-    [packer/openbsd.pkrvars.hcl](packer/openbsd.pkrvars.hcl).
+    in families `pg-ci-{net,open}bsd-{vanilla,postgres}`.
 
 
 ## How it works
