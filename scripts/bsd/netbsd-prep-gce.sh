@@ -12,6 +12,7 @@ EOF
 PKG_PATH="http://cdn.NetBSD.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r|cut -f '1 2' -d.)/All/" && \
 export PKG_PATH && \
 pkg_add pkgin && \
+echo $PKG_PATH > /usr/pkg/etc/pkgin/repositories.conf && \
 pkgin update && \
 pkgin upgrade -y && \
 pkgin -y install \
