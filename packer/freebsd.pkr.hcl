@@ -26,6 +26,7 @@ source "googlecompute" "freebsd-vanilla" {
   ssh_pty                 = "true"
   ssh_username            = "packer"
   ssh_wait_timeout        = "600s"
+  ssh_timeout             = "600s"
 }
 
 
