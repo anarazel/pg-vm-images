@@ -1,4 +1,6 @@
-FROM debian:bullseye
+ARG DEBIAN_RELEASE
+
+FROM debian:${DEBIAN_RELEASE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 

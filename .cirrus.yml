@@ -111,6 +111,8 @@ task:
 
       matrix:
         - env:
+            TASK_NAME: bookworm
+        - env:
             TASK_NAME: bullseye
         - env:
             TASK_NAME: sid
@@ -281,10 +283,17 @@ task:
     platform: linux
     cpu: 2
     memory: 8G
-  env:
-    IMAGE: linux_debian_bullseye_ci
+  matrix:
+    - env:
+        DOCKER_FILE: linux_debian_ci
+        IMAGE: linux_debian_${DEBIAN_RELEASE}_ci
+      matrix:
+        - env:
+            DEBIAN_RELEASE: bullseye
+        - env:
+            DEBIAN_RELEASE: bookworm
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_bullseye_ci')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_ci')
 
   <<: *gcp_docker_auth_unix
 
@@ -311,9 +320,10 @@ task:
       --platform linux/amd64 \
       --build-arg DATE=$DATE \
       --build-arg IMAGE_NAME=$IMAGE \
+      --build-arg DEBIAN_RELEASE=$DEBIAN_RELEASE \
       --tag $GCP_REPO/$IMAGE:latest \
       --tag $GCP_REPO/$IMAGE:$DATE \
-      -f docker/$IMAGE \
+      -f docker/$DOCKER_FILE \
       --push \
       .
 
@@ -322,8 +332,11 @@ task:
 
 task:
   name: 'Testing Container Image: ${IMAGE_NAME}'
-  env:
-    IMAGE_NAME: linux_debian_bullseye_ci
+  matrix:
+    - env:
+        IMAGE_NAME: linux_debian_bullseye_ci
+    - env:
+        IMAGE_NAME: linux_debian_bookworm_ci
   depends_on:
     - dockerbuild-${IMAGE_NAME}
   container:
@@ -334,12 +347,17 @@ task:
     - env
 
 # Disabled linux/arm64, fails currently due to reasons outside of our control
-#task:
-#  name: test-linux-container-arm64
+# task:
+#  name: 'Testing Arm Container Image: ${IMAGE_NAME}'
+#   matrix:
+#     - env:
+#         IMAGE_NAME: linux_debian_bullseye_ci
+#     - env:
+#         IMAGE_NAME: linux_debian_bookworm_ci
 #  depends_on:
-#    - linux_debian_bullseye_ci
+#    - ${IMAGE_NAME}
 #  arm_container:
-#    image: $GCP_REPO/linux_debian_bullseye_ci:latest
+#    image: $GCP_REPO/${IMAGE_NAME}:latest
 #  test_script:
 #    - uname -a
 #    - xsltproc --version
