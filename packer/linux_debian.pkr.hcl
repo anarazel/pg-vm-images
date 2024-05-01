@@ -7,36 +7,45 @@ locals {
 
   debian_gcp_images = [
     {
+      task_name = "bookworm"
+      zone = "us-west1-a"
+      machine = "t2d-standard-2"
+      source_image_family = "debian-12"
+    },
+    {
       task_name = "bullseye"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
+      source_image_family = "debian-11"
     },
     {
       task_name = "sid"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
+      source_image_family = "debian-11"
     },
     {
       task_name = "sid-newkernel"
       zone = "us-west1-a"
       machine = "t2d-standard-4"
+      source_image_family = "debian-11"
     },
     {
       task_name = "sid-newkernel-uring"
       zone = "us-west1-a"
       machine = "t2d-standard-4"
+      source_image_family = "debian-11"
     },
   ]
 }
 
-source "googlecompute" "bullseye-vanilla" {
+source "googlecompute" "debian-vanilla" {
   disk_size               = "25"
   disk_type               = "pd-ssd"
   preemptible             = "true"
   project_id              = var.gcp_project
   image_name              = "${local.image_identity}"
   instance_name           = "build-${local.image_identity}"
-  source_image_family     = "debian-11"
   source_image_project_id = ["debian-cloud"]
   ssh_pty                 = "true"
   ssh_username            = "packer"
@@ -53,13 +62,13 @@ build {
 
   dynamic "source" {
     for_each = local.debian_gcp_images
-    labels = ["source.googlecompute.bullseye-vanilla"]
+    labels = ["source.googlecompute.debian-vanilla"]
     iterator = tag
 
     content {
       # can't reference local. / var. here?!?
       name = tag.value.task_name
-
+      source_image_family = tag.value.source_image_family
       zone = tag.value.zone
       machine_type = tag.value.machine
     }
@@ -97,18 +106,18 @@ build {
     inline = [
       <<-SCRIPT
         tee /etc/apt/sources.list <<-EOF
-          deb http://deb.debian.org/debian bullseye main
-          deb-src http://deb.debian.org/debian bullseye main
-          deb http://security.debian.org/debian-security bullseye-security main
-          deb-src http://security.debian.org/debian-security bullseye-security main
-          deb http://deb.debian.org/debian bullseye-updates main
-          deb-src http://deb.debian.org/debian bullseye-updates main
+          deb http://deb.debian.org/debian ${source.name} main
+          deb-src http://deb.debian.org/debian ${source.name} main
+          deb http://security.debian.org/debian-security ${source.name}-security main
+          deb-src http://security.debian.org/debian-security ${source.name}-security main
+          deb http://deb.debian.org/debian ${source.name}-updates main
+          deb-src http://deb.debian.org/debian ${source.name}-updates main
         EOF
 
         apt-get update -y
       SCRIPT
     ]
-    only = ["googlecompute.bullseye"]
+    only = ["googlecompute.bullseye", "googlecompute.bookworm"]
   }
 
   provisioner "shell" {
