@@ -20,7 +20,7 @@ source "googlecompute" "freebsd-vanilla" {
   project_id              = var.gcp_project
   image_name              = "${local.image_identity}"
   instance_name           = "build-${local.image_identity}"
-  source_image_family     = "freebsd-13-2"
+  source_image_family     = "freebsd-13-3"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   machine_type            = "t2d-standard-2"
   ssh_pty                 = "true"
@@ -56,9 +56,7 @@ build {
         pkg update
         pkg upgrade -y
 
-        # Avoid having both python 3.8 and 2.7 installed
         pkg install -y -g 'py*-google-compute-engine'
-        pkg remove -y python2* python38
 
         # remove superfluous packages
         pkg autoremove -y
