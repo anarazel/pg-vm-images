@@ -36,7 +36,7 @@ source "googlecompute" "windows" {
   disk_size               = "50"
   disk_type               = "pd-ssd"
   project_id              = var.gcp_project
-  source_image_family     = "windows-2022"
+  source_image_family     = "pg-ci-windows-base"
   image_name              = local.image_identity
   zone                    = "us-west1-a"
   machine_type            = "t2d-standard-4"
@@ -68,29 +68,9 @@ build {
   }
 
   ### base installations
-  # googlecompute only
   provisioner "powershell" {
     execute_command = var.execute_command
     inline = [
-      "$ErrorActionPreference = 'Stop'",
-      # disable antivirus
-      "Set-MpPreference -DisableRealtimeMonitoring $true -SubmitSamplesConsent NeverSend -MAPSReporting Disable",
-
-      # install choco
-      "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))",
-
-      "choco install -y --no-progress 7zip",
-      "choco install -y --no-progress git --parameters=\"/GitAndUnixToolsOnPath\"",
-    ]
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    inline = [
-      "$ErrorActionPreference = 'Stop'",
-      # contains useful utilities, including a diff we can use
-      "[Environment]::SetEnvironmentVariable('PATH',  'C:\\Program Files\\Git\\usr\\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
-
       # set IMAGE_IDENTITY to distinguish images on CI runs
       "[Environment]::SetEnvironmentVariable('IMAGE_IDENTITY', '${local.image_identity}', 'Machine')",
     ]
@@ -189,9 +169,9 @@ build {
     script = "scripts/windows_install_pg_deps.ps1"
   }
 
+  # clean unnecessary files
   provisioner "powershell" {
     execute_command = var.execute_command
-    script = "scripts/windows_install_vs_2019.ps1"
+    script = "scripts/windows_clean_unnecessary_files.ps1"
   }
-  ### end of vs-2019 installations
 }
