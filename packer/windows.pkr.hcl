@@ -81,6 +81,7 @@ build {
 
       "choco install -y --no-progress 7zip",
       "choco install -y --no-progress git --parameters=\"/GitAndUnixToolsOnPath\"",
+      "choco install -y --no-progress ccache"
     ]
   }
 
