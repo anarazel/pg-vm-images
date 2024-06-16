@@ -10,9 +10,7 @@ if (!$?) { throw 'cmdfail' }
 
 echo "installing perl $perl_vesion"
 
-# Exclude the 'c' directory - it contains enough contrib stuff -which we don't
-# need - to bloat the image size noticeably
-7z.exe x "$filepath" -xr!c -oc:\strawberry\$perl_version
+7z.exe x "$filepath" -oc:\strawberry\$perl_version
 if (!$?) { throw 'cmdfail' }
 
 Remove-Item "$filepath" -Force
