@@ -15,3 +15,5 @@ Rename-Item -Path c:\winflexbison\win_flex.exe c:\winflexbison\flex.exe
 Rename-Item -Path c:\winflexbison\win_bison.exe c:\winflexbison\bison.exe
 
 Remove-Item "$filepath" -Force
+
+[Environment]::SetEnvironmentVariable('PATH',  'C:\winflexbison;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
