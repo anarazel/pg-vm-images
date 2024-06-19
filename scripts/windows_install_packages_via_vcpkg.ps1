@@ -78,11 +78,17 @@ Function InstallAndPrepareImage()
   $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed\x64-windows"
   $PKG_PATHS = "${VCPKG_PKG_PREFIX}\debug\lib;" +
     "${VCPKG_PKG_PREFIX}\debug\bin;" +
-    "${VCPKG_PKG_PREFIX}\tools\pkgconf;" +
+    "${VCPKG_PKG_PREFIX}\tools\pkgconf;";
 
-  [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
-  [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine')
-  [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine')
+
+  echo old env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
+
+  [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine');
+  [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine');
+  [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine');
+
+  echo new env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
+
 }
 
 Function InstallAndPrepareImageOld()
@@ -118,9 +124,7 @@ Function InstallAndPrepareImageOld()
 
   $PKG_PATHS = "${VCPKG_PKG_PREFIX}\debug\lib;" +
     "${VCPKG_PKG_PREFIX}\debug\bin;" +
-    "${VCPKG_PKG_PREFIX}\tools\pkgconf;" +
-
-  echo old env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
+    "${VCPKG_PKG_PREFIX}\tools\pkgconf;";
 
   [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
   [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine')
