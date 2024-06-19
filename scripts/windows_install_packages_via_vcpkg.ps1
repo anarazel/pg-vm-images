@@ -61,11 +61,16 @@ Function InstallVcpkgPackages()
 
 Function InstallAndPrepareImage()
 {
-  $CIRRUS_BUILD_ID = ${Env:CIRRUS_BUILD_ID}
+  #$CIRRUS_BUILD_ID = ${Env:CIRRUS_BUILD_ID}
 
-  $VCPKG_PATH = "c:\vcpkg"
-  $ARTIFACT_NAME = "pg-deps.7z"
-  $ARTIFACT_URL = "https://api.cirrus-ci.com/v1/artifact/build/${CIRRUS_BUILD_ID}/build-vcpkg-cache/vcpkg_cache_zip/${ARTIFACT_NAME}"
+  $VCPKG_PATH = "c:\vcpkg";
+  $ARTIFACT_NAME = "pg-deps.7z";
+  #$REPO_NAME = $ENV:CIRRUS_REPO_FULL_NAME;
+  #$BRANCH_NAME = $ENV:CIRRUS_BRANCH;
+  # It's tempting to use the URL below, to allow skipping the task to build vcpkg,
+  # but unfortunately a skipped task "hides" prior results, making it useless.
+  #$ARTIFACT_URL = "https://api.cirrus-ci.com/v1/artifact/github/${ENV:CIRRUS_REPO_FULL_NAME}/build-vcpkg-cache/vcpkg_cache_zip/${ARTIFACT_NAME}?branch=${ENV:CIRRUS_BRANCH}";
+  $ARTIFACT_URL = "https://api.cirrus-ci.com/v1/artifact/build/${ENV:CIRRUS_BUILD_ID}/build-vcpkg-cache/vcpkg_cache_zip/${ARTIFACT_NAME}"
 
   echo "Downloading  ${ARTIFACT_URL}"
   curl.exe -fsSLO ${ARTIFACT_URL}
@@ -75,20 +80,28 @@ Function InstallAndPrepareImage()
   7z.exe x ${ARTIFACT_NAME} -o"$VCPKG_PATH"
   if (!$?) { throw 'cmdfail' };
 
+  ls $VCPKG_PATH
+  # there got to be a better way to avoid this top-level dir
+  mv C:\vcpkg\pg-deps\* C:\vcpkg\
+  rmdir C:\vcpkg\pg-deps
+  ls $VCPKG_PATH
+
+
   $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed\x64-windows"
   $PKG_PATHS = "${VCPKG_PKG_PREFIX}\debug\lib;" +
     "${VCPKG_PKG_PREFIX}\debug\bin;" +
     "${VCPKG_PKG_PREFIX}\tools\pkgconf;";
 
 
-  echo old env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
+  $p=[Environment]::GetEnvironmentVariable('PATH', 'Machine');
+  echo "old env: $p";
 
   [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine');
   [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine');
   [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine');
 
-  echo new env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
-
+  $p=[Environment]::GetEnvironmentVariable('PATH', 'Machine');
+  echo "new env: $p";
 }
 
 Function InstallAndPrepareImageOld()
@@ -129,9 +142,6 @@ Function InstallAndPrepareImageOld()
   [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
   [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine')
   [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine')
-
-
-  echo new env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
 }
 
 Function Main()

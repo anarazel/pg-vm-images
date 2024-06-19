@@ -6,8 +6,14 @@ variable "build_type" {
   default = "googlecompute"
 }
 
+variable "cirrus_branch" {
+  default = env("CIRRUS_BRANCH")
+}
 variable "cirrus_build_id" {
   default = env("CIRRUS_BUILD_ID")
+}
+variable "cirrus_repo_full_name" {
+  default = env("CIRRUS_REPO_FULL_NAME")
 }
 
 # Packer doesn't capture errors correctly when default execute command is used.
@@ -72,6 +78,17 @@ build {
   }
 
   ### base installations
+
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    environment_vars = [
+      "CIRRUS_BRANCH=${var.cirrus_branch}",
+      "CIRRUS_BUILD_ID=${var.cirrus_build_id}",
+      "CIRRUS_REPO_FULL_NAME=${var.cirrus_repo_full_name}",
+    ]
+    script = "scripts/windows_install_packages_via_vcpkg.ps1"
+  }
+
   provisioner "powershell" {
     execute_command = var.execute_command
     inline = [
@@ -85,12 +102,6 @@ build {
     execute_command = var.execute_command
     environment_vars = ["TEMP_PYTHON_VERSION=${local.python_version}"]
     script = "scripts/windows_install_python.ps1"
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    environment_vars = ["CIRRUS_BUILD_ID=${var.cirrus_build_id}"]
-    script = "scripts/windows_install_packages_via_vcpkg.ps1"
   }
 
   # old, to be removed
