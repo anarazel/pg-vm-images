@@ -6,6 +6,10 @@ variable "build_type" {
   default = "googlecompute"
 }
 
+variable "cirrus_build_id" {
+  default = env("CIRRUS_BUILD_ID")
+}
+
 # Packer doesn't capture errors correctly when default execute command is used.
 # See $ErrorActionPreference = 'Stop' in the new execute_command.
 # So, use new execute_command to handle VM errors correctly
@@ -89,6 +93,13 @@ build {
     script = "scripts/windows_install_python.ps1"
   }
 
+  ### vs-2019 installations
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    environment_vars = ["CIRRUS_BUILD_ID=${var.cirrus_build_id}"]
+    script = "scripts/windows_install_packages_via_vcpkg.ps1"
+  }
+
   # install meson and ninja
   provisioner "powershell" {
     execute_command = var.execute_command
@@ -96,6 +107,11 @@ build {
       "$ErrorActionPreference = 'Stop'",
       "py -m pip install meson ninja"
     ]
+  }
+
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    script = "scripts/windows_install_winflexbison.ps1"
   }
 
   # install perl
