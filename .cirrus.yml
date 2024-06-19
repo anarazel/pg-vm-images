@@ -85,6 +85,7 @@ gcp_docker_auth_win: &gcp_docker_auth_win
 task:
   name: Clean up leftover running
   alias: cleanup-leftover-running
+  skip: true
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -100,6 +101,12 @@ task:
 task:
   name: 'Building VM Image: ${IMAGE_NAME}'
   alias: vmbuild-${TASK_NAME}
+
+  trigger_type: manual
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $SCRIPTS, $PACKERFILE)
+  allow_failures: $CIRRUS_TASK_NAME =~ '.*\[sid\].*'
+  auto_cancellation: false
+
   matrix:
     - depends_on: cleanup-leftover-running
       matrix:
@@ -127,6 +134,9 @@ task:
             PACKERFILE: packer/windows_base.pkr.hcl
             TASK_NAME: windows-base
             SCRIPTS: scripts/windows_install_vs_2019.ps1
+          trigger_type: automatic
+          skip: true
+
 
     # build-vcpkg-cache task already depends on cleanup-leftover-running task
     - depends_on: build-vcpkg-cache
@@ -142,10 +152,6 @@ task:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
     memory: 256Mi
-
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $SCRIPTS, $PACKERFILE)
-  allow_failures: $CIRRUS_TASK_NAME =~ '.*\[sid\].*'
-  auto_cancellation: false
 
   <<: *gcp_auth_unix
 
@@ -240,6 +246,7 @@ task:
 task:
   name: 'Building VM Image: ${IMAGE_NAME}'
   alias: vmbuild-${TASK_NAME}
+  trigger_type: manual
 
   matrix:
     - env:
@@ -326,6 +333,7 @@ task:
 # precisely.
 task:
   name: Clean up old images
+  trigger_type: manual
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -341,6 +349,7 @@ task:
 task:
   name: 'Building Container Image: ${IMAGE}'
   alias: dockerbuild-${IMAGE}
+  trigger_type: manual
 
   compute_engine_instance:
     image_project: cirrus-images
@@ -397,6 +406,8 @@ task:
 
 task:
   name: 'Testing Container Image: ${IMAGE_NAME}'
+  trigger_type: manual
+
   matrix:
     - env:
         IMAGE_NAME: linux_debian_bullseye_ci
@@ -430,6 +441,7 @@ task:
 
 task:
   name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
+  trigger_type: manual
   matrix:
     - env:
         IMAGE_NAME: netbsd-postgres-9-3
@@ -454,6 +466,7 @@ task:
 
 task:
   name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
+  trigger_type: manual
   env:
     IMAGE_NAME: windows-ci
   depends_on:
