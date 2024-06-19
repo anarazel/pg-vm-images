@@ -216,14 +216,12 @@ task:
 
   install_vcpkg_packages_script:
     .\scripts\windows_install_packages_via_vcpkg.ps1 -GenerateCacheTask
+    ls -l
 
   upload_caches: vcpkg
 
-  zip_vcpkg_cache_script: |
-    7z.exe a -r vcpkg_cache.zip ${Env:VCPKG_CACHE}\*
-
   vcpkg_cache_zip_artifacts:
-    path: vcpkg_cache.zip
+    path: pg-deps.7z
 
 
 task:

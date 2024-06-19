@@ -80,12 +80,6 @@ build {
     ]
   }
 
-  # install windows debugger
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_dbg.ps1"
-  }
-
   # install python
   provisioner "powershell" {
     execute_command = var.execute_command
@@ -93,11 +87,22 @@ build {
     script = "scripts/windows_install_python.ps1"
   }
 
-  ### vs-2019 installations
   provisioner "powershell" {
     execute_command = var.execute_command
     environment_vars = ["CIRRUS_BUILD_ID=${var.cirrus_build_id}"]
     script = "scripts/windows_install_packages_via_vcpkg.ps1"
+  }
+
+  # old, to be removed
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    script = "scripts/windows_install_pg_deps.ps1"
+  }
+
+  # install windows debugger
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    script = "scripts/windows_install_dbg.ps1"
   }
 
   # install meson and ninja
@@ -173,17 +178,6 @@ build {
     ]
   }
   ### end of mingw installations
-
-  ### vs-2019 installations
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_winflexbison.ps1"
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_pg_deps.ps1"
-  }
 
   # clean unnecessary files
   provisioner "powershell" {

@@ -47,10 +47,45 @@ Function InstallVcpkgPackages()
     tcl `
     zlib `
     zstd
-if (!$?) { throw 'cmdfail' };
+  if (!$?) { throw 'cmdfail' };
+
+  .\vcpkg.exe export --raw --output=pg-deps --x-all-installed
+  if (!$?) { throw 'cmdfail' };
+
+  7z.exe a -r pg-deps.7z pg-deps
+  if (!$?) { throw 'cmdfail' };
+
+  mv pg-deps.7z ..
+  ls -l ..
 }
 
 Function InstallAndPrepareImage()
+{
+  $CIRRUS_BUILD_ID = ${Env:CIRRUS_BUILD_ID}
+
+  $VCPKG_PATH = "c:\vcpkg"
+  $ARTIFACT_NAME = "pg-deps.7z"
+  $ARTIFACT_URL = "https://api.cirrus-ci.com/v1/artifact/build/${CIRRUS_BUILD_ID}/build-vcpkg-cache/vcpkg_cache_zip/${ARTIFACT_NAME}"
+
+  echo "Downloading  ${ARTIFACT_URL}"
+  curl.exe -fsSLO ${ARTIFACT_URL}
+  if (!$?) { throw 'cmdfail' };
+
+  echo "Extracting the cache"
+  7z.exe x ${ARTIFACT_NAME} -o"$VCPKG_PATH"
+  if (!$?) { throw 'cmdfail' };
+
+  $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed\x64-windows"
+  $PKG_PATHS = "${VCPKG_PKG_PREFIX}\debug\lib;" +
+    "${VCPKG_PKG_PREFIX}\debug\bin;" +
+    "${VCPKG_PKG_PREFIX}\tools\pkgconf;" +
+
+  [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
+  [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine')
+  [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine')
+}
+
+Function InstallAndPrepareImageOld()
 {
   $VCPKG_PATH = "c:\vcpkg"
   $VCPKG_CACHE_PATH = "${VCPKG_PATH}\binary_cache\"
@@ -85,9 +120,14 @@ Function InstallAndPrepareImage()
     "${VCPKG_PKG_PREFIX}\debug\bin;" +
     "${VCPKG_PKG_PREFIX}\tools\pkgconf;" +
 
+  echo old env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
+
   [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
   [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine')
   [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine')
+
+
+  echo new env: [Environment]::GetEnvironmentVariable('PATH', 'Machine');
 }
 
 Function Main()
