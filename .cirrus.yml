@@ -188,6 +188,7 @@ task:
   name: 'Build VCPKG Cache'
   alias: build-vcpkg-cache
   depends_on: vmbuild-windows-base
+  skip: true
 
   env:
     VCPKG_PATH: ${CIRRUS_WORKING_DIR}\vcpkg
@@ -227,6 +228,7 @@ task:
 task:
   name: Clean up Windows base images
   depends_on: vmbuild-windows-ci
+  only_if: false
 
   container:
     dockerfile: docker/linux_debian_packer
