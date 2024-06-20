@@ -144,6 +144,7 @@ task:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
         TASK_NAME: windows-ci
+      trigger_type: automatic
 
   env:
     IMAGE_NAME: ${PREFIX}-${TASK_NAME}
@@ -188,7 +189,6 @@ task:
   name: 'Build VCPKG Cache'
   alias: build-vcpkg-cache
   depends_on: vmbuild-windows-base
-  skip: true
 
   env:
     VCPKG_PATH: ${CIRRUS_WORKING_DIR}\vcpkg
