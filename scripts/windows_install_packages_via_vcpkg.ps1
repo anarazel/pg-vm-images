@@ -42,11 +42,15 @@ Function InstallVcpkgPackages()
   # Build readline dynamically, at least for distribution doing otherwise
   # might be problematic?
   #
+  # Build intl/gettext dynamically, it's awkward to generate the right flags
+  # for static linking right now.
+  #
   # ICU: ?
-  # TCL: ?
+  # TCL: doesn't currently provide enough for PG to build against?
+  # UUID: none of the options are available via vcpkg
   .\vcpkg.exe install @("${VCPKG_FLAGS}".Split(" ")) `
-    gettext[tools]:x64-windows-static-md `
-    krb5:x64-windows-rel `
+    gettext[tools]:x64-windows `
+    krb5:x64-windows-release `
     icu:x64-windows-static-md `
     libxml2[tools,iconv,icu]:x64-windows-static-md `
     libxslt:x64-windows-static-md `
@@ -54,7 +58,6 @@ Function InstallVcpkgPackages()
     openssl:x64-windows-static-md `
     pkgconf:x64-windows-static-md-release `
     readline-win32:x64-windows `
-    tcl `
     zlib:x64-windows-static-md `
     zstd:x64-windows-static-md
   if (!$?) { throw 'cmdfail' };
@@ -100,15 +103,17 @@ Function InstallAndPrepareImage()
   $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed";
   $ADD_TO_PATH =
     "${VCPKG_PKG_PREFIX}\x64-windows-release\bin;" +
-    "${VCPKG_PKG_PREFIX}\x64-windows\debug\bin" +
+    "${VCPKG_PKG_PREFIX}\x64-windows\debug\bin;" +
     "${VCPKG_PKG_PREFIX}\x64-windows-static-md-release\tools\pkgconf;" +
-    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\gettext\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-release\tools\krb5\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows\tools\gettext\bin;" +
     "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\libxml2\bin;" +
-    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\libxslt\bin;"
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\libxslt\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\zstd\bin;"
   ;
 
   $PKG_CONFIG_PATHS =
-    "${VCPKG_PKG_PREFIX}\x64-windows-release\lib\pkgconfig;"
+    "${VCPKG_PKG_PREFIX}\x64-windows-release\lib\pkgconfig;" +
     "${VCPKG_PKG_PREFIX}\x64-windows-static-md\debug\lib\pkgconfig;" +
     "${VCPKG_PKG_PREFIX}\x64-windows\debug\lib\pkgconfig;"
   ;
