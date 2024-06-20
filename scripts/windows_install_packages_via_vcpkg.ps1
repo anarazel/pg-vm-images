@@ -34,19 +34,29 @@ Function InstallVcpkgPackages()
 
   cd ${VCPKG_PATH}
   .\bootstrap-vcpkg.bat -disableMetrics
+  # Build krb5 only in release, the debug variant has a lot of debug output,
+  # causing test failures.
+  #
+  # Build many libraries in static mode, dynamic linking slows the tests down.
+  #
+  # Build readline dynamically, at least for distribution doing otherwise
+  # might be problematic?
+  #
+  # ICU: ?
+  # TCL: ?
   .\vcpkg.exe install @("${VCPKG_FLAGS}".Split(" ")) `
-    "gettext[tools]" `
-    krb5 `
-    icu `
-    "libxml2[tools,iconv,icu]" `
-    libxslt `
-    lz4 `
-    openssl `
-    pkgconf `
-    readline-win32 `
+    gettext[tools]:x64-windows-static-md `
+    krb5:x64-windows-rel `
+    icu:x64-windows-static-md `
+    libxml2[tools,iconv,icu]:x64-windows-static-md `
+    libxslt:x64-windows-static-md `
+    lz4:x64-windows-static-md `
+    openssl:x64-windows-static-md `
+    pkgconf:x64-windows-static-md-release `
+    readline-win32:x64-windows `
     tcl `
-    zlib `
-    zstd
+    zlib:x64-windows-static-md `
+    zstd:x64-windows-static-md
   if (!$?) { throw 'cmdfail' };
 
   .\vcpkg.exe export --raw --output=pg-deps --x-all-installed
@@ -87,18 +97,29 @@ Function InstallAndPrepareImage()
   ls $VCPKG_PATH
 
 
-  $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed\x64-windows"
-  $PKG_PATHS = "${VCPKG_PKG_PREFIX}\debug\lib;" +
-    "${VCPKG_PKG_PREFIX}\debug\bin;" +
-    "${VCPKG_PKG_PREFIX}\tools\pkgconf;";
+  $VCPKG_PKG_PREFIX = "${VCPKG_PATH}\installed";
+  $ADD_TO_PATH =
+    "${VCPKG_PKG_PREFIX}\x64-windows-release\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows\debug\bin" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md-release\tools\pkgconf;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\gettext\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\libxml2\bin;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\tools\libxslt\bin;"
+  ;
+
+  $PKG_CONFIG_PATHS =
+    "${VCPKG_PKG_PREFIX}\x64-windows-release\lib\pkgconfig;"
+    "${VCPKG_PKG_PREFIX}\x64-windows-static-md\debug\lib\pkgconfig;" +
+    "${VCPKG_PKG_PREFIX}\x64-windows\debug\lib\pkgconfig;"
+  ;
 
 
   $p=[Environment]::GetEnvironmentVariable('PATH', 'Machine');
   echo "old env: $p";
 
-  [Environment]::SetEnvironmentVariable('PATH', ${PKG_PATHS} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine');
+  [Environment]::SetEnvironmentVariable('PATH', ${ADD_TO_PATH} + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine');
   [Environment]::SetEnvironmentVariable('PKG_CONFIG', 'pkgconf', 'Machine');
-  [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', "${VCPKG_PATH}\installed\x64-windows\debug\lib\pkgconfig", 'Machine');
+  [Environment]::SetEnvironmentVariable('PKG_CONFIG_PATH', $PKG_CONFIG_PATHS, 'Machine');
 
   $p=[Environment]::GetEnvironmentVariable('PATH', 'Machine');
   echo "new env: $p";
