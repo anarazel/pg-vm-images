@@ -178,6 +178,44 @@ task:
       --family ${IMAGE_NAME} \
       ${IMAGE_NAME}-${DATE}
 
+task:
+  name: 'Build VCPKG Cache'
+  alias: build-vcpkg-cache
+  depends_on: vmbuild-windows-base
+
+  env:
+    VCPKG_PATH: ${CIRRUS_WORKING_DIR}\vcpkg
+    VCPKG_CACHE: ${VCPKG_PATH}\binary_cache
+    CIRRUS_SHELL: powershell
+    ErrorActionPreference: Stop
+
+  compute_engine_instance:
+    image_project: $GCP_PROJECT
+    image: family/pg-ci-windows-base
+    platform: windows
+    cpu: 4
+    disk: 50
+
+  sysinfo_script: |
+    chcp
+    systeminfo
+    get-psdrive -psprovider filesystem
+    Get-ChildItem -Path Env:
+
+  clone_vcpkg_script:
+    git clone --depth 1 https://github.com/Microsoft/vcpkg.git ${Env:VCPKG_PATH}
+
+  vcpkg_cache:
+    folder: ${VCPKG_CACHE}
+
+  install_vcpkg_packages_script:
+    .\scripts\windows_install_packages_via_vcpkg.ps1
+
+  upload_caches: vcpkg
+
+  vcpkg_cache_zip_artifacts:
+    path: pg-deps.7z
+
 
 task:
   name: Clean up Windows base images
