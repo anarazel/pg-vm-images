@@ -128,8 +128,8 @@ task:
             TASK_NAME: windows-base
             SCRIPTS: scripts/windows*
 
-    # vmbuild-windows-base task already depends on cleanup-leftover-running task
-    - depends_on: vmbuild-windows-base
+    # build-vcpkg-cache task already depends on cleanup-leftover-running task
+    - depends_on: build-vcpkg-cache
       env:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
@@ -209,7 +209,7 @@ task:
     folder: ${VCPKG_CACHE}
 
   install_vcpkg_packages_script:
-    .\scripts\windows_install_packages_via_vcpkg.ps1
+    .\scripts\windows_install_packages_via_vcpkg.ps1 -GenerateCacheTask
 
   upload_caches: vcpkg
 
