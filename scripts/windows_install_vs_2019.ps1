@@ -31,8 +31,3 @@ rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\ucrt\arm64"
 rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\um\arm"
 rm -r "C:\Program Files (x86)\Windows Kits\10\Lib\*\um\arm64"
 du -shc "" "C:\Program Files (x86)\Windows Kits"
-
-cd c:\
-Remove-Item C:\t -Force -Recurse
-Remove-Item -Force -Recurse ${Env:TEMP}\*
-Remove-Item -Force -Recurse "${Env:ProgramData}\Package Cache"
