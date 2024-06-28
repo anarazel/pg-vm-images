@@ -179,7 +179,6 @@ task:
   matrix:
     - env:
         PKRVARFILE: packer/openbsd.pkrvars.hcl
-        VERSION: 7-3
       matrix:
         - env:
             TASK_NAME: openbsd-vanilla
@@ -192,7 +191,6 @@ task:
 
     - env:
         PKRVARFILE: packer/netbsd.pkrvars.hcl
-        VERSION: 9-3
 
       matrix:
         - env:
@@ -233,7 +231,6 @@ task:
       -timestamp-ui \
       -force \
       -var-file="${PKRVARFILE}" \
-      -var "version=${VERSION}" \
       -var "image_date=$DATE" \
       -var "image_name=${IMAGE_NAME}" \
       -var "prefix=${PREFIX}" \
@@ -250,7 +247,7 @@ task:
 
     gcloud compute images update \
       --project "$GCP_PROJECT" \
-      --family ${IMAGE_NAME}-${VERSION} \
+      --family ${IMAGE_NAME} \
       ${IMAGE_NAME}-${DATE}
 
 
@@ -367,11 +364,11 @@ task:
   name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   matrix:
     - env:
-        IMAGE_NAME: netbsd-postgres-9-3
+        IMAGE_NAME: netbsd-postgres
         PLATFORM: netbsd
 
     - env:
-        IMAGE_NAME: openbsd-postgres-7-2
+        IMAGE_NAME: openbsd-postgres
         PLATFORM: openbsd
 
   depends_on:

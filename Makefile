@@ -35,7 +35,6 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=netbsd-vanilla" \
 	  -var "prefix=${PREFIX}" \
-	  -var "version=${VERSION}" \
 	  -var "bucket=somebucket" \
 	  packer/netbsd_openbsd.pkr.hcl
 #	NetBSD Postgres
@@ -46,7 +45,6 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=netbsd-postgres" \
 	  -var "prefix=${PREFIX}" \
-	  -var "version=${VERSION}" \
 	  -var "bucket=somebucket" \
 	  packer/netbsd_openbsd.pkr.hcl
 #	OpenBSD Vanilla
@@ -57,7 +55,6 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=openbsd-vanilla" \
 	  -var "prefix=${PREFIX}" \
-	  -var "version=${VERSION}" \
 	  -var "bucket=somebucket" \
 	  packer/netbsd_openbsd.pkr.hcl
 #	OpenBSD Postgres
@@ -68,6 +65,5 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=openbsd-postgres" \
 	  -var "prefix=${PREFIX}" \
-	  -var "version=${VERSION}" \
 	  -var "bucket=somebucket" \
 	  packer/netbsd_openbsd.pkr.hcl
