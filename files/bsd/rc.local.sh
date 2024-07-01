@@ -2,9 +2,9 @@
 
 # Save to /etc/rc.local, to be ran on startup
 
-# Set IMAGE_IDENTITY variable
+# Set [BASE_]IMAGE_IDENTITY variables
 . /etc/environment.d/image_identity.conf
-export IMAGE_IDENTITY
+export BASE_IMAGE_IDENTITY IMAGE_IDENTITY
 
 if [ "$(uname)" = "NetBSD" ]
 then
