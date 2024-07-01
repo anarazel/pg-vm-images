@@ -84,7 +84,7 @@ build {
   provisioner "shell" {
     inline = [
       "mkdir -p /etc/environment.d",
-      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
+      "echo \"BASE_IMAGE_IDENTITY=${local.image_identity}\" | tee -a /etc/environment.d/image_identity.conf",
     ]
   }
 
@@ -179,7 +179,7 @@ build {
   provisioner "shell" {
     inline = [
       "mkdir -p /etc/environment.d",
-      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee /etc/environment.d/image_identity.conf",
+      "echo \"IMAGE_IDENTITY=${local.image_identity}\" | tee -a /etc/environment.d/image_identity.conf",
     ]
   }
 
