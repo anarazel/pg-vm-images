@@ -2,6 +2,8 @@
 
 set -e
 
+PYTHON_VERSION=3.9
+
 pkg_add -I \
     vim--no_x11 git \
     bash \
@@ -21,7 +23,7 @@ pkg_add -I \
     libxslt \
     lz4 \
     openpam \
-    python%3.9 \
+    python%${PYTHON_VERSION} \
     readline \
     tcl%8.6 \
     zstd \
@@ -29,6 +31,9 @@ pkg_add -I \
     login_krb5 \
     openldap-client--gssapi \
     openldap-server--gssapi
+
+# create a symbolic link to python3, then upgrade pip
+ln -sf /usr/local/bin/python${PYTHON_VERSION} /usr/local/bin/python3
 python3 -m ensurepip --upgrade
 
 #####
