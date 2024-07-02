@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 pkg_add -I \
     vim--no_x11 git \
     bash \
