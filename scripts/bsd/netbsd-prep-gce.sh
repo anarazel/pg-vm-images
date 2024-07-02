@@ -18,6 +18,4 @@ echo $PKG_PATH > /usr/pkg/etc/pkgin/repositories.conf && \
 pkgin update && \
 pkgin upgrade -y && \
 pkgin -y install \
-    curl \
-    mozilla-rootcerts && \
-mozilla-rootcerts install
+    curl
