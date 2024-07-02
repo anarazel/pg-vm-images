@@ -28,16 +28,16 @@ boot_command = [
   "<enter><wait300s>",
   # Continue
   "<enter><wait5s>",
-  # Enable sshd
-  "g<enter><wait5s>",
-  # Change root password
-  "d<enter><wait5s><enter><wait5s>",
   # Set root password
   "packer<enter><wait5s>",
   # Set root password again
   "packer<enter><wait5s>",
   # Set root password again
   "packer<enter><wait5s>",
+  # Skip 'cryptographically strong pseudo random' warning
+  "x<enter><wait5s>",
+  # Enable sshd
+  "g<enter><wait5s>",
   # Finished configuring
   "x<enter><wait5s>",
   # Continue
@@ -52,11 +52,11 @@ boot_command = [
   "echo '/sbin/dhcpcd -4' > /etc/rc.local<enter><wait5s>",
   "reboot<enter>"
 ]
-iso_checksum = "sha256:7e7f03bfd0584480cd11ed8833963310e34361d105498a028a2ebf3c10354171"
+iso_checksum = "sha256:59afa864ce54b70cadffe846a251cb8462e868188154cbb1babfa92bebf1c2a0"
 iso_urls = [
-  "NetBSD-9.3-amd64.iso",
-  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-9.3/images/NetBSD-9.3-amd64.iso"
+  "NetBSD-10.0-amd64.iso",
+  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-10.0/images/NetBSD-10.0-amd64.iso"
 ]
-output_file_name = "output/netbsd93.tar.gz"
+output_file_name = "output/netbsd10-0.tar.gz"
 vanilla_name = [ { name = "netbsd-vanilla" } ]
 postgres_name = [ { name = "netbsd-postgres" } ]
