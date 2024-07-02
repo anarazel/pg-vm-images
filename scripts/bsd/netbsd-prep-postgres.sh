@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin
 
 # Install required packages for running tests on netBSD

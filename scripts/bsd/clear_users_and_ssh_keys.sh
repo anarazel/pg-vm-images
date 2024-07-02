@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 if [ "$(uname)" = "NetBSD" ]
 then
     export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin
