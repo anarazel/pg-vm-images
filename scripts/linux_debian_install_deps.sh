@@ -26,7 +26,7 @@ apt-get -y install --no-install-recommends \
   \
   libio-pty-perl \
   libipc-run-perl \
-  python3-distutils \
+  python3-setuptools \
   \
   libicu-dev \
   libkrb5-*-heimdal \
@@ -45,7 +45,7 @@ apt-get -y install --no-install-recommends \
   libxml2-dev \
   libxslt1-dev \
   libzstd-dev \
-  llvm-dev \
+  llvm-16-dev \
   systemtap-sdt-dev \
   tcl-dev \
   uuid-dev \
