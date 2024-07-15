@@ -26,7 +26,7 @@ apt-get -y install --no-install-recommends \
   \
   libio-pty-perl \
   libipc-run-perl \
-  python3-distutils \
+  python3-setuptools \
   \
   libicu-dev \
   libkrb5-*-heimdal \
