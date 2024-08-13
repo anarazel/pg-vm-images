@@ -19,9 +19,32 @@ fi
 # these users will exist in postgres images.
 # we need to remove these users.
 
-project_level_ssh_keys=$(curl -fsH "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/project/attributes/ssh-keys)
-instance_level_ssh_keys=$(curl -fsH "Metadata-Flavor: Google"  http://metadata.google.internal/computeMetadata/v1/instance/attributes/ssh-keys)
-ssh_keys=$(printf '%s\n%s' "$project_level_ssh_keys" "$instance_level_ssh_keys")
+ssh_keys=""
+
+# do not fail if curl fails with 404
+curl_helper ()
+{
+    curl_temp_path=$(mktemp)
+
+    exit_code=0
+    http_code=$(curl -fsH "Metadata-Flavor: Google" -o ${curl_temp_path} -w "%{http_code}\n" $1) || exit_code=$?
+
+    if [ "${exit_code}" != "0" ] && [ "${http_code}" != "404" ]
+    then
+        echo "Curl failed with exit code ${exit_code}"
+        exit ${exit_code}
+    elif [ "${http_code}" = "404" ]
+    then
+        echo "Curl returned 404"
+    else
+        ssh_keys=$(printf '%s\n%s' "$ssh_keys" "$(cat $curl_temp_path)")
+    fi
+
+    rm -f $curl_temp_path
+}
+
+curl_helper http://metadata.google.internal/computeMetadata/v1/project/attributes/ssh-keys
+curl_helper http://metadata.google.internal/computeMetadata/v1/instance/attributes/ssh-keys
 
 if [ "$ssh_keys" != "" ]
 then
