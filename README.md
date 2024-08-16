@@ -23,7 +23,7 @@ image without Postgres:
 foo_task:
   compute_engine_instance:
     image_project: pg-ci-images
-    image: family/pg-ci-netbsd-vanilla-9-2
+    image: family/pg-ci-netbsd-vanilla
     platform: netbsd
 ```
 
