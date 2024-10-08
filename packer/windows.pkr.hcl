@@ -22,7 +22,7 @@ variable "gcp_project" {
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
 
-  perl_version = "5.26.3.1"
+  perl_version = "5.40.0.1"
   python_version = "3.10.6"
 
   windows_gcp_images = [
