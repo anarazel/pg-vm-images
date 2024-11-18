@@ -19,3 +19,7 @@ pkgin update && \
 pkgin upgrade -y && \
 pkgin -y install \
     curl
+
+# Install sudo and then set its configuration to 'users can access sudo without password'
+pkgin -y install sudo
+echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' | sudo EDITOR='tee -a' visudo
