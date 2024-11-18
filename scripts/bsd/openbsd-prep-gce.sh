@@ -23,3 +23,7 @@ pkg_add -uvI
 
 # Install curl for startup & shutdown scripts
 pkg_add -I curl
+
+# Install sudo and then set its configuration to 'users can access sudo without password'
+pkg_add -I sudo--
+echo '%wheel ALL=(ALL) NOPASSWD: SETENV: ALL' | sudo EDITOR='tee -a' visudo
