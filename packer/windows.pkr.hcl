@@ -6,6 +6,10 @@ variable "build_type" {
   default = "googlecompute"
 }
 
+variable "cirrus_build_id" {
+  default = env("CIRRUS_BUILD_ID")
+}
+
 # Packer doesn't capture errors correctly when default execute command is used.
 # See $ErrorActionPreference = 'Stop' in the new execute_command.
 # So, use new execute_command to handle VM errors correctly
@@ -36,7 +40,7 @@ source "googlecompute" "windows" {
   disk_size               = "50"
   disk_type               = "pd-ssd"
   project_id              = var.gcp_project
-  source_image_family     = "windows-2022"
+  source_image_family     = "pg-ci-windows-base"
   image_name              = local.image_identity
   zone                    = "us-west1-a"
   machine_type            = "t2d-standard-4"
@@ -67,31 +71,10 @@ build {
     }
   }
 
-  ### base installations
-  # googlecompute only
+  # set IMAGE_IDENTITY to distinguish images on CI runs
   provisioner "powershell" {
     execute_command = var.execute_command
     inline = [
-      "$ErrorActionPreference = 'Stop'",
-      # disable antivirus
-      "Set-MpPreference -DisableRealtimeMonitoring $true -SubmitSamplesConsent NeverSend -MAPSReporting Disable",
-
-      # install choco
-      "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))",
-
-      "choco install -y --no-progress 7zip",
-      "choco install -y --no-progress git --parameters=\"/GitAndUnixToolsOnPath\"",
-    ]
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    inline = [
-      "$ErrorActionPreference = 'Stop'",
-      # contains useful utilities, including a diff we can use
-      "[Environment]::SetEnvironmentVariable('PATH',  'C:\\Program Files\\Git\\usr\\bin;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
-
-      # set IMAGE_IDENTITY to distinguish images on CI runs
       "[Environment]::SetEnvironmentVariable('IMAGE_IDENTITY', '${local.image_identity}', 'Machine')",
     ]
   }
@@ -102,6 +85,7 @@ build {
     script = "scripts/windows_install_dbg.ps1"
   }
 
+  ### vs-2019 installations
   # install python
   provisioner "powershell" {
     execute_command = var.execute_command
@@ -116,6 +100,24 @@ build {
       "$ErrorActionPreference = 'Stop'",
       "py -m pip install meson ninja"
     ]
+  }
+
+  # install packages via vcpkg
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    environment_vars = ["CIRRUS_BUILD_ID=${var.cirrus_build_id}"]
+    script = "scripts/windows_install_packages_via_vcpkg.ps1"
+  }
+
+  # install packages via installers
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    script = "scripts/windows_install_pg_deps.ps1"
+  }
+
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    script = "scripts/windows_install_winflexbison.ps1"
   }
 
   # install perl
@@ -178,20 +180,9 @@ build {
   }
   ### end of mingw installations
 
-  ### vs-2019 installations
+  # clean unnecessary files
   provisioner "powershell" {
     execute_command = var.execute_command
-    script = "scripts/windows_install_winflexbison.ps1"
+    script = "scripts/windows_clean_unnecessary_files.ps1"
   }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_pg_deps.ps1"
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_vs_2019.ps1"
-  }
-  ### end of vs-2019 installations
 }

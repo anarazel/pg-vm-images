@@ -101,35 +101,42 @@ task:
   name: 'Building VM Image: ${IMAGE_NAME}'
   alias: vmbuild-${TASK_NAME}
   matrix:
-    - env:
-        TASK_NAME: freebsd-13
-        PACKERFILE: packer/freebsd.pkr.hcl
-
-    - env:
-        PACKERFILE: packer/linux_debian.pkr.hcl
-        SCRIPTS: scripts/linux_debian_*
-
+    - depends_on: cleanup-leftover-running
       matrix:
         - env:
-            TASK_NAME: bookworm
-        - env:
-            TASK_NAME: bullseye
-        - env:
-            TASK_NAME: sid
-        - env:
-            TASK_NAME: sid-newkernel
-        - env:
-            TASK_NAME: sid-newkernel-uring
+            TASK_NAME: freebsd-13
+            PACKERFILE: packer/freebsd.pkr.hcl
 
-    - env:
+        - env:
+            PACKERFILE: packer/linux_debian.pkr.hcl
+            SCRIPTS: scripts/linux_debian_*
+
+          matrix:
+            - env:
+                TASK_NAME: bookworm
+            - env:
+                TASK_NAME: bullseye
+            - env:
+                TASK_NAME: sid
+            - env:
+                TASK_NAME: sid-newkernel
+            - env:
+                TASK_NAME: sid-newkernel-uring
+
+        - env:
+            PACKERFILE: packer/windows_base.pkr.hcl
+            TASK_NAME: windows-base
+            SCRIPTS: scripts/windows*
+
+    # build-vcpkg-cache task already depends on cleanup-leftover-running task
+    - depends_on: build-vcpkg-cache
+      env:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
         TASK_NAME: windows-ci
 
   env:
     IMAGE_NAME: ${PREFIX}-${TASK_NAME}
-
-  depends_on: cleanup-leftover-running
 
   container:
     dockerfile: docker/linux_debian_packer
@@ -170,6 +177,61 @@ task:
       --project "$GCP_PROJECT" \
       --family ${IMAGE_NAME} \
       ${IMAGE_NAME}-${DATE}
+
+task:
+  name: 'Build VCPKG Cache'
+  alias: build-vcpkg-cache
+  depends_on: vmbuild-windows-base
+
+  env:
+    VCPKG_PATH: ${CIRRUS_WORKING_DIR}\vcpkg
+    VCPKG_CACHE: ${VCPKG_PATH}\binary_cache
+    CIRRUS_SHELL: powershell
+    ErrorActionPreference: Stop
+
+  compute_engine_instance:
+    image_project: $GCP_PROJECT
+    image: family/pg-ci-windows-base
+    platform: windows
+    cpu: 4
+    disk: 50
+
+  sysinfo_script: |
+    chcp
+    systeminfo
+    get-psdrive -psprovider filesystem
+    Get-ChildItem -Path Env:
+
+  clone_vcpkg_script:
+    git clone --depth 1 https://github.com/Microsoft/vcpkg.git ${Env:VCPKG_PATH}
+
+  vcpkg_cache:
+    folder: ${VCPKG_CACHE}
+
+  install_vcpkg_packages_script:
+    .\scripts\windows_install_packages_via_vcpkg.ps1 -GenerateCacheTask
+
+  upload_caches: vcpkg
+
+  vcpkg_cache_zip_artifacts:
+    path: pg-deps.7z
+
+
+task:
+  name: Clean up Windows base images
+  depends_on: vmbuild-windows-ci
+
+  container:
+    dockerfile: docker/linux_debian_packer
+    cpu: 0.5
+    memory: 256Mi
+
+  <<: *gcp_auth_unix
+
+  # There could be leftover windows-base images, so delete all of them
+  cleanup_windows_base_images_script: |
+    export IMAGES=$(gcloud compute images list --project $GCP_PROJECT --format='object value(name)' --no-standard-images | grep "$PREFIX-windows-base")
+    gcloud compute images delete --quiet --project $GCP_PROJECT $IMAGES
 
 
 task:
