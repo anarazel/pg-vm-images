@@ -8,7 +8,7 @@ export BASE_IMAGE_IDENTITY IMAGE_IDENTITY
 
 if [ "$(uname)" = "NetBSD" ]
 then
-    export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/pkg/bin:/usr/pkg/sbin
+    export PATH=/usr/pkg/bin:/usr/pkg/sbin:/usr/bin:/bin:/usr/sbin:/sbin
 
     # restarting syslogd
     restart_syslogd()
