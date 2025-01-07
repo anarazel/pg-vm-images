@@ -21,6 +21,7 @@ pkgin -y install \
     icu \
     lz4 \
     libxslt \
+    mit-krb5 \
     tcl \
     zstd
 
