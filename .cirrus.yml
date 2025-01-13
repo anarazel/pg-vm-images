@@ -102,7 +102,7 @@ task:
   alias: vmbuild-${TASK_NAME}
   matrix:
     - env:
-        TASK_NAME: freebsd-13
+        TASK_NAME: freebsd-14
         PACKERFILE: packer/freebsd.pkr.hcl
 
     - env:
@@ -144,6 +144,9 @@ task:
 
   info_script:
     - packer --version
+
+  packer_init_script:
+    - packer init ${PACKERFILE}
 
   export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
@@ -218,6 +221,9 @@ task:
 
   info_script:
     - packer --version
+
+  packer_init_script:
+    - packer init ${PACKERFILE}
 
   export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
