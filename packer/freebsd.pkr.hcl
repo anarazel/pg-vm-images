@@ -7,7 +7,7 @@ locals {
 
   freebsd_gcp_images = [
     {
-      task_name = "freebsd-13"
+      task_name = "freebsd-14"
       zone = "us-west1-a"
     },
   ]
@@ -20,11 +20,12 @@ source "googlecompute" "freebsd-vanilla" {
   project_id              = var.gcp_project
   image_name              = "${local.image_identity}"
   instance_name           = "build-${local.image_identity}"
-  source_image_family     = "freebsd-13-3"
+  source_image_family     = "freebsd-14-2"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   machine_type            = "t2d-standard-2"
   ssh_pty                 = "true"
   ssh_username            = "packer"
+  temporary_key_pair_type = "ed25519"
 }
 
 
@@ -97,7 +98,7 @@ build {
         if pkg info p5-IO-Tty | grep -E '^Version *: *1.20$' ; then
           GOOD_PKG="p5-IO-Tty-1.17.pkg"
           pkg remove -y p5-IO-Tty
-          curl -O "https://pkg.freebsd.org/freebsd:13:x86:64/release_2/All/$GOOD_PKG"
+          curl -O "https://pkg.freebsd.org/freebsd:14:x86:64/release_0/All/$GOOD_PKG"
           pkg install -y $GOOD_PKG
           rm $GOOD_PKG
           pkg install -y p5-IPC-Run
@@ -147,10 +148,6 @@ build {
         echo 'kern.timecounter.invariant_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc=1' | tee -a /boot/loader.conf
         echo 'kern.timecounter.smp_tsc_adjust=1' | tee -a /boot/loader.conf
-
-        # Freebsd 13.2 causes problems with tcl if the timezone is not explicitly configured
-        # https://postgr.es/m/20230731191510.pebqeiuo2sbmlcfh%40awork3.anarazel.de
-        tzsetup UTC
       SCRIPT
     ]
   }
