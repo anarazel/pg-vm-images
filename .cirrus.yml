@@ -102,7 +102,7 @@ task:
   alias: vmbuild-${TASK_NAME}
   matrix:
     - env:
-        TASK_NAME: freebsd-13
+        TASK_NAME: freebsd-14
         PACKERFILE: packer/freebsd.pkr.hcl
 
     - env:

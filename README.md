@@ -29,7 +29,7 @@ foo_task:
 
 The following images are available:
 
--   FreeBSD images with Postgres are available in the family `pg-ci-freebsd-13`.
+-   FreeBSD images with Postgres are available in the family `pg-ci-freebsd-14`.
     (If you are looking for images without Postgres, just use FreeBSD's
     [official GCP images](https://cloud.google.com/compute/docs/images#freebsd).)
 
