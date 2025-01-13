@@ -19,9 +19,17 @@ RUN \
   curl \
     -fs \
     -o /usr/share/keyrings/cloud.google.asc \
-    https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
+    https://packages.cloud.google.com/apt/doc/apt-key.gpg \
+    && \
+  echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.asc] https://apt.releases.hashicorp.com bullseye main" > \
+    /etc/apt/sources.list.d/hashicorp.list && \
+  curl \
+    -fs \
+    -o /usr/share/keyrings/hashicorp-archive-keyring.asc \
+    https://apt.releases.hashicorp.com/gpg \
+    && \
   apt-get update -y && \
   apt-get install --no-install-recommends -y \
-    google-cloud-sdk \
+    google-cloud-sdk packer \
     && \
   apt-get clean && rm -rf /var/lib/apt/lists/*

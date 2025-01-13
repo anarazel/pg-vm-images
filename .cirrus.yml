@@ -145,6 +145,9 @@ task:
   info_script:
     - packer --version
 
+  packer_init_script:
+    - packer init ${PACKERFILE}
+
   export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')
     echo "DATE=${DATE}" | tee -a $CIRRUS_ENV
@@ -218,6 +221,9 @@ task:
 
   info_script:
     - packer --version
+
+  packer_init_script:
+    - packer init ${PACKERFILE}
 
   export_date_script: |
     DATE=$(date --utc +'%Y-%m-%dt%H-%M-%S')

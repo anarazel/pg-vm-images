@@ -11,6 +11,19 @@ variable "postgres_name" { type = list(map(string)) }
 variable "vanilla_name" { type = list(map(string)) }
 variable "prefix" {type = string }
 
+packer {
+  required_plugins {
+    googlecompute = {
+      source  = "github.com/hashicorp/googlecompute"
+      version = "~> 1"
+    }
+    qemu = {
+      version = "~> 1"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
+
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
 }
