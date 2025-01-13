@@ -1,6 +1,15 @@
 variable "image_name" { type = string }
 variable "image_date" { type = string }
 
+packer {
+  required_plugins {
+    googlecompute = {
+      source  = "github.com/hashicorp/googlecompute"
+      version = "~> 1"
+    }
+  }
+}
+
 variable "build_type" {
   type = string
   default = "googlecompute"

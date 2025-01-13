@@ -2,6 +2,15 @@ variable "image_date" { type = string }
 variable "gcp_project" { type = string }
 variable "image_name" { type = string }
 
+packer {
+  required_plugins {
+    googlecompute = {
+      source  = "github.com/hashicorp/googlecompute"
+      version = "~> 1"
+    }
+  }
+}
+
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
 
