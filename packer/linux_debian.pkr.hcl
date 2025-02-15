@@ -90,7 +90,12 @@ build {
 
         # Remove unnecessary packages, to reduce image size
         apt-get purge -y \
-          man-db unattended-upgrades gnupg publicsuffix \
+          cron \
+          gnupg \
+          publicsuffix \
+          unattended-upgrades \
+          exim4 \
+          man-db
 
         # For unknown reasons occasionally the source image doesn't contain google-cloud-sdk, making the uninstallation fail
         apt-get purge -y google-cloud-sdk || true
