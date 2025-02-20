@@ -92,19 +92,6 @@ build {
           openldap25-client \
           openldap25-server
 
-        # === begin temporary workaround for broken p5-IO-Tty 1.20 ===
-        # https://github.com/cpan-authors/IO-Tty/issues/38
-        # https://www.postgresql.org/message-id/flat/757523.1705091568%40sss.pgh.pa.us
-        if pkg info p5-IO-Tty | grep -E '^Version *: *1.20$' ; then
-          GOOD_PKG="p5-IO-Tty-1.17.pkg"
-          pkg remove -y p5-IO-Tty
-          curl -O "https://pkg.freebsd.org/freebsd:14:x86:64/release_0/All/$GOOD_PKG"
-          pkg install -y $GOOD_PKG
-          rm $GOOD_PKG
-          pkg install -y p5-IPC-Run
-        fi
-        # === end temporary workaround for broken p5-IO-Tty ===
-
         # remove temporary files
         pkg clean -ay
         rm -fr /usr/ports /usr/src /usr/tests /usr/lib/debug
