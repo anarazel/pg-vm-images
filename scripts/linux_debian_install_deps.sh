@@ -29,6 +29,7 @@ apt-get -y install --no-install-recommends \
   libipc-run-perl \
   python3-setuptools \
   \
+  libcurl4-openssl-dev \
   libicu-dev \
   libkrb5-*-heimdal \
   libkrb5-dev \
@@ -46,8 +47,8 @@ apt-get -y install --no-install-recommends \
   libxml2-dev \
   libxslt1-dev \
   libzstd-dev \
-  llvm-dev \
   llvm-16-dev \
+  llvm-dev \
   systemtap-sdt-dev \
   tcl-dev \
   uuid-dev \
@@ -88,6 +89,7 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
   apt-get -y install --no-install-recommends --no-remove \
     gcc-multilib \
     \
+    libcurl4-openssl-dev:i386 \
     libicu-dev:i386 \
     libkrb5-*-heimdal:i386 \
     libkrb5-dev:i386 \
