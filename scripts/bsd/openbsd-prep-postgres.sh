@@ -51,3 +51,4 @@ cat ${FSTAB_FILE}
 # Set kernel parameters for running postgres tests
 echo "/sbin/sysctl kern.seminfo.semmni=2048" >> /etc/rc.local
 echo "/sbin/sysctl kern.seminfo.semmns=32768" >> /etc/rc.local
+echo "/sbin/sysctl kern.maxfiles=10000" >> /etc/rc.local
