@@ -7,7 +7,7 @@ pre-commit:
 	packer validate \
 	  -var gcp_project=pg-ci-images-dev \
 	  -var "image_date=$(IMAGE_DATE)" \
-	  -var "image_name=freebsd-14" \
+	  -var "image_name=freebsd" \
 	  packer/freebsd.pkr.hcl
 #	Debian Bullseye
 	packer validate \

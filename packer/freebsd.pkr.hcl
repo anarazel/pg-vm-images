@@ -7,7 +7,7 @@ locals {
 
   freebsd_gcp_images = [
     {
-      task_name = "freebsd-14"
+      task_name = "freebsd"
       zone = "us-west1-a"
     },
   ]
