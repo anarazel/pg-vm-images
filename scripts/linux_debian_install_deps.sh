@@ -18,7 +18,7 @@ apt-get -y install --no-install-recommends \
   bison \
   ccache \
   clang \
-  clang-16 \
+  '?name(clang-16)' \
   flex \
   g++ \
   gcc \
@@ -47,7 +47,7 @@ apt-get -y install --no-install-recommends \
   libxml2-dev \
   libxslt1-dev \
   libzstd-dev \
-  llvm-16-dev \
+  '?name(llvm-16-dev)' \
   llvm-dev \
   systemtap-sdt-dev \
   tcl-dev \
