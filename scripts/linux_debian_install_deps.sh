@@ -35,6 +35,7 @@ apt-get -y install --no-install-recommends \
   libkrb5-dev \
   libldap2-dev \
   liblz4-dev \
+  libnuma-dev \
   libossp-uuid-dev \
   libpam-dev \
   libperl-dev \
