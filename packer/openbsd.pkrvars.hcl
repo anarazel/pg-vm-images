@@ -2,7 +2,7 @@ name = "openbsd"
 boot_command = [
   "S<enter><wait>",
   "cat <<EOF >>install.conf<enter>",
-  "System hostname = openbsd73<enter>",
+  "System hostname = openbsd77<enter>",
   "Password for root = packer<enter>",
   "Allow root ssh login = yes<enter>",
   "What timezone are you in = Etc/UTC<enter>",
@@ -12,11 +12,11 @@ boot_command = [
   "EOF<enter>",
   "install -af install.conf && reboot<enter>"
 ]
-iso_checksum = "sha256:034435c6e27405d5a7fafb058162943c194eb793dafdc412c08d49bb56b3892a"
+iso_checksum = "sha256:da0106e39463f015524dca806f407c37a9bdd17e6dfffe533b06a2dd2edd8a27"
 iso_urls                = [
-  "install75.iso",
-  "https://cdn.openbsd.org/pub/OpenBSD/7.5/amd64/install75.iso"
+  "install77.iso",
+  "https://cdn.openbsd.org/pub/OpenBSD/7.7/amd64/install77.iso"
 ]
-output_file_name = "output/openbsd7-5.tar.gz"
+output_file_name = "output/openbsd7-7.tar.gz"
 vanilla_name = [ { name = "openbsd-vanilla" } ]
 postgres_name = [ { name = "openbsd-postgres" } ]
