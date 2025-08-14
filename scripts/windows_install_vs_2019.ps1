@@ -14,7 +14,7 @@ Start-Process -Wait `
       '--quiet', '--wait', '--norestart', '--nocache', `
       '--installPath', 'c:\BuildTools', `
       '--add', 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', `
-      '--add', 'Microsoft.VisualStudio.Component.Windows10SDK.20348'
+      '--add', 'Microsoft.VisualStudio.Component.Windows11SDK.22621'
 if (!$?) { throw 'cmdfail' }
 
 [Environment]::SetEnvironmentVariable('PATH',  'C:\BuildTools\VC\Auxiliary\Build;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
