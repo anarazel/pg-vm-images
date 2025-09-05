@@ -178,7 +178,7 @@ build {
   }
   ### end of mingw installations
 
-  ### vs-2019 installations
+  ### Visual Studio installations
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_winflexbison.ps1"
@@ -191,7 +191,7 @@ build {
 
   provisioner "powershell" {
     execute_command = var.execute_command
-    script = "scripts/windows_install_vs_2019.ps1"
+    script = "scripts/windows_install_vs.ps1"
   }
-  ### end of vs-2019 installations
+  ### end of Visual Studio installations
 }
