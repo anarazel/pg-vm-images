@@ -13,6 +13,7 @@ pkgin -y install \
     meson \
     bison \
     ccache \
+    docbook-xml \
     p5-IPC-Run \
     flex \
     pkgconf \
