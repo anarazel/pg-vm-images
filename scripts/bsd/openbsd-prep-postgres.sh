@@ -16,6 +16,7 @@ pkg_add -I \
     \
     p5-IPC-Run \
     \
+    docbook \
     icu4c \
     libxml \
     libxslt \

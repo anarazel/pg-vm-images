@@ -79,6 +79,7 @@ build {
           p5-IPC-Run \
           \
           curl \
+          docbook-xml \
           liblz4 \
           libbacktrace \
           libxml2 \
