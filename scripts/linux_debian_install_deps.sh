@@ -73,8 +73,8 @@ apt-get -y install --no-install-recommends \
   slapd \
   zstd \
   \
-  g++-mingw-w64-x86-64-win32 \
-  gcc-mingw-w64-x86-64-win32 \
+  g++-mingw-w64-ucrt64 \
+  gcc-mingw-w64-ucrt64 \
   libz-mingw-w64-dev \
   mingw-w64-tools
 
