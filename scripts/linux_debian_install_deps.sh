@@ -4,6 +4,24 @@ set -e
 
 export DEBIAN_FRONTEND=noninteractive
 
+
+temp_ver=$(cat /etc/debian_version)
+case "$temp_ver" in
+  sid|*/sid)
+    # Set version to 999 for Debian Sid, this is helpful for comparing
+    # version numbers
+    MAJOR_DEBIAN_VERSION=999
+    ;;
+  *)
+    MAJOR_DEBIAN_VERSION=$(echo "$temp_ver" | cut -d. -f1)
+  ;;
+esac
+
+if [ "$MAJOR_DEBIAN_VERSION" -lt 11 ]; then
+  echo "Oldest supported Debian release is 'bullseye'"
+  exit 1
+fi
+
 apt-get -y install --no-install-recommends \
   procps \
   \
@@ -73,10 +91,21 @@ apt-get -y install --no-install-recommends \
   slapd \
   zstd \
   \
-  g++-mingw-w64-x86-64-win32 \
-  gcc-mingw-w64-x86-64-win32 \
   libz-mingw-w64-dev \
   mingw-w64-tools
+
+# g++-mingw-w64-x86-64-win32 and gcc-mingw-w64-x86-64-win32 packages have
+# missing some functions in the headers starting from trixie, install ucrt64
+# versions on these releases.
+if [ "$MAJOR_DEBIAN_VERSION" -lt "13" ] ; then
+  apt-get -y install --no-install-recommends \
+    g++-mingw-w64-x86-64-win32 \
+    gcc-mingw-w64-x86-64-win32
+else
+  apt-get -y install --no-install-recommends \
+    g++-mingw-w64-ucrt64 \
+    gcc-mingw-w64-ucrt64
+fi
 
 if [ $(dpkg --print-architecture) = "amd64" ] ; then
 
