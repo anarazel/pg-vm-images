@@ -111,6 +111,8 @@ task:
 
       matrix:
         - env:
+            TASK_NAME: trixie
+        - env:
             TASK_NAME: bookworm
         - env:
             TASK_NAME: bullseye
@@ -289,6 +291,8 @@ task:
             DEBIAN_RELEASE: bullseye
         - env:
             DEBIAN_RELEASE: bookworm
+        - env:
+            DEBIAN_RELEASE: trixie
 
   skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_ci')
 
@@ -334,6 +338,8 @@ task:
         IMAGE_NAME: linux_debian_bullseye_ci
     - env:
         IMAGE_NAME: linux_debian_bookworm_ci
+    - env:
+        IMAGE_NAME: linux_debian_trixie_ci
   depends_on:
     - dockerbuild-${IMAGE_NAME}
   container:
@@ -351,6 +357,8 @@ task:
 #         IMAGE_NAME: linux_debian_bullseye_ci
 #     - env:
 #         IMAGE_NAME: linux_debian_bookworm_ci
+#     - env:
+#         IMAGE_NAME: linux_debian_trixie_ci
 #  depends_on:
 #    - ${IMAGE_NAME}
 #  arm_container:

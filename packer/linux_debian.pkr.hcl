@@ -7,6 +7,12 @@ locals {
 
   debian_gcp_images = [
     {
+      task_name = "trixie"
+      zone = "us-west1-a"
+      machine = "t2d-standard-2"
+      source_image_family = "debian-13"
+    },
+    {
       task_name = "bookworm"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
@@ -122,7 +128,7 @@ build {
         apt-get update -y
       SCRIPT
     ]
-    only = ["googlecompute.bullseye", "googlecompute.bookworm"]
+    only = ["googlecompute.bullseye", "googlecompute.bookworm", "googlecompute.trixie"]
   }
 
   provisioner "shell" {

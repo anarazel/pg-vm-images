@@ -21,6 +21,12 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=bookworm" \
 	  packer/linux_debian.pkr.hcl
+#	Debian Trixie
+	packer validate \
+	  -var gcp_project=pg-ci-images-dev \
+	  -var "image_date=$(IMAGE_DATE)" \
+	  -var "image_name=trixie" \
+	  packer/linux_debian.pkr.hcl
 #	Windows VM
 	packer validate \
 	  -var gcp_project=pg-ci-images-dev \
