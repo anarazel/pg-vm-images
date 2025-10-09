@@ -20,7 +20,7 @@ source "googlecompute" "freebsd-vanilla" {
   project_id              = var.gcp_project
   image_name              = "${local.image_identity}"
   instance_name           = "build-${local.image_identity}"
-  source_image_family     = "freebsd-14-2"
+  source_image_family     = "freebsd-14-3"
   source_image_project_id = ["freebsd-org-cloud-dev"]
   machine_type            = "t2d-standard-2"
   ssh_pty                 = "true"
