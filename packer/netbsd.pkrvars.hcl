@@ -52,11 +52,11 @@ boot_command = [
   "echo '/sbin/dhcpcd -4' > /etc/rc.local<enter><wait5s>",
   "reboot<enter>"
 ]
-iso_checksum = "sha256:59afa864ce54b70cadffe846a251cb8462e868188154cbb1babfa92bebf1c2a0"
+iso_checksum = "sha256:505e4fb6de7996ad3544bd2d770d5c597f4da6a105dc6c3843395943f3d0dd6f"
 iso_urls = [
-  "NetBSD-10.0-amd64.iso",
-  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-10.0/images/NetBSD-10.0-amd64.iso"
+  "NetBSD-10.1-amd64.iso",
+  "https://cdn.netbsd.org/pub/NetBSD/NetBSD-10.1/images/NetBSD-10.1-amd64.iso"
 ]
-output_file_name = "output/netbsd10-0.tar.gz"
+output_file_name = "output/netbsd10-1.tar.gz"
 vanilla_name = [ { name = "netbsd-vanilla" } ]
 postgres_name = [ { name = "netbsd-postgres" } ]
