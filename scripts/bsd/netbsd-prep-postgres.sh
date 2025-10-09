@@ -32,3 +32,13 @@ echo "alias pip3=pip3.12" >> ~/.bashrc
 # Set kernel parameters for running postgres tests
 echo "sysctl -w kern.ipc.semmni=2048" >> /etc/rc.local
 echo "sysctl -w kern.ipc.semmns=32768" >> /etc/rc.local
+
+# Generate more verbose boot logs, helpful for debugging
+awk '/Boot normally/ {
+    new=$0;
+    sub(/normally/, "verbose", new);
+    sub(/boot$/, "boot -v", new);
+    print new;
+}
+{ print }
+' /boot.cfg > /boot.cfg.new && mv /boot.cfg.new /boot.cfg
