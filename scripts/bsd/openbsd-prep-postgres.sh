@@ -14,7 +14,9 @@ pkg_add -I \
     ccache \
     gettext-tools \
     \
+    gnupg \
     p5-IPC-Run \
+    p5-Module-Signature \
     \
     docbook \
     icu4c \
@@ -30,6 +32,16 @@ pkg_add -I \
     login_krb5 \
     openldap-client--gssapi \
     openldap-server--gssapi
+
+# Upgrade the IPC::Run version to latest.
+export MODULE_SIGNATURE_KEYSERVER=pgpkeys.eu
+(
+ echo;                            # automate first-time setup
+ echo o conf check_sigs 1;        # check signatures
+ echo o conf init gpg; echo;      # use the default path for gpg
+ echo o conf recommends_policy 0; # don't install "recommended" modules
+ echo notest install IPC::Run;
+) | cpan
 
 #####
 # Add 'noatime' and 'softdep' to the mount points
