@@ -14,7 +14,9 @@ pkg_add -I \
     ccache \
     gettext-tools \
     \
+    gnupg \
     p5-IPC-Run \
+    p5-Module-Signature \
     \
     docbook \
     icu4c \

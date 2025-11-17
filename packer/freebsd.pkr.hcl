@@ -76,7 +76,9 @@ build {
           flex \
           gettext \
           \
+          gnupg \
           p5-IPC-Run \
+          p5-Module-Signature \
           \
           curl \
           docbook-xml \
@@ -142,6 +144,10 @@ build {
         echo 'kern.timecounter.smp_tsc_adjust=1' | tee -a /boot/loader.conf
       SCRIPT
     ]
+  }
+
+  provisioner "shell" {
+    script = "scripts/update_ipc_run.sh"
   }
 
   # set IMAGE_IDENTITY to distinguish images on CI runs
