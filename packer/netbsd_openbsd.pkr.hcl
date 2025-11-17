@@ -175,6 +175,10 @@ build {
     only = ["googlecompute.openbsd-postgres"]
   }
 
+  provisioner "shell" {
+    script = "scripts/update_ipc_run.sh"
+  }
+
   # set IMAGE_IDENTITY to distinguish images on CI runs
   provisioner "shell" {
     inline = [

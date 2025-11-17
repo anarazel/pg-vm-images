@@ -199,6 +199,11 @@ build {
 
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    script = "scripts/update_ipc_run.sh"
+  }
+
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
         git clone --single-branch --depth 1 git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git /usr/src/linux

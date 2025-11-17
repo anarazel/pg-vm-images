@@ -14,7 +14,9 @@ pkgin -y install \
     bison \
     ccache \
     docbook-xml \
+    gnupg \
     p5-IPC-Run \
+    p5-Module-Signature \
     flex \
     pkgconf \
     python312 \
