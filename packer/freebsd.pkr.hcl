@@ -76,7 +76,9 @@ build {
           flex \
           gettext \
           \
+          gnupg \
           p5-IPC-Run \
+          p5-Module-Signature \
           \
           curl \
           docbook-xml \
@@ -93,6 +95,16 @@ build {
           krb5 \
           openldap25-client \
           openldap25-server
+
+        # Upgrade the IPC::Run version to latest.
+        export MODULE_SIGNATURE_KEYSERVER=pgpkeys.eu
+        (
+         echo;                            # automate first-time setup
+         echo o conf check_sigs 1;        # check signatures
+         echo o conf init gpg; echo;      # use the default path for gpg
+         echo o conf recommends_policy 0; # don't install "recommended" modules
+         echo notest install IPC::Run;
+        ) | cpan
 
         # remove temporary files
         pkg clean -ay
