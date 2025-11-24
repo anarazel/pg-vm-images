@@ -315,6 +315,13 @@ build {
     ]
   }
 
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      "tune2fs -o journal_data_writeback /dev/sda1",
+    ]
+  }
+
   # reboot to verify we still boot
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
