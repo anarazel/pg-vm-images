@@ -19,6 +19,10 @@ variable "gcp_project" {
   default = ""
 }
 
+variable "github_token" {
+  default = env("CIRRUS_REPO_CLONE_TOKEN")
+}
+
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
 
@@ -109,15 +113,6 @@ build {
     script = "scripts/windows_install_python.ps1"
   }
 
-  # install meson and ninja
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    inline = [
-      "$ErrorActionPreference = 'Stop'",
-      "py -m pip install meson ninja"
-    ]
-  }
-
   # install perl
   provisioner "powershell" {
     execute_command = var.execute_command
@@ -133,12 +128,6 @@ build {
       "[Environment]::SetEnvironmentVariable('DEFAULT_PERL_VERSION', '${local.perl_version}', 'Machine')",
       "[Environment]::SetEnvironmentVariable('PATH',  \"C:\\strawberry\\${local.perl_version}\\perl\\bin;\" + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')",
     ]
-  }
-
-  # install openssl
-  provisioner "powershell" {
-    execute_command = var.execute_command
-    script = "scripts/windows_install_openssl.ps1"
   }
   ### end of base installations
 
@@ -181,11 +170,7 @@ build {
   ### Visual Studio installations
   provisioner "powershell" {
     execute_command = var.execute_command
-    script = "scripts/windows_install_winflexbison.ps1"
-  }
-
-  provisioner "powershell" {
-    execute_command = var.execute_command
+    environment_vars = ["GITHUB_TOKEN=${var.github_token}"]
     script = "scripts/windows_install_pg_deps.ps1"
   }
 
