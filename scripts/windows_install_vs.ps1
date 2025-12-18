@@ -30,6 +30,11 @@ function InstallVS($Version, $Link)
 
 InstallVS "2019" "https://aka.ms/vs/16/release/vs_buildtools.exe"
 InstallVS "2022" "https://aka.ms/vs/17/release/vs_buildtools.exe"
+# There is no versioned URL for VS 2026, so use the general stable channel URL
+# as a temporary workaround. This should be updated to a versioned URL once
+# available. See:
+# https://developercommunity.visualstudio.com/t/Missing-Version-Specific-Download-Link-f/11002499
+InstallVS "2026" "https://aka.ms/vs/stable/vs_buildtools.exe"
 
 # Set VS-2019 as default
 [Environment]::SetEnvironmentVariable('PATH',  'C:\VS_2019\VC\Auxiliary\Build;' + [Environment]::GetEnvironmentVariable('PATH', 'Machine'), 'Machine')
