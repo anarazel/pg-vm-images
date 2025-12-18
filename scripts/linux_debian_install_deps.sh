@@ -43,8 +43,10 @@ apt-get -y install --no-install-recommends \
   gettext \
   python3-pip \
   \
+  gnupg \
   libio-pty-perl \
   libipc-run-perl \
+  libmodule-signature-perl \
   python3-setuptools \
   \
   libcurl4-openssl-dev \
@@ -139,3 +141,13 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
     tcl-dev:i386 \
     uuid-dev:i386
 fi
+
+# Upgrade the IPC::Run version to latest.
+export MODULE_SIGNATURE_KEYSERVER=pgpkeys.eu
+(
+ echo;                            # automate first-time setup
+ echo o conf check_sigs 1;        # check signatures
+ echo o conf init gpg; echo;      # use the default path for gpg
+ echo o conf recommends_policy 0; # don't install "recommended" modules
+ echo notest install IPC::Run;
+) | cpan

@@ -14,7 +14,9 @@ pkgin -y install \
     bison \
     ccache \
     docbook-xml \
+    gnupg \
     p5-IPC-Run \
+    p5-Module-Signature \
     flex \
     pkgconf \
     python312 \
@@ -25,6 +27,16 @@ pkgin -y install \
     mit-krb5 \
     tcl \
     zstd
+
+# Upgrade the IPC::Run version to latest.
+export MODULE_SIGNATURE_KEYSERVER=pgpkeys.eu
+(
+ echo;                            # automate first-time setup
+ echo o conf check_sigs 1;        # check signatures
+ echo o conf init gpg; echo;      # use the default path for gpg
+ echo o conf recommends_policy 0; # don't install "recommended" modules
+ echo notest install IPC::Run;
+) | cpan
 
 echo "alias python3=python3.12" >> ~/.bashrc
 echo "alias pip3=pip3.12" >> ~/.bashrc
