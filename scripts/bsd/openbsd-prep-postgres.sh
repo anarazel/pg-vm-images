@@ -47,3 +47,25 @@ cat ${FSTAB_FILE}
 echo "/sbin/sysctl kern.seminfo.semmni=2048" >> /etc/rc.local
 echo "/sbin/sysctl kern.seminfo.semmns=32768" >> /etc/rc.local
 echo "/sbin/sysctl kern.maxfiles=10000" >> /etc/rc.local
+
+# Max process limit for user was 256 on OpenBSD and that was causing problems
+# on the Postgres tests. Set max process limit to 4096 and current max
+# processes to 512.
+awk 'BEGIN { in_default = 0 }
+/^default:\\/ {
+    in_default = 1
+    print
+    next
+}
+/^[^[:space:]].*:\\/ {
+    in_default = 0
+    print
+    next
+}
+in_default {
+    gsub(/:maxproc-max=[0-9]+/, ":maxproc-max=4096")
+    gsub(/:maxproc-cur=[0-9]+/, ":maxproc-cur=512")
+}
+{ print }
+' /etc/login.conf > /etc/login.conf.new && mv /etc/login.conf.new /etc/login.conf
+cap_mkdb /etc/login.conf
