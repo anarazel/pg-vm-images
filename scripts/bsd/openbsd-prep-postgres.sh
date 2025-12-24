@@ -22,6 +22,9 @@ pkg_add -I \
     libxslt \
     lz4 \
     openpam \
+    py3-cryptography \
+    py3-packaging \
+    py3-test \
     python%3 \
     readline \
     tcl%8.6 \

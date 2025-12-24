@@ -45,6 +45,9 @@ apt-get -y install --no-install-recommends \
   \
   libio-pty-perl \
   libipc-run-perl \
+  python3-cryptography \
+  python3-packaging \
+  python3-pytest \
   python3-setuptools \
   \
   libcurl4-openssl-dev \
