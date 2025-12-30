@@ -11,7 +11,7 @@ echo 'installing python'
 
 Start-Process -Wait -FilePath "$filepath" `
   -ArgumentList `
-    '/quiet', 'SimpleInstall=1', 'PrependPath=1', 'CompileAll=1', `
+    '/quiet', 'PrependPath=1', 'CompileAll=1', `
     'TargetDir=c:\python\', 'InstallAllUsers=1', 'Shortcuts=0', `
     'Include_docs=0', 'Include_tcltk=0', 'Include_tests=0'
 if (!$?) { throw 'cmdfail' }
