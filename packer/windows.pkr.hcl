@@ -109,12 +109,12 @@ build {
     script = "scripts/windows_install_python.ps1"
   }
 
-  # install meson and ninja
+  # install meson, ninja, and pytest
   provisioner "powershell" {
     execute_command = var.execute_command
     inline = [
       "$ErrorActionPreference = 'Stop'",
-      "py -m pip install meson ninja"
+      "py -m pip install cryptography meson ninja packaging pytest"
     ]
   }
 

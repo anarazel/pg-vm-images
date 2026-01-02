@@ -85,7 +85,10 @@ build {
           libxml2 \
           libxslt \
           python3 \
+          'py*-cryptography' \
+          'py*-packaging' \
           'py*-pip' \
+          'py*-pytest' \
           readline \
           tcl86 \
           zstd \
