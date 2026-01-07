@@ -371,6 +371,14 @@ task:
   name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   matrix:
     - env:
+        IMAGE_NAME: bookworm
+        PLATFORM: linux
+
+    - env:
+        IMAGE_NAME: trixie
+        PLATFORM: linux
+
+    - env:
         IMAGE_NAME: netbsd-postgres
         PLATFORM: netbsd
 
@@ -379,7 +387,7 @@ task:
         PLATFORM: openbsd
 
   depends_on:
-    - vmbuild-${PLATFORM}-postgres
+    - vmbuild-${IMAGE_NAME}
 
   compute_engine_instance:
     image_project: $GCP_PROJECT
