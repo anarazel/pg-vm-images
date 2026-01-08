@@ -17,8 +17,8 @@ case "$temp_ver" in
   ;;
 esac
 
-if [ "$MAJOR_DEBIAN_VERSION" -lt 11 ]; then
-  echo "Oldest supported Debian release is 'bullseye'"
+if [ "$MAJOR_DEBIAN_VERSION" -lt 12 ]; then
+  echo "Oldest supported Debian release is 'bookworm'"
   exit 1
 fi
 
