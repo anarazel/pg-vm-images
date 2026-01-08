@@ -9,12 +9,6 @@ pre-commit:
 	  -var "image_date=$(IMAGE_DATE)" \
 	  -var "image_name=freebsd" \
 	  packer/freebsd.pkr.hcl
-#	Debian Bullseye
-	packer validate \
-	  -var gcp_project=pg-ci-images-dev \
-	  -var "image_date=$(IMAGE_DATE)" \
-	  -var "image_name=bullseye" \
-	  packer/linux_debian.pkr.hcl
 #	Debian Bookworm
 	packer validate \
 	  -var gcp_project=pg-ci-images-dev \

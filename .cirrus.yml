@@ -115,8 +115,6 @@ task:
         - env:
             TASK_NAME: bookworm
         - env:
-            TASK_NAME: bullseye
-        - env:
             TASK_NAME: sid
         - env:
             TASK_NAME: sid-newkernel
@@ -288,8 +286,6 @@ task:
         IMAGE: linux_debian_${DEBIAN_RELEASE}_ci
       matrix:
         - env:
-            DEBIAN_RELEASE: bullseye
-        - env:
             DEBIAN_RELEASE: bookworm
         - env:
             DEBIAN_RELEASE: trixie
@@ -335,8 +331,6 @@ task:
   name: 'Testing Container Image: ${IMAGE_NAME}'
   matrix:
     - env:
-        IMAGE_NAME: linux_debian_bullseye_ci
-    - env:
         IMAGE_NAME: linux_debian_bookworm_ci
     - env:
         IMAGE_NAME: linux_debian_trixie_ci
@@ -353,8 +347,6 @@ task:
 # task:
 #  name: 'Testing Arm Container Image: ${IMAGE_NAME}'
 #   matrix:
-#     - env:
-#         IMAGE_NAME: linux_debian_bullseye_ci
 #     - env:
 #         IMAGE_NAME: linux_debian_bookworm_ci
 #     - env:

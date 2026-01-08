@@ -19,12 +19,6 @@ locals {
       source_image_family = "debian-12"
     },
     {
-      task_name = "bullseye"
-      zone = "us-west1-a"
-      machine = "t2d-standard-2"
-      source_image_family = "debian-11"
-    },
-    {
       task_name = "sid"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
@@ -128,7 +122,7 @@ build {
         apt-get update -y
       SCRIPT
     ]
-    only = ["googlecompute.bullseye", "googlecompute.bookworm", "googlecompute.trixie"]
+    only = ["googlecompute.bookworm", "googlecompute.trixie"]
   }
 
   provisioner "shell" {
