@@ -4,13 +4,17 @@ FROM debian:${DEBIAN_RELEASE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-COPY /scripts/linux_debian_install_deps.sh /scripts/
+COPY /scripts/linux_debian_install_deps.sh /scripts/update_ipc_run.sh /scripts/
 
+# The default port for hkp:// (11371) appears to be blocked somewhere in the
+# Cirrus docker-builder, causing the IPC::Run update to fail. Set
+# MODULE_SIGNATURE_KEYSERVERPORT to 80 to work around it.
 RUN \
   apt-get -y update && \
   apt-get -y upgrade && \
   /scripts/linux_debian_install_deps.sh && \
-  rm /scripts/linux_debian_install_deps.sh && \
+  MODULE_SIGNATURE_KEYSERVERPORT=80 /scripts/update_ipc_run.sh && \
+  rm /scripts/linux_debian_install_deps.sh /scripts/update_ipc_run.sh && \
   apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ARG DATE IMAGE_NAME

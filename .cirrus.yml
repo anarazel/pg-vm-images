@@ -345,6 +345,7 @@ task:
     - uname -a
     - xsltproc --version
     - env
+    - perl -mIPC::Run -e 'print "$IPC::Run::VERSION\n";'
 
 # Disabled linux/arm64, fails currently due to reasons outside of our control
 # task:
@@ -367,6 +368,14 @@ task:
   name: 'Testing VM Image: ${PREFIX}-${IMAGE_NAME}'
   matrix:
     - env:
+        IMAGE_NAME: bookworm
+        PLATFORM: linux
+
+    - env:
+        IMAGE_NAME: trixie
+        PLATFORM: linux
+
+    - env:
         IMAGE_NAME: netbsd-postgres
         PLATFORM: netbsd
 
@@ -375,7 +384,7 @@ task:
         PLATFORM: openbsd
 
   depends_on:
-    - vmbuild-${PLATFORM}-postgres
+    - vmbuild-${IMAGE_NAME}
 
   compute_engine_instance:
     image_project: $GCP_PROJECT
@@ -385,6 +394,7 @@ task:
   test_script:
     - uname -a
     - env
+    - perl -mIPC::Run -e 'print "$IPC::Run::VERSION\n";'
 
 
 task:
@@ -403,6 +413,7 @@ task:
     - set
     - where perl
     - perl --version
+    - perl -mIPC::Run -e "print qq{$IPC::Run::VERSION\n};"
     - python --version
     - vcvarsall x64
     - bison --version
@@ -411,5 +422,6 @@ task:
   test_mingw_script:
     - C:\msys64\usr\bin\bash.exe -lc 'where perl'
     - C:\msys64\usr\bin\bash.exe -lc 'perl --version'
+    - C:\msys64\usr\bin\bash.exe -lc 'perl -mIPC::Run -e "print qq{\$IPC::Run::VERSION\\n};"'
     - C:\msys64\usr\bin\bash.exe -lc 'bison --version'
     - C:\msys64\usr\bin\bash.exe -lc 'flex --version'
