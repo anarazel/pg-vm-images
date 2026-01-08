@@ -22,19 +22,19 @@ locals {
       task_name = "sid"
       zone = "us-west1-a"
       machine = "t2d-standard-2"
-      source_image_family = "debian-11"
+      source_image_family = "debian-13"
     },
     {
       task_name = "sid-newkernel"
       zone = "us-west1-a"
       machine = "t2d-standard-4"
-      source_image_family = "debian-11"
+      source_image_family = "debian-13"
     },
     {
       task_name = "sid-newkernel-uring"
       zone = "us-west1-a"
       machine = "t2d-standard-4"
-      source_image_family = "debian-11"
+      source_image_family = "debian-13"
     },
   ]
 }
@@ -129,6 +129,7 @@ build {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
       <<-SCRIPT
+        rm -f /etc/apt/sources.list.d/debian.sources
         tee /etc/apt/sources.list <<-EOF
             deb http://deb.debian.org/debian unstable main
             deb-src http://deb.debian.org/debian unstable main
