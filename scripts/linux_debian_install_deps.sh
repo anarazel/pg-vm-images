@@ -62,7 +62,7 @@ apt-get -y install --no-install-recommends \
   libperl-dev \
   libpython3-dev \
   libreadline-dev \
-  libselinux*-dev \
+  libselinux-dev \
   libssl-dev \
   libsystemd-dev \
   liburing-dev \
@@ -132,7 +132,7 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
     libperl-dev:i386 \
     libpython3-dev:i386 \
     libreadline-dev:i386 \
-    libselinux*-dev:i386 \
+    libselinux-dev:i386 \
     libssl-dev:i386 \
     libsystemd-dev:i386 \
     liburing-dev:i386 \
