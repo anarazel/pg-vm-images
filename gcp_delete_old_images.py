@@ -85,10 +85,19 @@ def delete_old_docker_images_helper(delete_images, base_cmd,
 def get_manifests(images):
     latest_images_manifests = set()
     for image in images:
-        podman_cmd = ['podman', 'manifest', 'inspect',
+        podman_cmd = ['podman',
+                        # Use vfs storage driver as Podman overlay is not
+                        # supported over overlayfs
+                        # See: https://github.com/containers/buildah/issues/3666
+                      '--storage-driver', 'vfs',
+                      'manifest', 'inspect',
                       f'{image["package"]}@{image["version"]}']
-        res = subprocess.run(podman_cmd, capture_output=True,
-                             check=True, text=True)
+        res = subprocess.run(podman_cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            print(f"Error: podman manifest inspect failed for " +
+                  f"{image['package']}@{image['version']}: {res.stderr}")
+            sys.exit(res.returncode)
+
         manifest = json.loads(res.stdout)
 
         if manifest.get('manifests', False):

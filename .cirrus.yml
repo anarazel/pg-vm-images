@@ -104,10 +104,12 @@ task:
     - env:
         TASK_NAME: freebsd
         PACKERFILE: packer/freebsd.pkr.hcl
+        MEMORY: 256Mi
 
     - env:
         PACKERFILE: packer/linux_debian.pkr.hcl
         SCRIPTS: scripts/linux_debian_*
+        MEMORY: 256Mi
 
       matrix:
         - env:
@@ -129,6 +131,8 @@ task:
         PACKERFILE: packer/windows.pkr.hcl
         SCRIPTS: scripts/windows*
         TASK_NAME: windows-ci
+        # 256Mi is not enough after docker image is updated to trixie
+        MEMORY: 512Mi
 
   env:
     IMAGE_NAME: ${PREFIX}-${TASK_NAME}
@@ -138,7 +142,7 @@ task:
   container:
     dockerfile: docker/linux_debian_packer
     cpu: 0.5
-    memory: 256Mi
+    memory: $MEMORY
 
   skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', $SCRIPTS, $PACKERFILE)
   auto_cancellation: false
