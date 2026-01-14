@@ -43,8 +43,10 @@ apt-get -y install --no-install-recommends \
   gettext \
   python3-pip \
   \
+  gnupg \
   libio-pty-perl \
   libipc-run-perl \
+  libmodule-signature-perl \
   python3-cryptography \
   python3-packaging \
   python3-pytest \
