@@ -19,6 +19,11 @@ variable "gcp_project" {
   default = ""
 }
 
+variable "github_token" {
+  type = string
+  default = env("CIRRUS_REPO_CLONE_TOKEN")
+}
+
 locals {
   image_identity = "${var.image_name}-${var.image_date}"
 
@@ -187,6 +192,12 @@ build {
   provisioner "powershell" {
     execute_command = var.execute_command
     script = "scripts/windows_install_pg_deps.ps1"
+  }
+
+  provisioner "powershell" {
+    execute_command = var.execute_command
+    environment_vars = ["GITHUB_TOKEN=${var.github_token}"]
+    script = "scripts/windows_install_winpgbuild_deps.ps1"
   }
 
   provisioner "powershell" {
