@@ -99,6 +99,14 @@ apt-get -y install --no-install-recommends \
   libz-mingw-w64-dev \
   mingw-w64-tools
 
+# openssl-provider-fips is only available on Debian Trixie and sid. This can
+# fail if the new Debian release doesn't have openssl-provider-fips package but
+# failure will notify us so it is okay.
+if [ "$MAJOR_DEBIAN_VERSION" -ge "13" ] ; then
+  apt-get -y install --no-install-recommends \
+    openssl-provider-fips
+fi
+
 # g++-mingw-w64-x86-64-win32 and gcc-mingw-w64-x86-64-win32 packages have
 # missing some functions in the headers starting from trixie, install ucrt64
 # versions on these releases.

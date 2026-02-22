@@ -202,6 +202,40 @@ build {
     script = "scripts/update_ipc_run.sh"
   }
 
+  # OpenSSL FIPS will be used only in Debian Trixie for now.
+  provisioner "shell" {
+    execute_command = "sudo env {{ .Vars }} {{ .Path }}"
+    inline = [
+      <<-SCRIPT
+        openssl fipsinstall -out /etc/ssl/fipsmodule.cnf -module $(find /usr -name fips.so -print -quit)
+        cat > /etc/ssl/openssl-fips.cnf <<-CONF
+          config_diagnostics = 1
+          openssl_conf = openssl_init
+
+          .include /etc/ssl/fipsmodule.cnf
+
+          [openssl_init]
+          providers = provider_sect
+          alg_section = algorithm_sect
+
+          [provider_sect]
+          fips = fips_sect
+          base = base_sect
+
+          [base_sect]
+          activate = 1
+
+          [fips_sect]
+          activate = 1
+
+          [algorithm_sect]
+          default_properties = fips=yes
+        CONF
+      SCRIPT
+    ]
+    only = ["googlecompute.trixie"]
+  }
+
   provisioner "shell" {
     execute_command = "sudo env {{ .Vars }} {{ .Path }}"
     inline = [
