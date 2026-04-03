@@ -24,7 +24,14 @@ msys 'pacman -Scc --noconfirm'
 
 # Install perl modules to enable tap tests
 msys 'where perl'
-msys '(echo; echo o conf recommends_policy 0; echo notest install IPC::Run) | cpan'
+echo "Check if IPC::Run is already installed, it shouldn't be at this point"
+msys 'perl -mIPC::Run -e 1 && exit 1 || exit 0'
+# MinGW CI tasks started failing after the package was updated from
+# NJM/IPC-Run-20250809.0 to TODDR/IPC-Run-20260322.0. There is no way to
+# install IPC::Run from an author without specifying the exact version number
+# so install the latest working one. (NJM/IPC-Run-20250809.0.tar.gz). See:
+# - https://postgr.es/m/CAN55FZ06xanSbJdHe-CurjX_qNuBWZDEvS1kAk36L38YCtZXnw%40mail.gmail.com
+msys '(echo; echo o conf recommends_policy 0; echo notest install NJM/IPC-Run-20250809.0.tar.gz) | cpan'
 
 # Check if IPC::Run is installed correctly
 msys 'perl -mIPC::Run -e 1'
