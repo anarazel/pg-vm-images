@@ -104,11 +104,12 @@ task:
     - env:
         TASK_NAME: freebsd
         PACKERFILE: packer/freebsd.pkr.hcl
+        SCRIPTS: scripts/update_ipc_run.sh
         MEMORY: 256Mi
 
     - env:
         PACKERFILE: packer/linux_debian.pkr.hcl
-        SCRIPTS: scripts/linux_debian_*
+        SCRIPTS: scripts/{update_ipc_run.sh,linux_debian_*}
         MEMORY: 256Mi
 
       matrix:
@@ -218,7 +219,7 @@ task:
     cpu: 2
     memory: 4G
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'files/bsd/*', 'scripts/bsd/*', $PACKERFILE, $PKRVARFILE)
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'docker/linux_debian_packer', 'files/bsd/*', 'scripts/update_ipc_run.sh', 'scripts/bsd/*', $PACKERFILE, $PKRVARFILE)
   auto_cancellation: false
 
   <<: *gcp_auth_unix
@@ -297,7 +298,7 @@ task:
         - env:
             DEBIAN_RELEASE: trixie
 
-  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/linux_debian*', 'docker/linux_debian_ci')
+  skip: $CIRRUS_LAST_GREEN_CHANGE != '' && $CIRRUS_CRON != 'regular-rebuild' && !changesInclude('.cirrus.yml', 'scripts/update_ipc_run.sh', 'scripts/linux_debian*', 'docker/linux_debian_ci')
 
   <<: *gcp_docker_auth_unix
 
