@@ -1,6 +1,12 @@
 ARG DEBIAN_RELEASE
+ARG TAG_PREFIX
+ARG DATE
 
-FROM debian:${DEBIAN_RELEASE}
+FROM debian:$DEBIAN_RELEASE
+
+LABEL \
+  org.opencontainers.image.source="https://github.com/anarazel/pg-vm-images" \
+  org.opencontainers.image.description="image for running postgres CI"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
