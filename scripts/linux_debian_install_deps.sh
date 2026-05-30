@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 set -e
 
@@ -36,7 +36,7 @@ apt-get -y install --no-install-recommends \
   bison \
   ccache \
   clang \
-  '?name(clang-16)' \
+  '?exact-name(clang-16)' \
   flex \
   g++ \
   gcc \
@@ -76,14 +76,6 @@ apt-get -y install --no-install-recommends \
   systemtap-sdt-dev \
   tcl-dev \
   uuid-dev \
-  \
-  docbook-xml \
-  docbook-xsl \
-  fop \
-  libxml2-utils \
-  pandoc \
-  wget \
-  xsltproc \
   \
   lcov \
   \
@@ -144,3 +136,6 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
     tcl-dev:i386 \
     uuid-dev:i386
 fi
+
+rm /usr/lib/llvm-*/lib/*.a
+rm /usr/lib/{i386-linux-gnu,x86_64-linux-gnu}/{libicu*,libcrypto*,libssl*,libsystemd*,libperl*}.a

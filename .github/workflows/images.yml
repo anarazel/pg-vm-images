@@ -1,0 +1,114 @@
+name: PG VM Images build
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  # One job to determine dates etc, so it's the same between concurrently built images
+  setup:
+    name: Setup
+    runs-on: ubuntu-slim
+    outputs:
+      date: ${{ steps.setup.outputs.date}}
+      tag_base: ${{ steps.setup.outputs.tag_base}}
+      name_base: ${{ steps.setup.outputs.name_base}}
+      tag_prefix: ${{ steps.setup.outputs.tag_base}}/${{ steps.setup.outputs.name_base}}
+
+    steps:
+      - name: setup
+        id: setup
+        run: |
+          echo date=$(date --utc +'%Y-%m-%dt%H-%M-%S') >> "$GITHUB_OUTPUT"
+
+          echo tag_base=ghcr.io/${GITHUB_REPOSITORY} >> "$GITHUB_OUTPUT"
+
+          echo name_base=test_linux_debian >> "$GITHUB_OUTPUT"
+
+  # Build actual images
+  build-images:
+    name: Build Images
+    needs: setup
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    env:
+      TAG_BASE: ghcr.io/anarazel/pg-vm-images/
+      DEBIAN_RELEASE: trixie
+      NAME_BASE: test_linux_debian
+      DATE: ${{needs.setup.outputs.date}}
+    steps:
+      - name: info
+        run: |
+          env
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - uses: actions/checkout@v6
+
+        #--tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:latest \
+      - name: Build Base
+        run: |
+          set -x
+          docker buildx build \
+            --debug \
+            --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
+            --build-arg DATE=${{needs.setup.outputs.date}} \
+            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci \
+            --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
+            -f docker/linux_debian_ci \
+            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}} \
+            .
+
+      - name: Push Base
+        run: |
+          set -x
+          docker push \
+            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}}
+
+      - name: Build Docs
+        run: |
+          docker buildx build \
+            --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
+            --build-arg DATE=${{needs.setup.outputs.date}} \
+            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci_docs \
+            --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
+            -f docker/linux_debian_ci_docs \
+            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}} \
+            .
+
+      - name: Push Docs
+        run: |
+          set -x
+          docker push \
+            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}}
+
+
+  test-images:
+    name: Test Images
+    needs: [setup, build-images]
+    strategy:
+      fail-fast: false
+      matrix:
+        debian_releases: [trixie]
+        images: [ci, ci_docs]
+    runs-on: ubuntu-latest
+    container:
+      image: ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_releases}}_${{matrix.images}}:${{needs.setup.outputs.date}}
+      options: --privileged
+
+    steps:
+      - name: doc
+        run:
+          echo ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_releases}}_${{matrix.images}}:${{needs.setup.outputs.date}}
+      - name: info
+        run:
+          echo $IMAGE_NAME
+          env
