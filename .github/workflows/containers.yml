@@ -52,16 +52,14 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - uses: actions/checkout@v6
 
-        #--tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:latest \
       - name: Build CI Base Container
         run: |
           set -x
-          docker buildx build \
-            --debug \
+          podman image build \
             --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
             --build-arg DATE=${{needs.setup.outputs.date}} \
             --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci \
@@ -73,12 +71,13 @@ jobs:
       - name: Push CI Base Container
         run: |
           set -x
-          docker push \
+          podman image push \
+            --compression-format=zstd --compression-level=10 \
             ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}}
 
       - name: Build CI Docs Container
         run: |
-          docker buildx build \
+          podman image build \
             --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
             --build-arg DATE=${{needs.setup.outputs.date}} \
             --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci_docs \
@@ -90,7 +89,8 @@ jobs:
       - name: Push CI Docs Container
         run: |
           set -x
-          docker push \
+          podman image push \
+            --compression-format=zstd --compression-level=10 \
             ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}}
 
 
@@ -150,23 +150,24 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Pull ${{matrix.debian_release}} ${{matrix.image}}
         run: |
           set -x
-          docker pull \
+          podman image pull \
             ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:${{needs.setup.outputs.date}}
 
       - name: Tag ${{matrix.debian_release}} ${{matrix.image}} as latest
         run: |
           set -x
-          docker image tag \
+          podman image tag \
             ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:${{needs.setup.outputs.date}} \
             ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:latest
 
       - name: Push ${{matrix.debian_release}} ${{matrix.image}} as latest
         run: |
           set -x
-          docker image push \
+          podman image push \
+            --compression-format=zstd --compression-level=10 \
             ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:latest
