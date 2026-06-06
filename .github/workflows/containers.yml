@@ -83,6 +83,7 @@ jobs:
             --build-arg DATE=${{needs.setup.outputs.date}} \
             --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci_docs \
             --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
+            --squash \
             -f docker/linux_debian_ci_docs \
             --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}} \
             .
