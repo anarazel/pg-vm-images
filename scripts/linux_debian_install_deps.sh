@@ -78,8 +78,6 @@ apt-get -y install --no-install-recommends \
   tcl-dev \
   uuid-dev \
   \
-  lcov \
-  \
   krb5-admin-server \
   krb5-kdc \
   krb5-user \
