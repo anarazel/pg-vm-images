@@ -24,6 +24,7 @@ fi
 
 apt-get -y install --no-install-recommends \
   procps \
+  time \
   \
   build-essential \
   gdb \
