@@ -138,5 +138,14 @@ if [ $(dpkg --print-architecture) = "amd64" ] ; then
     uuid-dev:i386
 fi
 
+echo "packages installed, performing some rude cleanup"
+
+# We don't link statically, so we don't need the largest .a files. We can't
+# just remove all .a files, as some are required at compile time.
 rm /usr/lib/llvm-*/lib/*.a
 rm /usr/lib/{i386-linux-gnu,x86_64-linux-gnu}/{libicu*,libcrypto*,libssl*,libsystemd*,libperl*}.a
+
+# We don't need man pages and docs. Removing them is mostly interesting to
+# reduce container unpack times.
+find /usr/share/doc -type f -exec rm '{}' +
+find /usr/share/man -type f -exec rm '{}' +
