@@ -97,11 +97,6 @@ packages+=(
     uuid-dev
 )
 
-# Coverage
-packages+=(
-    lcov
-)
-
 # Test only dependencies
 packages+=(
   krb5-admin-server
