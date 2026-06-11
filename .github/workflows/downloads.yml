@@ -1,0 +1,133 @@
+name: build PG CI Downloads
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build-mingw:
+    permissions:
+      contents: write
+
+    runs-on: windows-2022
+
+    env:
+      MSYS2_PATH_TYPE: inherit
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 128
+
+      - name: 'map M:/'
+        shell: cmd
+        run: |
+          echo "mkdir 1"
+          mkdir "%RUNNER_TEMP%/pg-mingw-install" || true
+          #echo "mkdir 2"
+          #mkdir "C:/pg-msys/" || true
+          echo "mklink"
+          mklink /d "C:/pg-msys/" "%RUNNER_TEMP%/pg-mingw-install"
+
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2.31.1
+        with:
+          msystem: UCRT64
+          update: true
+          location: 'C:/pg-msys/'
+          install: >-
+            bison flex
+            mingw-w64-ucrt-x86_64-ccache
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-icu
+            mingw-w64-ucrt-x86_64-libxml2
+            mingw-w64-ucrt-x86_64-libxslt
+            mingw-w64-ucrt-x86_64-lz4
+            mingw-w64-ucrt-x86_64-make
+            mingw-w64-ucrt-x86_64-meson
+            mingw-w64-ucrt-x86_64-perl
+            mingw-w64-ucrt-x86_64-pkgconf
+            mingw-w64-ucrt-x86_64-readline
+            mingw-w64-ucrt-x86_64-zlib
+            mingw-w64-ucrt-x86_64-zstd
+
+      - name: Install additional dependencies
+        shell: msys2 {0}
+        run: |
+          # Pin IPC::Run to NJM/IPC-Run-20250809.0; TODDR/IPC-Run-20260322.0
+          # broke postgres tap tests on Windows (pipe stdio handling).
+          # See pg-vm-images commit ff5238afa3.
+          echo ::group::cpan_ipc_run
+          (echo; echo o conf recommends_policy 0; echo notest install NJM/IPC-Run-20250809.0.tar.gz) | cpan
+          perl -mIPC::Run -e 1
+          echo ::endgroup::
+
+      - name: Compress Full
+        shell: msys2 {0}
+        run: |
+          cd /c/pg-msys/
+          tar -cf - msys64 | zstd -f -T0 -10 - -o "${{github.workspace}}/msys64-full.tar.zst"
+
+      - name: Upload msys64-full.tar.zst
+        uses: actions/upload-artifact@v7
+        with:
+          name: msys64-full.tar.zst
+          path: msys64-full.tar.zst
+          if-no-files-found: error
+          archive: false
+
+      - name: Release Full
+        shell: msys2 {0}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -x
+          pwd
+          ls -la
+          gh release delete-asset -y test-release-2026-06-11_01 msys64-full.tar.zst
+          gh release upload test-release-2026-06-11_01 msys64-full.tar.zst
+
+      - name: Minimize
+        shell: msys2 {0}
+        run: |
+          cd /c/pg-msys/
+          du -sh msys64
+          find msys64/{usr,ucrt64}/share/{man,doc} -type f -exec rm '{}' +
+          du -sh msys64
+          find msys64/ucrt64/lib -name '*.a' -and -not -name '*.dll.a'|less
+          du -sh msys64
+
+          find "msys64/ucrt64/lib" -type f -name '*.dll.a' -print0 |
+          while IFS= read -r -d '' dll_a; do
+            base="${dll_a%.dll.a}"
+            a_file="${base}.a"
+
+            if [[ -f "$a_file" ]]; then
+              rm -f -- "$a_file"
+              printf 'Removed: %s\n' "$a_file"
+            fi
+          done
+          du -sh msys64
+
+      - name: Compress Min
+        shell: msys2 {0}
+        run: |
+          cd /c/pg-msys/
+          tar -cf - msys64 | zstd -f -T0 -10 - -o "${{github.workspace}}/msys64.tar.zst"
+
+      - name: Upload Min
+        uses: actions/upload-artifact@v7
+        with:
+          name: msys64.tar.zst
+          path: msys64.tar.zst
+          if-no-files-found: error
+          archive: false
+
+      - name: Release Min
+        shell: msys2 {0}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete-asset -y test-release-2026-06-11_01 msys64.tar.zst
+          gh release upload test-release-2026-06-11_01 msys64.tar.zst
