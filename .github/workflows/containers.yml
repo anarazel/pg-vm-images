@@ -57,43 +57,38 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Build CI Base Container
-        run: |
-          set -x
+        env:
+          CONTAINER: ci
+          OPTIONS: --squash-all
+        run: &podman_build_cmd |
           podman image build \
             --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
             --build-arg DATE=${{needs.setup.outputs.date}} \
-            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci \
+            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_${CONTAINER} \
             --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
-            --squash-all \
+            $OPTIONS \
             -f docker/linux_debian_ci \
-            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}} \
+            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_${CONTAINER}:${{needs.setup.outputs.date}} \
             .
 
       - name: Push CI Base Container
-        run: |
-          set -x
+        env:
+          CONTAINER: ci
+        run: &podman_push_cmd |
           podman image push \
             --compression-format=zstd --compression-level=10 \
-            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}}
+            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_${CONTAINER}:${{needs.setup.outputs.date}}
 
       - name: Build CI Docs Container
-        run: |
-          podman image build \
-            --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
-            --build-arg DATE=${{needs.setup.outputs.date}} \
-            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci_docs \
-            --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
-            --squash \
-            -f docker/linux_debian_ci_docs \
-            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}} \
-            .
+        env:
+          CONTAINER: ci
+          OPTIONS: --squash
+        run: *podman_build_cmd
 
       - name: Push CI Docs Container
-        run: |
-          set -x
-          podman image push \
-            --compression-format=zstd --compression-level=10 \
-            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}}
+        env:
+          CONTAINER: ci_docs
+        run: *podman_push_cmd
 
 
   # Basic test that the containers work
@@ -107,7 +102,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
+    strategy: &strategy
       fail-fast: false
       matrix:
         debian_release: [trixie]
@@ -142,11 +137,12 @@ jobs:
       contents: read
 
     # FIXME: Fix repetition
-    strategy:
-      fail-fast: false
-      matrix:
-        debian_release: [trixie]
-        image: [ci, ci_docs]
+    #strategy:
+    #  fail-fast: false
+    #  matrix:
+    #    debian_release: [trixie]
+    #    image: [ci, ci_docs]
+    strategy: *strategy
 
     steps:
 
