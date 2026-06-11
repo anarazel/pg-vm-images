@@ -2,6 +2,10 @@ name: build PG CI Containers
 
 on: [push, pull_request]
 
+env:
+  CONTAINER: linux_debian_ci
+  CONTAINER_VARIANTS_JSON: '["sanity-check","linux-meson-32","linux-meson-64","linux-autoconf","compiler-warnings"]'
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
@@ -16,6 +20,9 @@ jobs:
       name_base: ${{ steps.setup.outputs.name_base}}
       tag_prefix: ${{ steps.setup.outputs.tag_base}}/${{ steps.setup.outputs.name_base}}
 
+      variants_json: ${{ env.CONTAINER_VARIANTS_JSON }}
+      variants_shell: ${{ steps.setup.outputs.variants_shell}}
+
     steps:
       - name: setup
         id: setup
@@ -25,10 +32,11 @@ jobs:
           # Include the branch name, due to that autmatically everything on a
           # non-main branch will only be used if somebody explicitly changes
           # the image name in the postgres repo.
-          echo tag_base=ghcr.io/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME} >> "$GITHUB_OUTPUT"
+          echo "tag_base=ghcr.io/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
 
-          echo name_base=linux_debian >> "$GITHUB_OUTPUT"
+          echo "name_base=$CONTAINER" >> "$GITHUB_OUTPUT"
 
+          echo "variants_shell=$(echo "$CONTAINER_VARIANTS_JSON"|jq -r '.[]'|tr '\n' ' ')" >> "$GITHUB_OUTPUT"
 
   # Build Containers, but don't push them under an automatically usable label
   build-containers:
@@ -45,10 +53,9 @@ jobs:
       contents: read
 
     env:
-      TAG_BASE: ghcr.io/anarazel/pg-vm-images/
       DEBIAN_RELEASE: trixie
-      NAME_BASE: test_linux_debian
       DATE: ${{needs.setup.outputs.date}}
+
     steps:
       - name: info
         run: |
@@ -60,49 +67,62 @@ jobs:
 
       - uses: actions/checkout@v6
 
-      - name: Build CI Base Container
+      - name: Setup Arg File
         run: |
-          set -x
-          podman image build \
-            --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
-            --build-arg DATE=${{needs.setup.outputs.date}} \
-            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci \
-            --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
-            --squash-all \
-            -f docker/linux_debian_ci \
-            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}} \
-            .
+          tee build-args.conf <<-EOF
+            DEBIAN_RELEASE=${DEBIAN_RELEASE}
+            DATE=${{needs.setup.outputs.date}}
+            IMAGE_NAME=${{needs.setup.outputs.name_base}}/${DEBIAN_RELEASE}
+          EOF
 
-      - name: Push CI Base Container
+      - name: Build CI Containers
         run: |
-          set -x
-          podman image push \
-            --compression-format=zstd --compression-level=10 \
-            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci:${{needs.setup.outputs.date}}
+          for variant in ${{needs.setup.outputs.variants_shell}}; do
+            echo "::group::build_$variant"
 
-      - name: Build CI Docs Container
-        run: |
-          podman image build \
-            --build-arg DEBIAN_RELEASE=${DEBIAN_RELEASE} \
-            --build-arg DATE=${{needs.setup.outputs.date}} \
-            --build-arg IMAGE_NAME=${{needs.setup.outputs.name_base}}_${DEBIAN_RELEASE}_ci_docs \
-            --build-arg TAG_PREFIX=${{needs.setup.outputs.tag_prefix}} \
-            --squash \
-            -f docker/linux_debian_ci_docs \
-            --tag ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}} \
-            .
+            time podman image build \
+              --build-arg-file=build-args.conf \
+              --cache-ttl 8h \
+              -f docker/linux_debian_ci \
+              --tag ${{needs.setup.outputs.tag_prefix}}/${DEBIAN_RELEASE}/$variant:${{needs.setup.outputs.date}} \
+              --target=$variant \
+              . \
+              2>&1
 
-      - name: Push CI Docs Container
+            echo ::endgroup::
+          done
+
+      - name: Show CI Containers
         run: |
-          set -x
-          podman image push \
-            --compression-format=zstd --compression-level=10 \
-            ${{needs.setup.outputs.tag_prefix}}_${DEBIAN_RELEASE}_ci_docs:${{needs.setup.outputs.date}}
+          podman images
+
+      - name: Inspect CI Containers
+        run: |
+          for variant in ${{needs.setup.outputs.variants_shell}}; do
+            echo "::group::inspect_$variant"
+
+            podman image inspect \
+              ${{needs.setup.outputs.tag_prefix}}/${DEBIAN_RELEASE}/$variant:${{needs.setup.outputs.date}}
+
+            echo ::endgroup::
+          done
+
+      - name: Push CI Containers
+        run: |
+          for variant in ${{needs.setup.outputs.variants_shell}}; do
+            echo "::group::push_$variant"
+
+            time podman image push \
+              --compression-format=zstd --compression-level=10 \
+              ${{needs.setup.outputs.tag_prefix}}/${DEBIAN_RELEASE}/$variant:${{needs.setup.outputs.date}} \
+              2>&1
+            echo ::endgroup::
+          done
 
 
   # Basic test that the containers work
   test-containers:
-    name: Test Containers
+    name: Test ${{matrix.variant}} for ${{matrix.debian_release}}
     needs: [setup, build-containers]
     if: |
       !cancelled() &&
@@ -110,28 +130,28 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    strategy:
+    strategy: &strategy
       fail-fast: false
       matrix:
         debian_release: [trixie]
-        image: [ci, ci_docs]
+        variant: ${{fromJSON(needs.setup.outputs.variants_json)}}
 
     container:
-      image: ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:${{needs.setup.outputs.date}}
+      image: ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:${{needs.setup.outputs.date}}
       options: --privileged
 
     steps:
 
       # FIXME: Add more sanity tests
-      - name: Basic test for ${{matrix.debian_release}} ${{matrix.image}}
+      - name: Basic test for ${{matrix.debian_release}} ${{matrix.variant}}
         run: |
-          echo $IMAGE_NAME
+          echo $IMAGE_NAME $IMAGE_DATE
           env
 
 
   # If the tests above pass, tag them as the latest
   tag-containers:
-    name: Tag Containers as latest
+    name: Tag ${{matrix.variant}} for ${{matrix.debian_release}} as latest
     needs: [setup, test-containers]
     if: |
       !cancelled() &&
@@ -143,12 +163,7 @@ jobs:
       packages: write
       contents: read
 
-    # FIXME: Fix repetition
-    strategy:
-      fail-fast: false
-      matrix:
-        debian_release: [trixie]
-        image: [ci, ci_docs]
+    strategy: *strategy
 
     steps:
 
@@ -156,22 +171,48 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Pull ${{matrix.debian_release}} ${{matrix.image}}
+      - name: Pull ${{matrix.debian_release}} ${{matrix.variant}}
         run: |
           set -x
           podman image pull \
-            ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:${{needs.setup.outputs.date}}
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:${{needs.setup.outputs.date}}
 
-      - name: Tag ${{matrix.debian_release}} ${{matrix.image}} as latest
+      - name: Tag ${{matrix.debian_release}} ${{matrix.variant}} as latest
         run: |
           set -x
           podman image tag \
-            ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:${{needs.setup.outputs.date}} \
-            ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:latest
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:${{needs.setup.outputs.date}} \
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:latest
 
-      - name: Push ${{matrix.debian_release}} ${{matrix.image}} as latest
+      - name: Push ${{matrix.debian_release}} ${{matrix.variant}} as latest
         run: |
           set -x
           podman image push \
             --compression-format=zstd --compression-level=10 \
-            ${{needs.setup.outputs.tag_prefix}}_${{matrix.debian_release}}_${{matrix.image}}:latest
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:latest
+
+
+      # Backward compat aliases for the current CI name
+      - name: Alias ${{matrix.debian_release}} ${{matrix.variant}} as as ci
+        if: ${{ matrix.variant == 'linux-meson-32' }}
+        run: |
+          set -x
+          podman tag \
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:latest \
+            ${{needs.setup.outputs.tag_base}}/linux_debian_${{matrix.debian_release}}_ci:latest
+
+          podman image push \
+            --compression-format=zstd --compression-level=10 \
+            ${{needs.setup.outputs.tag_base}}/linux_debian_${{matrix.debian_release}}_ci:latest
+
+      - name: Alias ${{matrix.debian_release}} ${{matrix.variant}} as as ci_docs
+        if: ${{ matrix.variant == 'compiler-warnings' }}
+        run: |
+          set -x
+          podman tag \
+            ${{needs.setup.outputs.tag_prefix}}/${{matrix.debian_release}}/${{matrix.variant}}:latest \
+            ${{needs.setup.outputs.tag_base}}/linux_debian_${{matrix.debian_release}}_ci_docs:latest
+
+          podman image push \
+            --compression-format=zstd --compression-level=10 \
+            ${{needs.setup.outputs.tag_base}}/linux_debian_${{matrix.debian_release}}_ci_docs:latest

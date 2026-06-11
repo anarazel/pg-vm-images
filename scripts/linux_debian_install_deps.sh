@@ -234,12 +234,24 @@ if "$install_doc"; then
     )
 fi
 
+echo "Updating package metadata"
+apt-get -y update
+
+if "$install_base"; then
+    echo "Updating base"
+    apt-get -y upgrade
+fi
+
+
 echo "Installing ${packages[@]}"
 
 apt-get -y install --no-install-recommends "${packages[@]}"
 
 
 echo "packages installed, performing some rude cleanup"
+
+# Don't need to clean apt package downloads and metadata, they're in a
+# separately mounted cache.
 
 # We don't link statically, so we don't need the largest .a files. We can't
 # just remove all .a files, as some are required at compile time.
