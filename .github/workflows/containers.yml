@@ -34,6 +34,10 @@ jobs:
   build-containers:
     name: Build Containers
     needs: setup
+    if: |
+      !cancelled() &&
+      needs.setup.result == 'success'
+
     runs-on: ubuntu-latest
 
     permissions:
@@ -100,10 +104,9 @@ jobs:
   test-containers:
     name: Test Containers
     needs: [setup, build-containers]
-
     if: |
       !cancelled() &&
-      needs.build-containers.result != 'failure'
+      needs.build-containers.result == 'success'
 
     runs-on: ubuntu-latest
 
@@ -130,10 +133,9 @@ jobs:
   tag-containers:
     name: Tag Containers as latest
     needs: [setup, test-containers]
-
     if: |
       !cancelled() &&
-      needs.test-containers.result != 'failure'
+      needs.test-containers.result == 'success'
 
     runs-on: ubuntu-latest
 
