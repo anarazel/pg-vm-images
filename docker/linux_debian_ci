@@ -1,28 +1,88 @@
 ARG DEBIAN_RELEASE
-ARG TAG_PREFIX
 ARG DATE
+ARG IMAGE_NAME
 
-FROM debian:$DEBIAN_RELEASE
+# Base image, upon which all other images are built. This should not be used
+# externally.
+
+FROM debian:$DEBIAN_RELEASE AS base
 
 LABEL \
   org.opencontainers.image.source="https://github.com/anarazel/pg-vm-images" \
   org.opencontainers.image.description="image for running postgres CI"
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV IMAGE_NAME=$IMAGE_NAME
+ENV IMAGE_DATE=$DATE
+ENV IMAGE_IDENTITY=$IMAGE_NAME-$DATE
 
-COPY /scripts/linux_debian_install_deps.sh /scripts/update_ipc_run.sh /scripts/
 
+# We leave the install scripts in place, they're tiny and otherwise we have to
+# install them in multiple of these layers
+COPY /scripts/linux_debian_install_deps.sh \
+  /scripts/update_ipc_run.sh \
+  /scripts/
+
+
+# We mount the apt dirs as temporary caches below, so we actually benefit from
+# apt's caching.
+#
 # The default port for hkp:// (11371) appears to be blocked somewhere in the
 # Cirrus docker-builder, causing the IPC::Run update to fail. Set
 # MODULE_SIGNATURE_KEYSERVERPORT to 80 to work around it.
 RUN \
-  apt-get -y update && \
-  apt-get -y upgrade && \
-  /scripts/linux_debian_install_deps.sh && \
-  MODULE_SIGNATURE_KEYSERVERPORT=80 /scripts/update_ipc_run.sh && \
-  rm /scripts/linux_debian_install_deps.sh /scripts/update_ipc_run.sh && \
-  apt-get clean && rm -rf /var/lib/apt/lists/*
+  --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  \
+  rm -f /etc/apt/apt.conf.d/docker-clean && \
+  echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+  \
+  /scripts/linux_debian_install_deps.sh \
+    --install-base && \
+  \
+  MODULE_SIGNATURE_KEYSERVERPORT=80 /scripts/update_ipc_run.sh
 
-ARG DATE IMAGE_NAME
 
-ENV IMAGE_IDENTITY=$IMAGE_NAME-$DATE
+# Image with plain libraries and test dependencies install. This should not be
+# used externally.
+FROM base AS normal
+
+RUN \
+  --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  \
+  /scripts/linux_debian_install_deps.sh \
+    --install-normal
+
+
+# Image for the sanity-check job
+FROM base AS sanity-check
+
+
+# Image for the linux-meson-32 job
+FROM normal AS linux-meson-32
+
+RUN \
+  --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  \
+  /scripts/linux_debian_install_deps.sh \
+    --install-32
+
+
+# Image for the linux-meson-64 job
+FROM normal AS linux-meson-64
+
+
+# Image for the linux-autoconf job
+FROM normal AS linux-autoconf
+
+
+# Image for the compiler-warnings job
+FROM normal AS compiler-warnings
+RUN \
+  --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  \
+  /scripts/linux_debian_install_deps.sh \
+    --install-win --install-doc
