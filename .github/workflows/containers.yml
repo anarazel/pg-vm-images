@@ -13,6 +13,13 @@ jobs:
   # One job to determine dates etc, so it's the same between concurrently built images
   setup:
     name: Setup
+
+    # If a PR within the repository, skip the run for the PR, because the push
+    # already triggered CI.
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
+
     runs-on: ubuntu-slim
     outputs:
       date: ${{ steps.setup.outputs.date}}
